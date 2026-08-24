@@ -22,29 +22,102 @@ if (menuButton && navigation) {
 
 
 /* =========================================
-   CONTACT FORM
+   CONTACT FORM → GMAIL
 ========================================= */
 
-function submitDemo(event) {
+const contactForm = document.getElementById("contactForm");
 
-    event.preventDefault();
+if (contactForm) {
 
-    const form = event.target;
+    contactForm.addEventListener("submit", function (event) {
 
-    const message = document.getElementById("form-msg");
+        event.preventDefault();
 
-    if (!message) {
-        return false;
-    }
 
-    message.textContent =
-        "Thanks — your request has been received. We'll be in touch.";
+        /* Get form values */
 
-    message.style.marginTop = "15px";
+        const name =
+            document.getElementById("name").value.trim();
 
-    form.reset();
+        const business =
+            document.getElementById("business").value.trim();
 
-    return false;
+        const email =
+            document.getElementById("email").value.trim();
+
+        const phone =
+            document.getElementById("phone").value.trim();
+
+        const message =
+            document.getElementById("message").value.trim();
+
+
+        /* Gmail subject */
+
+        const subject =
+            encodeURIComponent(
+                "New Virtual Genie Enquiry — " + business
+            );
+
+
+        /* Gmail email body */
+
+        const body =
+            encodeURIComponent(
+`NEW VIRTUAL GENIE WEBSITE ENQUIRY
+
+Name:
+${name}
+
+Business:
+${business}
+
+Email:
+${email}
+
+Phone:
+${phone || "Not provided"}
+
+What they want to build:
+${message || "Not specified"}
+
+--------------------------------
+Submitted through Virtual Genie website`
+            );
+
+
+        /* Gmail compose URL */
+
+        const gmailURL =
+            `https://mail.google.com/mail/?view=cm&fs=1&to=virtualgenieai@gmail.com&su=${subject}&body=${body}`;
+
+
+        /* Open Gmail */
+
+        window.open(
+            gmailURL,
+            "_blank"
+        );
+
+
+        /* Show confirmation */
+
+        const formMessage =
+            document.getElementById("form-msg");
+
+
+        if (formMessage) {
+
+            formMessage.textContent =
+                "Opening Gmail with your enquiry...";
+
+            formMessage.style.marginTop =
+                "15px";
+
+        }
+
+    });
+
 }
 
 
@@ -52,49 +125,61 @@ function submitDemo(event) {
    SCROLL REVEAL
 ========================================= */
 
-const revealElements = document.querySelectorAll(
-    ".product-card, .feature-grid > div, .steps > div, .flow, .dark-band"
-);
+const revealElements =
+    document.querySelectorAll(
+        ".product-card, .feature-grid > div, .steps > div, .flow, .dark-band"
+    );
 
 
-const revealObserver = new IntersectionObserver(
-    (entries) => {
+if ("IntersectionObserver" in window) {
 
-        entries.forEach((entry) => {
+    const revealObserver =
+        new IntersectionObserver(
+            (entries) => {
 
-            if (entry.isIntersecting) {
+                entries.forEach((entry) => {
 
-                entry.target.classList.add("revealed");
+                    if (entry.isIntersecting) {
 
-                revealObserver.unobserve(entry.target);
+                        entry.target.classList.add(
+                            "revealed"
+                        );
 
+                        revealObserver.unobserve(
+                            entry.target
+                        );
+
+                    }
+
+                });
+
+            },
+            {
+                threshold: 0.12
             }
-
-        });
-
-    },
-    {
-        threshold: 0.12
-    }
-);
+        );
 
 
-revealElements.forEach((element) => {
+    revealElements.forEach((element) => {
 
-    element.classList.add("reveal");
+        element.classList.add("reveal");
 
-    revealObserver.observe(element);
+        revealObserver.observe(element);
 
-});
+    });
+
+}
 
 
 /* =========================================
    SIMPLE HERO PARALLAX
 ========================================= */
 
-const heroOrbit = document.querySelector(".hero-orbit");
+const heroOrbit =
+    document.querySelector(".hero-orbit");
 
-if (heroOrbit) {
+
+if (heroOrbit && window.innerWidth > 800) {
 
     window.addEventListener("mousemove", (event) => {
 
@@ -103,6 +188,7 @@ if (heroOrbit) {
 
         const y =
             (event.clientY / window.innerHeight - 0.5) * 10;
+
 
         heroOrbit.style.transform =
             `translate(${x}px, ${y}px)`;
@@ -117,7 +203,10 @@ if (heroOrbit) {
 ========================================= */
 
 const yearElements =
-    document.querySelectorAll("[data-year]");
+    document.querySelectorAll(
+        "[data-year]"
+    );
+
 
 yearElements.forEach((element) => {
 
