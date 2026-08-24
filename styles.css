@@ -1746,3 +1746,50 @@ footer .logo {
     }
 
 }
+/* SCROLL REVEAL */
+
+.reveal {
+    opacity: 0;
+    transform: translateY(25px);
+    transition:
+        opacity 0.7s ease,
+        transform 0.7s ease;
+}
+
+.reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+/* MOBILE NAV */
+
+@media (max-width: 800px) {
+
+    .nav nav.mobile-open {
+
+        display: flex;
+
+        position: absolute;
+
+        top: 76px;
+
+        left: 0;
+
+        width: 100%;
+
+        padding: 25px;
+
+        flex-direction: column;
+
+        gap: 20px;
+
+        background: rgba(247, 248, 250, 0.98);
+
+        border-bottom: 1px solid var(--line);
+
+        box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+
+    }
+
+}
