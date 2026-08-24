@@ -1562,3 +1562,624 @@ footer .logo {
     transform: translateY(0);
 
 }
+/* =========================================
+   VIRTUAL GENIE — MOBILE FOUNDATION UPDATE
+========================================= */
+
+
+/* =========================================
+   GLOBAL OVERFLOW PROTECTION
+========================================= */
+
+html,
+body {
+
+    width: 100%;
+
+    max-width: 100%;
+
+    overflow-x: hidden;
+
+}
+
+
+img,
+video,
+svg,
+canvas {
+
+    max-width: 100%;
+
+}
+
+
+main,
+section,
+header,
+footer {
+
+    max-width: 100%;
+
+}
+
+
+/* =========================================
+   MOBILE NAVIGATION
+========================================= */
+
+@media (max-width: 900px) {
+
+
+    .nav {
+
+        position: sticky;
+
+        top: 0;
+
+        z-index: 9999;
+
+        width: 100%;
+
+    }
+
+
+    .nav nav {
+
+        display: none;
+
+    }
+
+
+    .nav nav.mobile-open {
+
+        display: flex;
+
+        position: absolute;
+
+        top: 100%;
+
+        left: 0;
+
+        right: 0;
+
+        width: 100%;
+
+        padding: 8px 6vw 20px;
+
+        background: var(--paper);
+
+        border-bottom: 1px solid var(--line);
+
+        flex-direction: column;
+
+        gap: 0;
+
+        box-shadow:
+            0 12px 25px rgba(0,0,0,.06);
+
+    }
+
+
+    .nav nav.mobile-open a {
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        width: 100%;
+
+        padding: 18px 0;
+
+        border-bottom: 1px solid var(--line);
+
+        color: var(--ink);
+
+        font-size: 15px;
+
+        font-weight: 600;
+
+    }
+
+
+    .nav nav.mobile-open a:last-child {
+
+        border-bottom: 0;
+
+    }
+
+
+    .menu {
+
+        display: flex;
+
+        width: 44px;
+
+        height: 44px;
+
+        align-items: center;
+
+        justify-content: center;
+
+        padding: 0;
+
+        border: 0;
+
+        background: transparent;
+
+        cursor: pointer;
+
+        color: var(--ink);
+
+        font-size: 27px;
+
+        line-height: 1;
+
+        transition:
+            transform .2s ease;
+
+    }
+
+
+    .menu.menu-open {
+
+        transform: rotate(90deg);
+
+    }
+
+}
+
+
+/* =========================================
+   MOBILE HERO
+========================================= */
+
+@media (max-width: 560px) {
+
+
+    .hero {
+
+        width: 100%;
+
+        padding:
+            58px
+            6vw
+            65px;
+
+    }
+
+
+    .hero-copy {
+
+        width: 100%;
+
+    }
+
+
+    .hero h1 {
+
+        max-width: 100%;
+
+        font-size: 52px;
+
+        line-height: .94;
+
+        letter-spacing: -3px;
+
+        overflow-wrap: normal;
+
+        word-break: normal;
+
+    }
+
+
+    .lead {
+
+        width: 100%;
+
+        max-width: 100%;
+
+        font-size: 16px;
+
+        line-height: 1.55;
+
+    }
+
+
+    .actions {
+
+        width: 100%;
+
+    }
+
+
+    .hero-system {
+
+        width: 100%;
+
+        max-width: 100%;
+
+    }
+
+
+    .system-window {
+
+        width: 100%;
+
+        max-width: 100%;
+
+        box-shadow:
+            7px 7px 0 #d9d7d0;
+
+    }
+
+}
+
+
+/* =========================================
+   MOBILE SECTIONS
+========================================= */
+
+@media (max-width: 560px) {
+
+
+    .section {
+
+        width: 100%;
+
+        padding:
+            75px
+            6vw;
+
+    }
+
+
+    .section-head {
+
+        width: 100%;
+
+        max-width: 100%;
+
+        margin-bottom: 42px;
+
+    }
+
+
+    .section-head h2 {
+
+        max-width: 100%;
+
+        font-size: 42px;
+
+        line-height: .98;
+
+        letter-spacing: -2.5px;
+
+    }
+
+
+    .section-head > p:last-child {
+
+        max-width: 100%;
+
+        font-size: 15px;
+
+        line-height: 1.6;
+
+    }
+
+
+    .product-list {
+
+        width: 100%;
+
+    }
+
+
+    .product-row {
+
+        width: 100%;
+
+        min-width: 0;
+
+        grid-template-columns:
+            28px
+            minmax(0, 1fr)
+            20px;
+
+        gap: 10px;
+
+        padding:
+            28px
+            0;
+
+    }
+
+
+    .product-row > div {
+
+        min-width: 0;
+
+    }
+
+
+    .product-row h3 {
+
+        font-size: 23px;
+
+        line-height: 1.05;
+
+        letter-spacing: -1px;
+
+    }
+
+
+    .product-row p {
+
+        max-width: 100%;
+
+        font-size: 13px;
+
+        line-height: 1.55;
+
+    }
+
+
+    .row-arrow {
+
+        font-size: 18px;
+
+    }
+
+}
+
+
+/* =========================================
+   DARK STATEMENT
+========================================= */
+
+@media (max-width: 560px) {
+
+
+    .statement {
+
+        width: 100%;
+
+        padding:
+            78px
+            6vw;
+
+    }
+
+
+    .statement h2 {
+
+        max-width: 100%;
+
+        font-size: 43px;
+
+        line-height: .98;
+
+        letter-spacing: -2.5px;
+
+    }
+
+
+    .statement .button {
+
+        width: 100%;
+
+    }
+
+}
+
+
+/* =========================================
+   WORKFLOW
+========================================= */
+
+@media (max-width: 560px) {
+
+
+    .workflow {
+
+        width: 100%;
+
+    }
+
+
+    .workflow-step {
+
+        width: 100%;
+
+        min-height: 120px;
+
+        padding:
+            22px
+            0;
+
+    }
+
+
+    .workflow > b {
+
+        min-height: 30px;
+
+        transform: rotate(90deg);
+
+    }
+
+}
+
+
+/* =========================================
+   SOFTWARE DASHBOARD
+========================================= */
+
+@media (max-width: 560px) {
+
+
+    .system-body {
+
+        width: 100%;
+
+        min-width: 0;
+
+    }
+
+
+    .system-main {
+
+        width: 100%;
+
+        min-width: 0;
+
+        padding: 18px 14px;
+
+    }
+
+
+    .system-heading {
+
+        min-width: 0;
+
+    }
+
+
+    .system-heading h2 {
+
+        font-size: 23px;
+
+    }
+
+
+    .live {
+
+        white-space: nowrap;
+
+        font-size: 8px;
+
+    }
+
+
+    .metric-row {
+
+        width: 100%;
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .metric-row > div {
+
+        width: 100%;
+
+        min-width: 0;
+
+    }
+
+
+    .activity {
+
+        width: 100%;
+
+        min-width: 0;
+
+    }
+
+
+    .activity-chart {
+
+        width: 100%;
+
+    }
+
+
+    .ai-activity {
+
+        width: 100%;
+
+        min-width: 0;
+
+    }
+
+}
+
+
+/* =========================================
+   FOOTER
+========================================= */
+
+@media (max-width: 560px) {
+
+
+    footer {
+
+        width: 100%;
+
+        padding:
+            45px
+            6vw;
+
+        gap: 28px;
+
+    }
+
+
+    footer p {
+
+        margin: 0;
+
+        line-height: 1.5;
+
+    }
+
+}
+
+
+/* =========================================
+   TOUCH / MOBILE UX
+========================================= */
+
+@media (max-width: 900px) {
+
+
+    a,
+    button {
+
+        touch-action: manipulation;
+
+    }
+
+
+    .nav a,
+    .menu {
+
+        min-height: 44px;
+
+    }
+
+}
+
+
+/* =========================================
+   REDUCE MOTION
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+
+        scroll-behavior: auto !important;
+
+        transition: none !important;
+
+        animation: none !important;
+
+    }
+
+}
