@@ -2948,3 +2948,118 @@ body.cursor-active .cursor {
     }
 
 }
+/* =========================================
+   CINEMATIC REVEALS
+========================================= */
+
+.reveal-item {
+
+    opacity: 0;
+
+    transform:
+        translateY(35px);
+
+    transition:
+        opacity 1s cubic-bezier(.16,1,.3,1),
+        transform 1s cubic-bezier(.16,1,.3,1);
+
+}
+
+
+.reveal-item.is-visible {
+
+    opacity: 1;
+
+    transform:
+        translateY(0);
+
+}
+
+
+/* Core reacts to scroll */
+
+.genie-core {
+
+    transform:
+        translate(-50%, -45%)
+        rotate(var(--scroll-rotation, 0deg))
+        scale(var(--scroll-scale, 1));
+
+}
+
+
+/* Data points appear individually */
+
+.data-points i {
+
+    opacity: .35;
+
+    transition:
+        opacity .5s ease,
+        transform .5s ease;
+
+}
+
+
+.data-points i.selected {
+
+    animation:
+        dataPulse 2.2s ease-in-out infinite;
+
+}
+
+
+@keyframes dataPulse {
+
+    0%,
+    100% {
+
+        transform: scale(1);
+
+        opacity: .75;
+
+    }
+
+    50% {
+
+        transform: scale(1.6);
+
+        opacity: 1;
+
+    }
+
+}
+
+
+/* Network nodes */
+
+.network-node {
+
+    transition:
+        border-color .3s ease,
+        color .3s ease,
+        transform .3s ease;
+
+}
+
+
+/* Page entrance */
+
+body {
+
+    opacity: 1;
+
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+
+    .reveal-item {
+
+        opacity: 1;
+
+        transform: none;
+
+    }
+
+}
