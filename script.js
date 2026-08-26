@@ -1,863 +1,768 @@
 /* =========================================================
    VIRTUAL GENIE
-   NEURAL LATTICE EXPERIENCE
-   MOBILE-FIRST WEBGL
+   INTERACTION + WEBGL EXPERIENCE
 ========================================================= */
 
 (() => {
     "use strict";
 
+
+    /* =====================================================
+       BASIC SETUP
+    ====================================================== */
+
+    const body = document.body;
     const canvas = document.getElementById("experience");
 
-    if (!canvas || typeof THREE === "undefined") {
-        console.error("Virtual Genie: WebGL initialization failed.");
+    if (!canvas) {
         return;
     }
 
+
     /* =====================================================
-       DEVICE / PERFORMANCE
-    ===================================================== */
+       REDUCED MOTION
+    ====================================================== */
 
-    const mobile =
-        window.matchMedia("(max-width: 700px)").matches;
+    const reduceMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+    ).matches;
 
-    const reducedMotion =
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const touch =
-        "ontouchstart" in window ||
-        navigator.maxTouchPoints > 0;
+    /* =====================================================
+       MOBILE MENU
+    ====================================================== */
 
-    const DPR = Math.min(
-        window.devicePixelRatio || 1,
-        mobile ? 1.25 : 1.7
+    const menuToggle = document.getElementById("menuToggle");
+    const mobileMenu = document.getElementById("mobileMenu");
+
+    if (menuToggle && mobileMenu) {
+
+        const closeMenu = () => {
+
+            menuToggle.classList.remove("active");
+
+            menuToggle.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+
+            mobileMenu.classList.remove("open");
+
+            mobileMenu.setAttribute(
+                "aria-hidden",
+                "true"
+            );
+
+            body.classList.remove("menu-open");
+        };
+
+
+        const openMenu = () => {
+
+            menuToggle.classList.add("active");
+
+            menuToggle.setAttribute(
+                "aria-expanded",
+                "true"
+            );
+
+            mobileMenu.classList.add("open");
+
+            mobileMenu.setAttribute(
+                "aria-hidden",
+                "false"
+            );
+
+            body.classList.add("menu-open");
+        };
+
+
+        menuToggle.addEventListener(
+            "click",
+            () => {
+
+                const isOpen =
+                    menuToggle.classList.contains("active");
+
+                if (isOpen) {
+                    closeMenu();
+                } else {
+                    openMenu();
+                }
+
+            }
+        );
+
+
+        mobileMenu
+            .querySelectorAll("a")
+            .forEach(link => {
+
+                link.addEventListener(
+                    "click",
+                    closeMenu
+                );
+
+            });
+
+
+        document.addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key === "Escape" &&
+                    menuToggle.classList.contains("active")
+                ) {
+                    closeMenu();
+                }
+
+            }
+        );
+
+
+        window.addEventListener(
+            "resize",
+            () => {
+
+                if (
+                    window.innerWidth > 900 &&
+                    menuToggle.classList.contains("active")
+                ) {
+                    closeMenu();
+                }
+
+            }
+        );
+    }
+
+
+    /* =====================================================
+       SMOOTH INTERNAL LINKS
+    ====================================================== */
+
+    document
+        .querySelectorAll('a[href^="#"]')
+        .forEach(link => {
+
+            link.addEventListener(
+                "click",
+                event => {
+
+                    const targetId =
+                        link.getAttribute("href");
+
+                    if (
+                        !targetId ||
+                        targetId === "#"
+                    ) {
+                        return;
+                    }
+
+                    const target =
+                        document.querySelector(targetId);
+
+                    if (!target) {
+                        return;
+                    }
+
+                    event.preventDefault();
+
+                    target.scrollIntoView({
+                        behavior: reduceMotion
+                            ? "auto"
+                            : "smooth",
+                        block: "start"
+                    });
+
+                }
+            );
+
+        });
+
+
+    /* =====================================================
+       SCROLL STATE
+    ====================================================== */
+
+    let scrollY = window.scrollY || 0;
+    let targetScroll = scrollY;
+
+    let viewportWidth =
+        window.innerWidth;
+
+    let viewportHeight =
+        window.innerHeight;
+
+
+    window.addEventListener(
+        "scroll",
+        () => {
+
+            targetScroll =
+                window.scrollY || 0;
+
+        },
+        {
+            passive: true
+        }
     );
 
-    const NODE_COUNT = mobile ? 520 : 1050;
-    const CONNECTION_COUNT = mobile ? 650 : 1700;
-    const SIGNAL_COUNT = mobile ? 10 : 24;
 
-    const BG = 0x050505;
-    const WHITE = 0xf1f0eb;
-    const SOFT = 0x858581;
-    const ACCENT = 0xd8ff5a;
+    window.addEventListener(
+        "resize",
+        () => {
+
+            viewportWidth =
+                window.innerWidth;
+
+            viewportHeight =
+                window.innerHeight;
+
+        }
+    );
 
 
     /* =====================================================
-       HELPERS
-    ===================================================== */
+       HERO PARALLAX
+    ====================================================== */
 
-    const clamp = (value, min, max) =>
-        Math.max(min, Math.min(max, value));
+    const heroContent =
+        document.querySelector(".hero-content");
 
-    const lerp = (a, b, t) =>
-        a + (b - a) * t;
+    const heroTop =
+        document.querySelector(".hero-top");
 
-    const smoothstep = (a, b, x) => {
-        const t = clamp((x - a) / (b - a), 0, 1);
-        return t * t * (3 - 2 * t);
+    const heroBottom =
+        document.querySelector(".hero-bottom");
+
+
+    const updateHero = () => {
+
+        if (!heroContent) {
+            return;
+        }
+
+        const heroHeight =
+            viewportHeight;
+
+        const progress =
+            Math.min(
+                Math.max(
+                    scrollY / heroHeight,
+                    0
+                ),
+                1
+            );
+
+
+        if (reduceMotion) {
+            return;
+        }
+
+
+        const contentY =
+            progress * -90;
+
+        const opacity =
+            1 - progress * 1.15;
+
+
+        heroContent.style.transform =
+            `translate3d(0, ${contentY}px, 0)`;
+
+        heroContent.style.opacity =
+            Math.max(opacity, 0);
+
+
+        if (heroTop) {
+
+            heroTop.style.transform =
+                `translate3d(0, ${progress * -25}px, 0)`;
+
+            heroTop.style.opacity =
+                Math.max(
+                    1 - progress * 1.5,
+                    0
+                );
+        }
+
+
+        if (heroBottom) {
+
+            heroBottom.style.transform =
+                `translate3d(0, ${progress * 25}px, 0)`;
+
+            heroBottom.style.opacity =
+                Math.max(
+                    1 - progress * 2,
+                    0
+                );
+        }
+
     };
 
 
     /* =====================================================
-       SCENE
-    ===================================================== */
+       INTERSECTION OBSERVER
+    ====================================================== */
 
-    const scene = new THREE.Scene();
+    const revealItems =
+        document.querySelectorAll(
+            ".system-intro-content, " +
+            ".system-product, " +
+            ".process-item, " +
+            ".final-cta"
+        );
 
-    scene.background =
-        new THREE.Color(BG);
+
+    if (
+        !reduceMotion &&
+        "IntersectionObserver" in window
+    ) {
+
+        const observer =
+            new IntersectionObserver(
+                entries => {
+
+                    entries.forEach(entry => {
+
+                        if (
+                            entry.isIntersecting
+                        ) {
+
+                            entry.target.classList.add(
+                                "is-visible"
+                            );
+
+                        }
+
+                    });
+
+                },
+                {
+                    threshold: 0.12,
+                    rootMargin: "0px 0px -8% 0px"
+                }
+            );
+
+
+        revealItems.forEach(
+            element => observer.observe(element)
+        );
+
+    } else {
+
+        revealItems.forEach(
+            element =>
+                element.classList.add(
+                    "is-visible"
+                )
+        );
+
+    }
 
 
     /* =====================================================
-       CAMERA
-    ===================================================== */
+       THREE.JS CHECK
+    ====================================================== */
+
+    if (
+        typeof THREE === "undefined"
+    ) {
+
+        console.warn(
+            "Three.js was not loaded."
+        );
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       THREE.JS SCENE
+    ====================================================== */
+
+    const scene =
+        new THREE.Scene();
+
 
     const camera =
         new THREE.PerspectiveCamera(
-            mobile ? 58 : 48,
-            window.innerWidth / window.innerHeight,
+            45,
+            viewportWidth / viewportHeight,
             0.1,
-            200
+            100
         );
 
-    camera.position.set(
-        0,
-        0,
-        mobile ? 9.5 : 11
-    );
 
+    camera.position.z =
+        viewportWidth < 700
+            ? 7
+            : 6;
 
-    /* =====================================================
-       RENDERER
-    ===================================================== */
 
     const renderer =
         new THREE.WebGLRenderer({
             canvas,
-            antialias: !mobile,
-            alpha: false,
+            antialias: true,
+            alpha: true,
             powerPreference: "high-performance"
         });
 
-    renderer.setPixelRatio(DPR);
+
+    renderer.setPixelRatio(
+        Math.min(
+            window.devicePixelRatio || 1,
+            viewportWidth < 700 ? 1.5 : 2
+        )
+    );
+
 
     renderer.setSize(
-        window.innerWidth,
-        window.innerHeight,
+        viewportWidth,
+        viewportHeight,
         false
     );
 
-    renderer.outputColorSpace =
-        THREE.SRGBColorSpace;
 
-
-    /* =====================================================
-       MASTER WORLD
-    ===================================================== */
-
-    const world =
-        new THREE.Group();
-
-    scene.add(world);
-
-
-    /* =====================================================
-       NEURAL LATTICE
-    ===================================================== */
-
-    const nodes = [];
-
-    const nodePositions =
-        new Float32Array(
-            NODE_COUNT * 3
-        );
-
-    const nodeColors =
-        new Float32Array(
-            NODE_COUNT * 3
-        );
-
-    const nodeSizes =
-        new Float32Array(
-            NODE_COUNT
-        );
-
-
-    /*
-       Instead of random stars, build a
-       structured 3D intelligence field.
-
-       Nodes are distributed around a
-       distorted cylindrical / spherical
-       volume.
-    */
-
-    for (let i = 0; i < NODE_COUNT; i++) {
-
-        const i3 = i * 3;
-
-        const depth =
-            Math.random() * 2 - 1;
-
-        const angle =
-            Math.random() *
-            Math.PI *
-            2;
-
-        const radius =
-            1.8 +
-            Math.pow(
-                Math.random(),
-                0.55
-            ) * 5.8;
-
-        const vertical =
-            depth * 5.2;
-
-        /*
-           Organic distortion.
-        */
-
-        const wave =
-            Math.sin(
-                angle * 3 +
-                depth * 5
-            ) * 0.45;
-
-        const x =
-            Math.cos(angle) *
-            radius +
-            wave;
-
-        const y =
-            vertical +
-            Math.sin(
-                angle * 2
-            ) * 0.55;
-
-        const z =
-            Math.sin(angle) *
-            radius;
-
-
-        nodePositions[i3] = x;
-        nodePositions[i3 + 1] = y;
-        nodePositions[i3 + 2] = z;
-
-
-        /*
-           Mostly monochrome.
-
-           A restrained number of nodes
-           use the Virtual Genie accent.
-        */
-
-        if (Math.random() > 0.93) {
-
-            nodeColors[i3] =
-                0.72;
-
-            nodeColors[i3 + 1] =
-                0.92;
-
-            nodeColors[i3 + 2] =
-                0.25;
-
-        } else {
-
-            const brightness =
-                0.28 +
-                Math.random() * 0.55;
-
-            nodeColors[i3] =
-                brightness;
-
-            nodeColors[i3 + 1] =
-                brightness;
-
-            nodeColors[i3 + 2] =
-                brightness * 0.96;
-        }
-
-
-        nodeSizes[i] =
-            mobile
-                ? 0.045 + Math.random() * 0.065
-                : 0.04 + Math.random() * 0.075;
-
-
-        nodes.push({
-            x,
-            y,
-            z,
-
-            phase:
-                Math.random() *
-                Math.PI *
-                2,
-
-            speed:
-                0.08 +
-                Math.random() *
-                0.25
-        });
-    }
-
-
-    const nodeGeometry =
-        new THREE.BufferGeometry();
-
-
-    nodeGeometry.setAttribute(
-        "position",
-        new THREE.BufferAttribute(
-            nodePositions,
-            3
-        )
-    );
-
-
-    nodeGeometry.setAttribute(
-        "color",
-        new THREE.BufferAttribute(
-            nodeColors,
-            3
-        )
-    );
-
-
-    nodeGeometry.setAttribute(
-        "size",
-        new THREE.BufferAttribute(
-            nodeSizes,
-            1
-        )
+    renderer.setClearColor(
+        0x000000,
+        0
     );
 
 
     /* =====================================================
-       NODE TEXTURE
-    ===================================================== */
+       PARTICLE SYSTEM
+    ====================================================== */
 
-    const nodeCanvas =
-        document.createElement("canvas");
-
-    nodeCanvas.width = 32;
-    nodeCanvas.height = 32;
-
-    const nodeContext =
-        nodeCanvas.getContext("2d");
-
-    const nodeGradient =
-        nodeContext.createRadialGradient(
-            16,
-            16,
-            0,
-            16,
-            16,
-            16
-        );
-
-    nodeGradient.addColorStop(
-        0,
-        "rgba(255,255,255,1)"
-    );
-
-    nodeGradient.addColorStop(
-        0.25,
-        "rgba(255,255,255,.9)"
-    );
-
-    nodeGradient.addColorStop(
-        0.55,
-        "rgba(255,255,255,.25)"
-    );
-
-    nodeGradient.addColorStop(
-        1,
-        "rgba(255,255,255,0)"
-    );
-
-    nodeContext.fillStyle =
-        nodeGradient;
-
-    nodeContext.fillRect(
-        0,
-        0,
-        32,
-        32
-    );
+    const particleCount =
+        viewportWidth < 700
+            ? 650
+            : 1200;
 
 
-    const nodeTexture =
-        new THREE.CanvasTexture(
-            nodeCanvas
-        );
-
-
-    const nodeMaterial =
-        new THREE.PointsMaterial({
-            size:
-                mobile
-                    ? 0.08
-                    : 0.095,
-
-            map: nodeTexture,
-
-            transparent: true,
-
-            opacity: 0.72,
-
-            vertexColors: true,
-
-            depthWrite: false,
-
-            blending:
-                THREE.AdditiveBlending
-        });
-
-
-    const nodeCloud =
-        new THREE.Points(
-            nodeGeometry,
-            nodeMaterial
-        );
-
-
-    world.add(nodeCloud);
-
-
-    /* =====================================================
-       CONNECTIONS
-    ===================================================== */
-
-    /*
-       We connect nearby nodes.
-
-       Doing this only once keeps the
-       animation cheap enough for phones.
-    */
-
-    const connectionPositions =
+    const positions =
         new Float32Array(
-            CONNECTION_COUNT * 6
+            particleCount * 3
+        );
+
+
+    const basePositions =
+        new Float32Array(
+            particleCount * 3
+        );
+
+
+    const particleSizes =
+        new Float32Array(
+            particleCount
+        );
+
+
+    const randoms =
+        new Float32Array(
+            particleCount
         );
 
 
     for (
         let i = 0;
-        i < CONNECTION_COUNT;
+        i < particleCount;
         i++
     ) {
-
-        /*
-           Choose a source node.
-        */
-
-        const a =
-            Math.floor(
-                Math.random() *
-                NODE_COUNT
-            );
-
-
-        /*
-           Look for a nearby node.
-
-           We don't perform a full
-           nearest-neighbour calculation
-           because that is expensive on
-           mobile.
-        */
-
-        let b =
-            a +
-            Math.floor(
-                (Math.random() * 50) -
-                25
-            );
-
-
-        if (b < 0) {
-            b += NODE_COUNT;
-        }
-
-        if (b >= NODE_COUNT) {
-            b -= NODE_COUNT;
-        }
-
-
-        const aNode =
-            nodes[a];
-
-        const bNode =
-            nodes[b];
-
-
-        const i6 =
-            i * 6;
-
-
-        connectionPositions[i6] =
-            aNode.x;
-
-        connectionPositions[i6 + 1] =
-            aNode.y;
-
-        connectionPositions[i6 + 2] =
-            aNode.z;
-
-        connectionPositions[i6 + 3] =
-            bNode.x;
-
-        connectionPositions[i6 + 4] =
-            bNode.y;
-
-        connectionPositions[i6 + 5] =
-            bNode.z;
-
-    }
-
-
-    const connectionGeometry =
-        new THREE.BufferGeometry();
-
-
-    connectionGeometry.setAttribute(
-        "position",
-        new THREE.BufferAttribute(
-            connectionPositions,
-            3
-        )
-    );
-
-
-    const connectionMaterial =
-        new THREE.LineBasicMaterial({
-            color: SOFT,
-
-            transparent: true,
-
-            opacity:
-                mobile
-                    ? 0.09
-                    : 0.13,
-
-            depthWrite: false
-        });
-
-
-    const connections =
-        new THREE.LineSegments(
-            connectionGeometry,
-            connectionMaterial
-        );
-
-
-    world.add(connections);
-
-
-    /* =====================================================
-       CENTRAL INTELLIGENCE CORE
-    ===================================================== */
-
-    const core =
-        new THREE.Group();
-
-    world.add(core);
-
-
-    /*
-       Main wireframe sphere.
-    */
-
-    const coreGeometry =
-        new THREE.IcosahedronGeometry(
-            mobile
-                ? 0.82
-                : 1.05,
-            2
-        );
-
-
-    const coreMaterial =
-        new THREE.MeshBasicMaterial({
-            color: WHITE,
-
-            wireframe: true,
-
-            transparent: true,
-
-            opacity: 0.42
-        });
-
-
-    const coreMesh =
-        new THREE.Mesh(
-            coreGeometry,
-            coreMaterial
-        );
-
-
-    core.add(coreMesh);
-
-
-    /* =====================================================
-       CORE RINGS
-    ===================================================== */
-
-    function ring(
-        radius,
-        rotation,
-        opacity
-    ) {
-
-        const geometry =
-            new THREE.TorusGeometry(
-                radius,
-                mobile
-                    ? 0.009
-                    : 0.014,
-                8,
-                128
-            );
-
-
-        const material =
-            new THREE.MeshBasicMaterial({
-                color: WHITE,
-
-                transparent: true,
-
-                opacity
-            });
-
-
-        const mesh =
-            new THREE.Mesh(
-                geometry,
-                material
-            );
-
-
-        mesh.rotation.set(
-            ...rotation
-        );
-
-
-        core.add(mesh);
-
-        return mesh;
-    }
-
-
-    const ring1 =
-        ring(
-            1.15,
-            [
-                Math.PI / 2,
-                0,
-                0
-            ],
-            0.42
-        );
-
-
-    const ring2 =
-        ring(
-            1.48,
-            [
-                0.7,
-                0.3,
-                0.2
-            ],
-            0.18
-        );
-
-
-    const ring3 =
-        ring(
-            1.85,
-            [
-                1.3,
-                -0.5,
-                0.3
-            ],
-            0.10
-        );
-
-
-    /* =====================================================
-       CORE POINT
-    ===================================================== */
-
-    const pointGeometry =
-        new THREE.SphereGeometry(
-            0.11,
-            16,
-            16
-        );
-
-
-    const pointMaterial =
-        new THREE.MeshBasicMaterial({
-            color: ACCENT
-        });
-
-
-    const corePoint =
-        new THREE.Mesh(
-            pointGeometry,
-            pointMaterial
-        );
-
-
-    core.add(
-        corePoint
-    );
-
-
-    /* =====================================================
-       SIGNAL PARTICLES
-    ===================================================== */
-
-    const signalGeometry =
-        new THREE.BufferGeometry();
-
-
-    const signalPositions =
-        new Float32Array(
-            SIGNAL_COUNT * 3
-        );
-
-
-    const signalColors =
-        new Float32Array(
-            SIGNAL_COUNT * 3
-        );
-
-
-    const signals = [];
-
-
-    for (
-        let i = 0;
-        i < SIGNAL_COUNT;
-        i++
-    ) {
-
-        const a =
-            Math.floor(
-                Math.random() *
-                NODE_COUNT
-            );
-
-
-        const b =
-            Math.floor(
-                Math.random() *
-                NODE_COUNT
-            );
-
-
-        const start =
-            nodes[a];
-
-        const end =
-            nodes[b];
-
-
-        signals.push({
-            start,
-            end,
-
-            progress:
-                Math.random(),
-
-            speed:
-                0.12 +
-                Math.random() *
-                0.22
-        });
-
 
         const i3 =
             i * 3;
 
 
-        signalPositions[i3] =
-            start.x;
+        /*
+         * Wide, architectural field.
+         *
+         * The points are deliberately sparse.
+         * This is not a "glowing AI cloud".
+         */
 
-        signalPositions[i3 + 1] =
-            start.y;
+        const x =
+            (Math.random() - 0.5) * 9;
 
-        signalPositions[i3 + 2] =
-            start.z;
+        const y =
+            (Math.random() - 0.5) * 6;
+
+        const z =
+            (Math.random() - 0.5) * 5;
 
 
-        signalColors[i3] =
-            0.85;
+        positions[i3] =
+            x;
 
-        signalColors[i3 + 1] =
-            1;
+        positions[i3 + 1] =
+            y;
 
-        signalColors[i3 + 2] =
-            0.3;
+        positions[i3 + 2] =
+            z;
+
+
+        basePositions[i3] =
+            x;
+
+        basePositions[i3 + 1] =
+            y;
+
+        basePositions[i3 + 2] =
+            z;
+
+
+        particleSizes[i] =
+            Math.random() *
+            1.2 +
+            0.35;
+
+
+        randoms[i] =
+            Math.random();
 
     }
 
 
-    signalGeometry.setAttribute(
+    const particleGeometry =
+        new THREE.BufferGeometry();
+
+
+    particleGeometry.setAttribute(
         "position",
         new THREE.BufferAttribute(
-            signalPositions,
+            positions,
             3
         )
     );
 
 
-    signalGeometry.setAttribute(
-        "color",
+    particleGeometry.setAttribute(
+        "size",
         new THREE.BufferAttribute(
-            signalColors,
-            3
+            particleSizes,
+            1
         )
     );
 
 
-    const signalMaterial =
-        new THREE.PointsMaterial({
-            size:
-                mobile
-                    ? 0.12
-                    : 0.14,
+    /*
+     * Simple white material.
+     *
+     * No colored gradients.
+     */
 
-            map: nodeTexture,
+    const particleMaterial =
+        new THREE.PointsMaterial({
+
+            color: 0xf2f1ec,
+
+            size:
+                viewportWidth < 700
+                    ? 0.018
+                    : 0.022,
 
             transparent: true,
 
-            opacity: 1,
-
-            vertexColors: true,
+            opacity:
+                viewportWidth < 700
+                    ? 0.26
+                    : 0.32,
 
             depthWrite: false,
 
             blending:
-                THREE.AdditiveBlending
+                THREE.NormalBlending
+
         });
 
 
-    const signalCloud =
+    const particles =
         new THREE.Points(
-            signalGeometry,
-            signalMaterial
+            particleGeometry,
+            particleMaterial
         );
 
 
-    world.add(
-        signalCloud
-    );
+    scene.add(particles);
 
 
     /* =====================================================
-       POINTER / TOUCH
-    ===================================================== */
+       ARCHITECTURAL LINES
+    ====================================================== */
+
+    const lineGroup =
+        new THREE.Group();
+
+
+    scene.add(lineGroup);
+
+
+    const lineMaterial =
+        new THREE.LineBasicMaterial({
+            color: 0xf2f1ec,
+            transparent: true,
+            opacity:
+                viewportWidth < 700
+                    ? 0.06
+                    : 0.085
+        });
+
+
+    const lineCount =
+        viewportWidth < 700
+            ? 10
+            : 18;
+
+
+    for (
+        let i = 0;
+        i < lineCount;
+        i++
+    ) {
+
+        const geometry =
+            new THREE.BufferGeometry();
+
+
+        const points = [];
+
+
+        const y =
+            -3.2 +
+            (i / lineCount) * 6.4;
+
+
+        points.push(
+            new THREE.Vector3(
+                -5,
+                y,
+                -1
+            )
+        );
+
+
+        points.push(
+            new THREE.Vector3(
+                5,
+                y,
+                -1
+            )
+        );
+
+
+        geometry.setFromPoints(
+            points
+        );
+
+
+        const line =
+            new THREE.Line(
+                geometry,
+                lineMaterial
+            );
+
+
+        lineGroup.add(line);
+
+    }
+
+
+    /* =====================================================
+       VERTICAL STRUCTURE LINES
+    ====================================================== */
+
+    const verticalCount =
+        viewportWidth < 700
+            ? 5
+            : 9;
+
+
+    for (
+        let i = 0;
+        i < verticalCount;
+        i++
+    ) {
+
+        const geometry =
+            new THREE.BufferGeometry();
+
+
+        const points = [];
+
+
+        const x =
+            -4.5 +
+            (i / (verticalCount - 1)) * 9;
+
+
+        points.push(
+            new THREE.Vector3(
+                x,
+                -3,
+                -1
+            )
+        );
+
+
+        points.push(
+            new THREE.Vector3(
+                x,
+                3,
+                -1
+            )
+        );
+
+
+        geometry.setFromPoints(
+            points
+        );
+
+
+        const line =
+            new THREE.Line(
+                geometry,
+                lineMaterial
+            );
+
+
+        lineGroup.add(line);
+
+    }
+
+
+    /* =====================================================
+       INTERACTION
+    ====================================================== */
 
     let pointerX = 0;
     let pointerY = 0;
 
-    let targetX = 0;
-    let targetY = 0;
+    let smoothPointerX = 0;
+    let smoothPointerY = 0;
 
 
-    function setPointer(
-        x,
-        y
-    ) {
+    const updatePointer =
+        (x, y) => {
 
-        targetX =
-            (
-                x /
-                window.innerWidth -
-                0.5
-            );
+            pointerX =
+                (x / viewportWidth - 0.5) *
+                2;
 
+            pointerY =
+                (y / viewportHeight - 0.5) *
+                2;
 
-        targetY =
-            (
-                y /
-                window.innerHeight -
-                0.5
-            );
-    }
+        };
 
 
     window.addEventListener(
-        "mousemove",
+        "pointermove",
         event => {
 
-            setPointer(
+            updatePointer(
                 event.clientX,
                 event.clientY
             );
@@ -874,16 +779,16 @@
         event => {
 
             if (
-                event.touches &&
-                event.touches[0]
+                !event.touches ||
+                !event.touches[0]
             ) {
-
-                setPointer(
-                    event.touches[0].clientX,
-                    event.touches[0].clientY
-                );
-
+                return;
             }
+
+            updatePointer(
+                event.touches[0].clientX,
+                event.touches[0].clientY
+            );
 
         },
         {
@@ -893,736 +798,448 @@
 
 
     /* =====================================================
-       SCROLL
-    ===================================================== */
+       PRODUCT STATE
+    ====================================================== */
 
-    let scrollTarget = 0;
-    let scrollCurrent = 0;
-
-
-    function readScroll() {
-
-        const max =
-            Math.max(
-                1,
-                document.documentElement.scrollHeight -
-                window.innerHeight
-            );
-
-
-        scrollTarget =
-            clamp(
-                window.scrollY / max,
-                0,
-                1
-            );
-    }
-
-
-    window.addEventListener(
-        "scroll",
-        readScroll,
-        {
-            passive: true
-        }
-    );
-
-
-    readScroll();
-
-
-    /* =====================================================
-       MENU
-    ===================================================== */
-
-    const menuToggle =
-        document.getElementById(
-            "menuToggle"
-        );
-
-    const menu =
-        document.getElementById(
-            "menu"
+    const products =
+        document.querySelectorAll(
+            ".system-product"
         );
 
 
-    if (
-        menuToggle &&
-        menu
-    ) {
-
-        menuToggle.addEventListener(
-            "click",
-            () => {
-
-                const open =
-                    menu.classList.toggle(
-                        "open"
-                    );
+    let activeProduct =
+        "receptionist";
 
 
-                menuToggle.classList.toggle(
-                    "active",
-                    open
-                );
+    const productObserver =
+        "IntersectionObserver" in window
+            ? new IntersectionObserver(
+                entries => {
 
+                    entries.forEach(entry => {
 
-                menuToggle.setAttribute(
-                    "aria-expanded",
-                    open
-                        ? "true"
-                        : "false"
-                );
+                        if (
+                            entry.isIntersecting &&
+                            entry.intersectionRatio > 0.35
+                        ) {
 
+                            const system =
+                                entry.target.dataset.system;
 
-                document.body.classList.toggle(
-                    "menu-open",
-                    open
-                );
+                            if (system) {
 
-            }
-        );
+                                activeProduct =
+                                    system;
 
-
-        menu.querySelectorAll("a")
-            .forEach(
-                link => {
-
-                    link.addEventListener(
-                        "click",
-                        () => {
-
-                            menu.classList.remove(
-                                "open"
-                            );
-
-                            menuToggle.classList.remove(
-                                "active"
-                            );
-
-                            menuToggle.setAttribute(
-                                "aria-expanded",
-                                "false"
-                            );
-
-                            document.body.classList.remove(
-                                "menu-open"
-                            );
+                            }
 
                         }
-                    );
 
+                    });
+
+                },
+                {
+                    threshold: [
+                        0.35,
+                        0.55,
+                        0.75
+                    ]
                 }
-            );
-
-
-        document.addEventListener(
-            "keydown",
-            event => {
-
-                if (
-                    event.key === "Escape"
-                ) {
-
-                    menu.classList.remove(
-                        "open"
-                    );
-
-                    menuToggle.classList.remove(
-                        "active"
-                    );
-
-                    menuToggle.setAttribute(
-                        "aria-expanded",
-                        "false"
-                    );
-
-                    document.body.classList.remove(
-                        "menu-open"
-                    );
-
-                }
-            }
-        );
-    }
-
-
-    /* =====================================================
-       HERO HTML MOTION
-    ===================================================== */
-
-    const heroContent =
-        document.querySelector(
-            ".hero-content"
-        );
-
-    const heroIndex =
-        document.querySelector(
-            ".hero-index"
-        );
-
-    const heroStatus =
-        document.querySelector(
-            ".hero-status"
-        );
-
-
-    /* =====================================================
-       RESIZE
-    ===================================================== */
-
-    function resize() {
-
-        camera.aspect =
-            window.innerWidth /
-            window.innerHeight;
-
-
-        camera.fov =
-            window.innerWidth < 700
-                ? 58
-                : 48;
-
-
-        camera.updateProjectionMatrix();
-
-
-        renderer.setPixelRatio(
-            Math.min(
-                window.devicePixelRatio || 1,
-                window.innerWidth < 700
-                    ? 1.25
-                    : 1.7
             )
-        );
+            : null;
 
 
-        renderer.setSize(
-            window.innerWidth,
-            window.innerHeight,
-            false
+    if (productObserver) {
+
+        products.forEach(
+            product =>
+                productObserver.observe(product)
         );
 
     }
 
 
-    window.addEventListener(
-        "resize",
-        resize
-    );
+    /* =====================================================
+       SYSTEM VISUAL STATE
+    ====================================================== */
+
+    const systemTargets = {
+
+        receptionist: {
+            rotation: 0.18,
+            spread: 0.82
+        },
+
+        leads: {
+            rotation: 0.45,
+            spread: 1.18
+        },
+
+        infrastructure: {
+            rotation: 0.75,
+            spread: 1.42
+        },
+
+        "business-os": {
+            rotation: 1.05,
+            spread: 1.68
+        }
+
+    };
+
+
+    let currentSpread = 1;
+    let targetSpread = 1;
+
+    let currentRotation = 0;
+    let targetRotation = 0;
+
+
+    /* =====================================================
+       SCROLL → SYSTEM STATE
+    ====================================================== */
+
+    const updateSystemTarget =
+        () => {
+
+            const target =
+                systemTargets[
+                    activeProduct
+                ] ||
+                systemTargets.receptionist;
+
+
+            targetSpread =
+                target.spread;
+
+            targetRotation =
+                target.rotation;
+
+        };
 
 
     /* =====================================================
        ANIMATION
-    ===================================================== */
+    ====================================================== */
 
-    const clock =
-        new THREE.Clock();
-
-
-    function animate() {
-
-        requestAnimationFrame(
-            animate
-        );
+    let time = 0;
 
 
-        const time =
-            clock.getElapsedTime();
+    const animate =
+        () => {
 
-
-        /* ================================================
-           INPUT
-        ================================================ */
-
-        pointerX =
-            lerp(
-                pointerX,
-                targetX,
-                0.035
+            requestAnimationFrame(
+                animate
             );
 
 
-        pointerY =
-            lerp(
-                pointerY,
-                targetY,
-                0.035
-            );
+            /*
+             * Smooth scroll value.
+             */
 
-
-        scrollCurrent =
-            lerp(
-                scrollCurrent,
-                scrollTarget,
-                0.035
-            );
-
-
-        /* ================================================
-           WORLD MOVEMENT
-        ================================================ */
-
-        const movement =
-            reducedMotion
-                ? 0
-                : 1;
-
-
-        world.rotation.y =
-            pointerX *
-            0.10 +
-            time *
-            0.012 *
-            movement;
-
-
-        world.rotation.x =
-            pointerY *
-            0.045;
-
-
-        /*
-           Slowly push the entire field
-           through the camera as the page
-           progresses.
-        */
-
-        world.position.z =
-            scrollCurrent *
-            3.2;
-
-
-        world.position.y =
-            -scrollCurrent *
-            1.3;
-
-
-        /* ================================================
-           NODE BREATHING
-        ================================================ */
-
-        const positions =
-            nodeGeometry
-                .attributes
-                .position
-                .array;
-
-
-        for (
-            let i = 0;
-            i < NODE_COUNT;
-            i++
-        ) {
-
-            const node =
-                nodes[i];
-
-            const i3 =
-                i * 3;
-
-
-            const wave =
-                Math.sin(
-                    time *
-                    node.speed +
-                    node.phase
+            scrollY +=
+                (
+                    targetScroll -
+                    scrollY
+                ) *
+                (
+                    reduceMotion
+                        ? 1
+                        : 0.085
                 );
 
 
-            positions[i3] =
-                node.x +
-                Math.sin(
-                    time * 0.10 +
-                    node.phase
-                ) *
-                0.10;
+            time +=
+                reduceMotion
+                    ? 0.001
+                    : 0.006;
 
 
-            positions[i3 + 1] =
-                node.y +
-                wave *
-                0.08;
+            updateHero();
+
+            updateSystemTarget();
 
 
-            positions[i3 + 2] =
-                node.z +
-                Math.cos(
-                    time * 0.08 +
-                    node.phase
-                ) *
-                0.10;
-        }
+            /*
+             * Smooth pointer.
+             */
+
+            smoothPointerX +=
+                (
+                    pointerX -
+                    smoothPointerX
+                ) * 0.035;
 
 
-        nodeGeometry
-            .attributes
-            .position
-            .needsUpdate = true;
+            smoothPointerY +=
+                (
+                    pointerY -
+                    smoothPointerY
+                ) * 0.035;
 
 
-        /* ================================================
-           CONNECTION MOVEMENT
-        ================================================ */
+            /*
+             * Smooth visual system state.
+             */
 
-        connections.rotation.y =
-            Math.sin(
-                time * 0.08
-            ) *
-            0.05;
-
-
-        connections.rotation.x =
-            Math.cos(
-                time * 0.06
-            ) *
-            0.025;
+            currentSpread +=
+                (
+                    targetSpread -
+                    currentSpread
+                ) * 0.025;
 
 
-        /* ================================================
-           CORE
-        ================================================ */
-
-        core.rotation.x =
-            time *
-            0.16 *
-            movement;
+            currentRotation +=
+                (
+                    targetRotation -
+                    currentRotation
+                ) * 0.025;
 
 
-        core.rotation.y =
-            time *
-            0.25 *
-            movement;
+            /* ---------------------------------------------
+               PARTICLES
+            --------------------------------------------- */
+
+            const positionAttribute =
+                particleGeometry.attributes.position;
 
 
-        core.position.x =
-            pointerX *
-            0.25;
+            const array =
+                positionAttribute.array;
 
 
-        core.position.y =
-            pointerY *
-            0.16;
+            for (
+                let i = 0;
+                i < particleCount;
+                i++
+            ) {
+
+                const i3 =
+                    i * 3;
 
 
-        /*
-           The core becomes smaller as
-           the camera travels deeper.
-        */
+                const baseX =
+                    basePositions[i3];
 
-        const coreScale =
-            1 -
-            scrollCurrent *
-            0.32;
+                const baseY =
+                    basePositions[i3 + 1];
 
-
-        core.scale.setScalar(
-            coreScale
-        );
+                const baseZ =
+                    basePositions[i3 + 2];
 
 
-        ring1.rotation.z =
-            time *
-            0.35 *
-            movement;
-
-
-        ring2.rotation.x =
-            time *
-            -0.22 *
-            movement;
-
-
-        ring2.rotation.z =
-            time *
-            0.17 *
-            movement;
-
-
-        ring3.rotation.y =
-            time *
-            -0.11 *
-            movement;
-
-
-        /*
-           Core pulse.
-        */
-
-        const pulse =
-            1 +
-            Math.sin(
-                time * 1.7
-            ) *
-            0.035;
-
-
-        corePoint.scale.setScalar(
-            pulse
-        );
-
-
-        /* ================================================
-           SIGNALS
-        ================================================ */
-
-        const signalPositions =
-            signalGeometry
-                .attributes
-                .position
-                .array;
-
-
-        signals.forEach(
-            (signal, index) => {
-
-                signal.progress +=
-                    signal.speed *
-                    0.01 *
-                    movement;
-
-
-                if (
-                    signal.progress >= 1
-                ) {
-
-                    signal.progress = 0;
-
-
-                    const randomNode =
-                        nodes[
-                            Math.floor(
-                                Math.random() *
-                                NODE_COUNT
-                            )
-                        ];
-
-
-                    signal.start =
-                        randomNode;
-
-
-                    signal.end =
-                        nodes[
-                            Math.floor(
-                                Math.random() *
-                                NODE_COUNT
-                            )
-                        ];
-
-                }
-
-
-                const p =
-                    signal.progress;
+                const random =
+                    randoms[i];
 
 
                 /*
-                   Smooth movement rather
-                   than linear movement.
-                */
+                 * Very restrained movement.
+                 * More like a living system than particles.
+                 */
 
-                const eased =
-                    p * p *
-                    (3 - 2 * p);
-
-
-                const x =
-                    lerp(
-                        signal.start.x,
-                        signal.end.x,
-                        eased
-                    );
+                const wave =
+                    Math.sin(
+                        time * 0.75 +
+                        random * 12
+                    ) * 0.018;
 
 
-                const y =
-                    lerp(
-                        signal.start.y,
-                        signal.end.y,
-                        eased
-                    );
+                const drift =
+                    Math.cos(
+                        time * 0.45 +
+                        random * 8
+                    ) * 0.012;
 
 
-                const z =
-                    lerp(
-                        signal.start.z,
-                        signal.end.z,
-                        eased
-                    );
+                array[i3] =
+                    baseX *
+                    currentSpread +
+                    smoothPointerX *
+                    0.12 +
+                    wave;
 
 
-                const i3 =
-                    index * 3;
+                array[i3 + 1] =
+                    baseY *
+                    currentSpread -
+                    smoothPointerY *
+                    0.10 +
+                    drift;
 
 
-                signalPositions[i3] =
-                    x;
-
-                signalPositions[i3 + 1] =
-                    y;
-
-                signalPositions[i3 + 2] =
-                    z;
+                array[i3 + 2] =
+                    baseZ *
+                    currentSpread;
 
             }
-        );
 
 
-        signalGeometry
-            .attributes
-            .position
-            .needsUpdate = true;
+            positionAttribute.needsUpdate =
+                true;
 
 
-        /* ================================================
-           CAMERA JOURNEY
-        ================================================ */
+            /* ---------------------------------------------
+               PARTICLE ROTATION
+            --------------------------------------------- */
 
-        /*
-           This is important.
-
-           The animation isn't simply
-           "scrolling a background."
-
-           The camera actually travels
-           into the system.
-        */
-
-        const baseZ =
-            mobile
-                ? 9.5
-                : 11;
+            particles.rotation.y =
+                currentRotation * 0.16 +
+                smoothPointerX * 0.035;
 
 
-        const targetCameraZ =
-            baseZ -
-            scrollCurrent *
-            7.0;
+            particles.rotation.x =
+                smoothPointerY * 0.018;
 
 
-        camera.position.z =
-            lerp(
-                camera.position.z,
-                targetCameraZ,
-                0.035
+            /* ---------------------------------------------
+               LINE SYSTEM
+            --------------------------------------------- */
+
+            lineGroup.rotation.y =
+                currentRotation * 0.045 +
+                smoothPointerX * 0.025;
+
+
+            lineGroup.rotation.x =
+                smoothPointerY * 0.012;
+
+
+            /*
+             * Slow system movement.
+             */
+
+            lineGroup.position.y =
+                Math.sin(
+                    time * 0.4
+                ) * 0.025;
+
+
+            /* ---------------------------------------------
+               CAMERA
+            --------------------------------------------- */
+
+            camera.position.x +=
+                (
+                    smoothPointerX * 0.20 -
+                    camera.position.x
+                ) * 0.018;
+
+
+            camera.position.y +=
+                (
+                    -smoothPointerY * 0.12 -
+                    camera.position.y
+                ) * 0.018;
+
+
+            camera.lookAt(
+                0,
+                0,
+                0
             );
 
 
-        camera.position.x =
-            lerp(
-                camera.position.x,
-                pointerX *
-                0.75,
-                0.035
+            renderer.render(
+                scene,
+                camera
             );
 
-
-        camera.position.y =
-            lerp(
-                camera.position.y,
-                -pointerY *
-                0.45 +
-                scrollCurrent *
-                0.8,
-                0.035
-            );
+        };
 
 
-        /*
-           Camera looks deeper into the
-           lattice as the user scrolls.
-        */
-
-        const target =
-            new THREE.Vector3(
-                pointerX *
-                0.15,
-
-                scrollCurrent *
-                -0.4,
-
-                -2.0
-            );
-
-
-        camera.lookAt(
-            target
-        );
-
-
-        /* ================================================
-           HERO TEXT FADES INTO THE SYSTEM
-        ================================================ */
-
-        if (heroContent) {
-
-            const opacity =
-                1 -
-                smoothstep(
-                    0.02,
-                    0.20,
-                    scrollCurrent
-                );
-
-
-            heroContent.style.opacity =
-                opacity;
-
-
-            heroContent.style.transform =
-                `translate3d(
-                    0,
-                    ${scrollCurrent * -45}px,
-                    0
-                )`;
-
-        }
-
-
-        if (heroIndex) {
-
-            heroIndex.style.opacity =
-                1 -
-                smoothstep(
-                    0.01,
-                    0.16,
-                    scrollCurrent
-                );
-
-        }
-
-
-        if (heroStatus) {
-
-            heroStatus.style.opacity =
-                1 -
-                smoothstep(
-                    0.01,
-                    0.16,
-                    scrollCurrent
-                );
-
-        }
-
-
-        /* ================================================
-           RENDER
-        ================================================ */
-
-        renderer.render(
-            scene,
-            camera
-        );
-
-    }
+    animate();
 
 
     /* =====================================================
-       START
-    ===================================================== */
+       RESIZE
+    ====================================================== */
 
-    resize();
+    window.addEventListener(
+        "resize",
+        () => {
 
-    animate();
+            viewportWidth =
+                window.innerWidth;
+
+            viewportHeight =
+                window.innerHeight;
+
+
+            camera.aspect =
+                viewportWidth /
+                viewportHeight;
+
+
+            camera.fov =
+                viewportWidth < 700
+                    ? 48
+                    : 45;
+
+
+            camera.updateProjectionMatrix();
+
+
+            renderer.setPixelRatio(
+                Math.min(
+                    window.devicePixelRatio || 1,
+                    viewportWidth < 700
+                        ? 1.5
+                        : 2
+                )
+            );
+
+
+            renderer.setSize(
+                viewportWidth,
+                viewportHeight,
+                false
+            );
+
+
+            particleMaterial.size =
+                viewportWidth < 700
+                    ? 0.018
+                    : 0.022;
+
+
+            particleMaterial.opacity =
+                viewportWidth < 700
+                    ? 0.26
+                    : 0.32;
+
+        }
+    );
+
+
+    /* =====================================================
+       PAGE VISIBILITY
+    ====================================================== */
+
+    document.addEventListener(
+        "visibilitychange",
+        () => {
+
+            if (
+                document.hidden
+            ) {
+                renderer.setAnimationLoop(
+                    null
+                );
+            } else {
+                renderer.setAnimationLoop(
+                    null
+                );
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       INITIAL STATE
+    ====================================================== */
+
+    updateHero();
+    updateSystemTarget();
 
 })();
