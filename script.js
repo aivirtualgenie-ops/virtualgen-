@@ -1,901 +1,1261 @@
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+
 /* =========================================================
    VIRTUAL GENIE AI
-   CINEMATIC HERO ENGINE
-   Scroll + Mouse + Touch + Depth + Navigation
+   THREE.JS SENTIENT DIGITAL WORKER
 ========================================================= */
 
-document.addEventListener("DOMContentLoaded", () => {
 
-    "use strict";
+/* =========================================================
+   DOM
+========================================================= */
 
+const container =
+    document.getElementById("threeScene");
 
-    /* =====================================================
-       ELEMENTS
-    ===================================================== */
+const loaderElement =
+    document.getElementById("sceneLoader");
 
-    const body =
-        document.body;
+const taskStatus =
+    document.getElementById("taskStatus");
 
-    const hero =
-        document.querySelector(".hero");
+const taskTitle =
+    document.getElementById("taskTitle");
 
-    const scene =
-        document.querySelector(".hero-3d-scene");
-
-    const heroArt =
-        document.querySelector(".depth-character");
-
-    const depthBg =
-        document.querySelector(".depth-bg");
-
-    const blueLight =
-        document.querySelector(".light-blue");
-
-    const orangeLight =
-        document.querySelector(".light-orange");
-
-    const panels =
-        document.querySelectorAll(".floating-panel");
-
-    const rings =
-        document.querySelectorAll(".energy-ring");
-
-    const heroContent =
-        document.querySelector(".hero-content");
-
-    const heroGlow =
-        document.querySelector(".hero-glow");
-
-    const menuButton =
-        document.getElementById("menuButton");
-
-    const mobileMenu =
-        document.getElementById("mobileMenu");
+const taskDescription =
+    document.getElementById("taskDescription");
 
 
-    /* =====================================================
-       STATE
-    ===================================================== */
+/* =========================================================
+   BASIC CHECK
+========================================================= */
 
-    let scrollPosition =
-        window.scrollY;
-
-    let smoothScroll =
-        window.scrollY;
-
-    let targetMouseX = 0;
-    let targetMouseY = 0;
-
-    let mouseX = 0;
-    let mouseY = 0;
-
-    let lastTime = 0;
-
-    const reducedMotion =
-        window.matchMedia(
-            "(prefers-reduced-motion: reduce)"
-        ).matches;
+if (!container) {
+    throw new Error("Three.js container not found.");
+}
 
 
-    /* =====================================================
-       MOBILE MENU
-    ===================================================== */
+/* =========================================================
+   SCENE
+========================================================= */
 
-    if (
-        menuButton &&
-        mobileMenu
-    ) {
+const scene =
+    new THREE.Scene();
 
-        menuButton.addEventListener(
-            "click",
-            () => {
+scene.background =
+    new THREE.Color(0x030303);
 
-                const open =
-                    mobileMenu.classList.contains(
-                        "open"
-                    );
 
-                if (open) {
-                    closeMenu();
-                } else {
-                    openMenu();
-                }
+/* =========================================================
+   CAMERA
+========================================================= */
 
-            }
+const camera =
+    new THREE.PerspectiveCamera(
+        38,
+        window.innerWidth /
+            window.innerHeight,
+        0.1,
+        100
+    );
+
+camera.position.set(
+    0,
+    1.25,
+    7
+);
+
+
+/* =========================================================
+   RENDERER
+========================================================= */
+
+const renderer =
+    new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: false,
+        powerPreference: "high-performance"
+    });
+
+
+renderer.setPixelRatio(
+    Math.min(
+        window.devicePixelRatio,
+        2
+    )
+);
+
+
+renderer.setSize(
+    window.innerWidth,
+    window.innerHeight
+);
+
+
+renderer.outputColorSpace =
+    THREE.SRGBColorSpace;
+
+
+renderer.shadowMap.enabled = true;
+
+renderer.shadowMap.type =
+    THREE.PCFSoftShadowMap;
+
+
+container.appendChild(
+    renderer.domElement
+);
+
+
+/* =========================================================
+   LIGHTING
+========================================================= */
+
+const ambientLight =
+    new THREE.HemisphereLight(
+        0x9dbdff,
+        0x050505,
+        1.5
+    );
+
+scene.add(
+    ambientLight
+);
+
+
+const keyLight =
+    new THREE.DirectionalLight(
+        0xffffff,
+        3.2
+    );
+
+keyLight.position.set(
+    3,
+    5,
+    4
+);
+
+keyLight.castShadow = true;
+
+scene.add(
+    keyLight
+);
+
+
+const blueLight =
+    new THREE.PointLight(
+        0x398cff,
+        30,
+        12
+    );
+
+blueLight.position.set(
+    -3,
+    2,
+    2
+);
+
+scene.add(
+    blueLight
+);
+
+
+const orangeLight =
+    new THREE.PointLight(
+        0xff6d32,
+        18,
+        10
+    );
+
+orangeLight.position.set(
+    3,
+    1,
+    -1
+);
+
+scene.add(
+    orangeLight
+);
+
+
+/* =========================================================
+   FLOOR
+========================================================= */
+
+const floorMaterial =
+    new THREE.MeshStandardMaterial({
+        color: 0x050505,
+        roughness: .8,
+        metalness: .15
+    });
+
+
+const floor =
+    new THREE.Mesh(
+        new THREE.CircleGeometry(
+            12,
+            64
+        ),
+        floorMaterial
+    );
+
+
+floor.rotation.x =
+    -Math.PI / 2;
+
+floor.position.y =
+    -1.15;
+
+floor.receiveShadow = true;
+
+scene.add(
+    floor
+);
+
+
+/* =========================================================
+   FLOOR RING
+========================================================= */
+
+const ringMaterial =
+    new THREE.MeshBasicMaterial({
+        color: 0x3f8cff,
+        transparent: true,
+        opacity: .18,
+        side: THREE.DoubleSide
+    });
+
+
+const floorRing =
+    new THREE.Mesh(
+        new THREE.RingGeometry(
+            2.1,
+            2.12,
+            96
+        ),
+        ringMaterial
+    );
+
+
+floorRing.rotation.x =
+    -Math.PI / 2;
+
+floorRing.position.y =
+    -1.13;
+
+scene.add(
+    floorRing
+);
+
+
+/* =========================================================
+   AMBIENT PARTICLES
+========================================================= */
+
+const particleCount =
+    window.innerWidth < 700
+        ? 450
+        : 900;
+
+
+const particlePositions =
+    new Float32Array(
+        particleCount * 3
+    );
+
+
+for (
+    let i = 0;
+    i < particleCount;
+    i++
+) {
+
+    const radius =
+        3 +
+        Math.random() * 7;
+
+    const angle =
+        Math.random() *
+        Math.PI *
+        2;
+
+    const height =
+        -1 +
+        Math.random() * 6;
+
+    particlePositions[
+        i * 3
+    ] =
+        Math.cos(angle) *
+        radius;
+
+    particlePositions[
+        i * 3 + 1
+    ] =
+        height;
+
+    particlePositions[
+        i * 3 + 2
+    ] =
+        Math.sin(angle) *
+        radius;
+
+}
+
+
+const particleGeometry =
+    new THREE.BufferGeometry();
+
+
+particleGeometry.setAttribute(
+    "position",
+    new THREE.BufferAttribute(
+        particlePositions,
+        3
+    )
+);
+
+
+const particleMaterial =
+    new THREE.PointsMaterial({
+        color: 0x79aaff,
+        size:
+            window.innerWidth < 700
+                ? .018
+                : .025,
+        transparent: true,
+        opacity: .5,
+        depthWrite: false
+    });
+
+
+const particles =
+    new THREE.Points(
+        particleGeometry,
+        particleMaterial
+    );
+
+
+scene.add(
+    particles
+);
+
+
+/* =========================================================
+   GENIE
+========================================================= */
+
+let genie = null;
+
+let mixer = null;
+
+let animations = [];
+
+let currentAction = null;
+
+let currentTask = 0;
+
+let modelReady = false;
+
+
+/* =========================================================
+   CHARACTER ANIMATION STORAGE
+========================================================= */
+
+const actions = {};
+
+
+/* =========================================================
+   LOAD GLB
+========================================================= */
+
+const gltfLoader =
+    new GLTFLoader();
+
+
+gltfLoader.load(
+
+    "models/genie.glb",
+
+    gltf => {
+
+        genie =
+            gltf.scene;
+
+        genie.position.set(
+            0,
+            -1.05,
+            0
+        );
+
+        genie.scale.setScalar(
+            1.65
         );
 
 
-        mobileMenu
-            .querySelectorAll("a")
-            .forEach(link => {
+        genie.traverse(
+            object => {
 
-                link.addEventListener(
-                    "click",
-                    closeMenu
-                );
+                if (
+                    object.isMesh
+                ) {
 
-            });
+                    object.castShadow =
+                        true;
 
-
-        function openMenu() {
-
-            menuButton.classList.add(
-                "active"
-            );
-
-            mobileMenu.classList.add(
-                "open"
-            );
-
-            menuButton.setAttribute(
-                "aria-expanded",
-                "true"
-            );
-
-            mobileMenu.setAttribute(
-                "aria-hidden",
-                "false"
-            );
-
-            body.classList.add(
-                "menu-open"
-            );
-
-        }
-
-
-        function closeMenu() {
-
-            menuButton.classList.remove(
-                "active"
-            );
-
-            mobileMenu.classList.remove(
-                "open"
-            );
-
-            menuButton.setAttribute(
-                "aria-expanded",
-                "false"
-            );
-
-            mobileMenu.setAttribute(
-                "aria-hidden",
-                "true"
-            );
-
-            body.classList.remove(
-                "menu-open"
-            );
-
-        }
-
-    }
-
-
-    /* =====================================================
-       SMOOTH INTERNAL LINKS
-    ===================================================== */
-
-    document
-        .querySelectorAll(
-            'a[href^="#"]'
-        )
-        .forEach(link => {
-
-            link.addEventListener(
-                "click",
-                event => {
-
-                    const id =
-                        link.getAttribute(
-                            "href"
-                        );
+                    object.receiveShadow =
+                        true;
 
                     if (
-                        !id ||
-                        id === "#"
+                        object.material
                     ) {
-                        return;
+
+                        object.material
+                            .roughness = .42;
+
+                        object.material
+                            .metalness = .3;
+
                     }
 
-                    const target =
-                        document.querySelector(
-                            id
+                }
+
+            }
+        );
+
+
+        scene.add(
+            genie
+        );
+
+
+        /* -----------------------------------------
+           ANIMATION MIXER
+        ----------------------------------------- */
+
+        if (
+            gltf.animations &&
+            gltf.animations.length
+        ) {
+
+            mixer =
+                new THREE.AnimationMixer(
+                    genie
+                );
+
+            animations =
+                gltf.animations;
+
+
+            animations.forEach(
+                clip => {
+
+                    const action =
+                        mixer.clipAction(
+                            clip
                         );
 
-                    if (!target) {
-                        return;
-                    }
-
-                    event.preventDefault();
-
-                    const header =
-                        document.querySelector(
-                            ".site-header"
-                        );
-
-                    const headerHeight =
-                        header
-                            ? header.offsetHeight
-                            : 0;
-
-                    const position =
-                        target.getBoundingClientRect()
-                            .top
-                        +
-                        window.scrollY
-                        -
-                        headerHeight;
-
-                    window.scrollTo({
-
-                        top: position,
-
-                        behavior:
-                            reducedMotion
-                                ? "auto"
-                                : "smooth"
-
-                    });
+                    actions[
+                        clip.name.toLowerCase()
+                    ] =
+                        action;
 
                 }
             );
 
-        });
-
-
-    /* =====================================================
-       POINTER MOVEMENT
-    ===================================================== */
-
-    window.addEventListener(
-        "mousemove",
-        event => {
-
-            if (reducedMotion) {
-                return;
-            }
-
-            targetMouseX =
-                (
-                    event.clientX /
-                    window.innerWidth
-                    -
-                    0.5
-                ) * 2;
-
-            targetMouseY =
-                (
-                    event.clientY /
-                    window.innerHeight
-                    -
-                    0.5
-                ) * 2;
-
-        },
-        {
-            passive: true
-        }
-    );
-
-
-    /* =====================================================
-       TOUCH MOVEMENT
-    ===================================================== */
-
-    window.addEventListener(
-        "touchmove",
-        event => {
-
-            if (
-                reducedMotion ||
-                !event.touches.length
-            ) {
-                return;
-            }
-
-            const touch =
-                event.touches[0];
-
-            targetMouseX =
-                (
-                    touch.clientX /
-                    window.innerWidth
-                    -
-                    0.5
-                ) * 1.2;
-
-            targetMouseY =
-                (
-                    touch.clientY /
-                    window.innerHeight
-                    -
-                    0.5
-                ) * 1.2;
-
-        },
-        {
-            passive: true
-        }
-    );
-
-
-    /* =====================================================
-       SCROLL
-    ===================================================== */
-
-    window.addEventListener(
-        "scroll",
-        () => {
-
-            scrollPosition =
-                window.scrollY;
-
-        },
-        {
-            passive: true
-        }
-    );
-
-
-    /* =====================================================
-       HERO MOTION
-    ===================================================== */
-
-    function updateHero(progress) {
-
-        if (!hero) {
-            return;
         }
 
 
-        /* ---------------------------------------------
-           BACKGROUND
-        --------------------------------------------- */
+        modelReady = true;
 
-        if (depthBg) {
 
-            const x =
-                mouseX * -16;
+        if (loaderElement) {
 
-            const y =
-                mouseY * -10 -
-                progress * 45;
-
-            const scale =
-                1.42 +
-                progress * .18;
-
-            depthBg.style.transform =
-                `
-                translate3d(
-                    ${x}px,
-                    ${y}px,
-                    0
-                )
-                scale(${scale})
-                `;
+            loaderElement.classList.add(
+                "hidden"
+            );
 
         }
 
 
-        /* ---------------------------------------------
-           BLUE LIGHT
-        --------------------------------------------- */
+        /*
+         * Start with the first
+         * available idle animation.
+         */
 
-        if (blueLight) {
-
-            blueLight.style.transform =
-                `
-                translate3d(
-                    ${mouseX * 35}px,
-                    ${mouseY * 25 - progress * 35}px,
-                    -250px
-                )
-                scale(${1 + progress})
-                `;
-
-        }
-
-
-        /* ---------------------------------------------
-           ORANGE LIGHT
-        --------------------------------------------- */
-
-        if (orangeLight) {
-
-            orangeLight.style.transform =
-                `
-                translate3d(
-                    ${mouseX * -25}px,
-                    ${mouseY * -18 - progress * 20}px,
-                    -180px
-                )
-                scale(${1 + progress * .7})
-                `;
-
-        }
-
-
-        /* ---------------------------------------------
-           GENIE
-        --------------------------------------------- */
-
-        if (heroArt) {
-
-            const scale =
-                1 +
-                progress * .34;
-
-            const x =
-                mouseX * 24;
-
-            const y =
-                mouseY * 16 -
-                progress * 110;
-
-            const rotateX =
-                mouseY * 2.5;
-
-            const rotateY =
-                mouseX * -3;
-
-            heroArt.style.transform =
-                `
-                translate3d(
-                    ${x}px,
-                    ${y}px,
-                    150px
-                )
-                scale(${scale})
-                rotateX(${rotateX}deg)
-                rotateY(${rotateY}deg)
-                `;
-
-        }
-
-
-        /* ---------------------------------------------
-           HERO TEXT
-        --------------------------------------------- */
-
-        if (heroContent) {
-
-            const opacity =
-                Math.max(
-                    0,
-                    1 -
-                    progress * 1.7
-                );
-
-            const y =
-                progress * -110;
-
-            heroContent.style.opacity =
-                opacity;
-
-            heroContent.style.transform =
-                `
-                translate3d(
-                    ${mouseX * 6}px,
-                    ${y + mouseY * 4}px,
-                    0
-                )
-                `;
-
-        }
-
-
-        /* ---------------------------------------------
-           ATMOSPHERIC GLOW
-        --------------------------------------------- */
-
-        if (heroGlow) {
-
-            heroGlow.style.transform =
-                `
-                translate3d(
-                    ${mouseX * 15}px,
-                    ${mouseY * 12 - progress * 55}px,
-                    0
-                )
-                scale(${1 + progress * 1.4})
-                `;
-
-        }
-
-
-        /* ---------------------------------------------
-           FLOATING PANELS
-        --------------------------------------------- */
-
-        panels.forEach(
-            (panel, index) => {
-
-                const direction =
-                    index % 2 === 0
-                        ? 1
-                        : -1;
-
-                const horizontal =
-                    mouseX *
-                    (8 + index * 4) *
-                    direction;
-
-                const vertical =
-                    mouseY *
-                    (7 + index * 2);
-
-                const scrollX =
-                    progress *
-                    (index + 1) *
-                    7 *
-                    direction;
-
-                const scrollY =
-                    progress *
-                    (index + 1) *
-                    -24;
-
-                panel.style.marginLeft =
-                    `${horizontal + scrollX}px`;
-
-                panel.style.marginTop =
-                    `${vertical + scrollY}px`;
-
-            }
+        playAnimationByName(
+            [
+                "idle",
+                "breathing",
+                "stand",
+                "standing"
+            ]
         );
 
 
-        /* ---------------------------------------------
-           ENERGY RINGS
-        --------------------------------------------- */
-
-        rings.forEach(
-            (ring, index) => {
-
-                const direction =
-                    index === 0
-                        ? 1
-                        : -1;
-
-                ring.style.marginLeft =
-                    `${mouseX * 12 * direction}px`;
-
-                ring.style.marginTop =
-                    `${mouseY * 8}px`;
-
-            }
+        updateTask(
+            0
         );
+
+    },
+
+    undefined,
+
+    error => {
+
+        console.error(
+            "Could not load models/genie.glb",
+            error
+        );
+
+
+        if (loaderElement) {
+
+            loaderElement.innerHTML =
+                `
+                <span class="loader-dot"></span>
+                <span>3D MODEL NOT FOUND</span>
+                `;
+
+        }
+
+    }
+
+);
+
+
+/* =========================================================
+   ANIMATION FINDER
+========================================================= */
+
+function findAnimation(
+    possibleNames
+) {
+
+    const names =
+        Object.keys(actions);
+
+
+    for (
+        const requested
+        of possibleNames
+    ) {
+
+        const exact =
+            requested.toLowerCase();
+
+        const match =
+            names.find(
+                name =>
+                    name === exact
+            );
+
+        if (match) {
+            return actions[match];
+        }
 
     }
 
 
-    /* =====================================================
-       SCROLL PROGRESS
-    ===================================================== */
+    /*
+     * Fuzzy search.
+     */
 
-    function getHeroProgress() {
+    for (
+        const requested
+        of possibleNames
+    ) {
 
-        if (!hero) {
-            return 0;
+        const match =
+            names.find(
+                name =>
+                    name.includes(
+                        requested.toLowerCase()
+                    )
+            );
+
+        if (match) {
+            return actions[match];
         }
 
-        const heroHeight =
-            hero.offsetHeight;
+    }
 
-        if (!heroHeight) {
-            return 0;
+
+    return null;
+}
+
+
+/* =========================================================
+   PLAY ANIMATION
+========================================================= */
+
+function playAnimationByName(
+    possibleNames,
+    fadeDuration = .45
+) {
+
+    if (!mixer) {
+        return;
+    }
+
+
+    const nextAction =
+        findAnimation(
+            possibleNames
+        );
+
+
+    if (!nextAction) {
+
+        /*
+         * The model may not contain
+         * this specific animation.
+         *
+         * Don't break the scene.
+         */
+
+        return;
+
+    }
+
+
+    if (
+        currentAction ===
+        nextAction
+    ) {
+
+        return;
+
+    }
+
+
+    nextAction
+        .reset()
+        .fadeIn(
+            fadeDuration
+        )
+        .play();
+
+
+    if (currentAction) {
+
+        currentAction
+            .fadeOut(
+                fadeDuration
+            );
+
+    }
+
+
+    currentAction =
+        nextAction;
+
+}
+
+
+/* =========================================================
+   TASK DEFINITIONS
+========================================================= */
+
+const tasks = [
+
+    {
+        title:
+            "OBSERVING",
+
+        description:
+            "Monitoring your business environment.",
+
+        animations: [
+            "idle",
+            "breathing",
+            "stand"
+        ]
+    },
+
+
+    {
+        title:
+            "RECEIVING CALL",
+
+        description:
+            "Understanding an incoming customer request.",
+
+        animations: [
+            "phone",
+            "call",
+            "talk",
+            "gesture"
+        ]
+    },
+
+
+    {
+        title:
+            "THINKING",
+
+        description:
+            "Understanding the customer and deciding what happens next.",
+
+        animations: [
+            "think",
+            "thinking",
+            "idle"
+        ]
+    },
+
+
+    {
+        title:
+            "BOOKING APPOINTMENT",
+
+        description:
+            "Finding the right time and confirming the appointment.",
+
+        animations: [
+            "typing",
+            "computer",
+            "reach",
+            "gesture"
+        ]
+    },
+
+
+    {
+        title:
+            "UPDATING CRM",
+
+        description:
+            "Recording the customer and updating business data.",
+
+        animations: [
+            "typing",
+            "computer",
+            "gesture"
+        ]
+    },
+
+
+    {
+        title:
+            "RUNNING AUTOMATION",
+
+        description:
+            "Connecting systems and completing the workflow.",
+
+        animations: [
+            "gesture",
+            "reach",
+            "work",
+            "computer"
+        ]
+    },
+
+
+    {
+        title:
+            "COMPLETE",
+
+        description:
+            "Task completed. Returning to standby.",
+
+        animations: [
+            "idle",
+            "breathing",
+            "stand"
+        ]
+    }
+
+];
+
+
+/* =========================================================
+   UPDATE TASK
+========================================================= */
+
+function updateTask(
+    index
+) {
+
+    index =
+        Math.max(
+            0,
+            Math.min(
+                tasks.length - 1,
+                index
+            )
+        );
+
+
+    currentTask =
+        index;
+
+
+    const task =
+        tasks[index];
+
+
+    if (taskTitle) {
+
+        taskTitle.textContent =
+            task.title;
+
+    }
+
+
+    if (taskDescription) {
+
+        taskDescription.textContent =
+            task.description;
+
+    }
+
+
+    if (taskStatus) {
+
+        const number =
+            String(
+                index + 1
+            ).padStart(
+                2,
+                "0"
+            );
+
+
+        const numberElement =
+            taskStatus.querySelector(
+                ".task-status-number"
+            );
+
+
+        if (numberElement) {
+
+            numberElement.textContent =
+                number;
+
         }
 
-        return Math.min(
-            Math.max(
-                smoothScroll /
+    }
+
+
+    playAnimationByName(
+        task.animations
+    );
+
+}
+
+
+/* =========================================================
+   SCROLL STATE
+========================================================= */
+
+let targetScroll =
+    window.scrollY;
+
+let smoothScroll =
+    window.scrollY;
+
+
+window.addEventListener(
+    "scroll",
+    () => {
+
+        targetScroll =
+            window.scrollY;
+
+    },
+    {
+        passive: true
+    }
+);
+
+
+/* =========================================================
+   POINTER
+========================================================= */
+
+let pointerX = 0;
+let pointerY = 0;
+
+let targetPointerX = 0;
+let targetPointerY = 0;
+
+
+window.addEventListener(
+    "pointermove",
+    event => {
+
+        targetPointerX =
+            (
+                event.clientX /
+                window.innerWidth -
+                .5
+            );
+
+        targetPointerY =
+            (
+                event.clientY /
+                window.innerHeight -
+                .5
+            );
+
+    },
+    {
+        passive: true
+    }
+);
+
+
+/* =========================================================
+   CAMERA + CHARACTER MOTION
+========================================================= */
+
+function updateScene(
+    time
+) {
+
+    smoothScroll +=
+        (
+            targetScroll -
+            smoothScroll
+        ) * .075;
+
+
+    pointerX +=
+        (
+            targetPointerX -
+            pointerX
+        ) * .045;
+
+
+    pointerY +=
+        (
+            targetPointerY -
+            pointerY
+        ) * .045;
+
+
+    const hero =
+        document.querySelector(
+            ".hero"
+        );
+
+
+    if (!hero) {
+        return;
+    }
+
+
+    const heroHeight =
+        hero.offsetHeight;
+
+
+    const heroProgress =
+        THREE.MathUtils.clamp(
+            smoothScroll /
                 heroHeight,
-                0
-            ),
+            0,
             1
         );
 
+
+    /* -----------------------------------------
+       CAMERA
+    ----------------------------------------- */
+
+    const cameraTargetX =
+        pointerX * .55;
+
+    const cameraTargetY =
+        1.25 -
+        pointerY * .18 -
+        heroProgress * .2;
+
+    const cameraTargetZ =
+        7 -
+        heroProgress * 2.0;
+
+
+    camera.position.x +=
+        (
+            cameraTargetX -
+            camera.position.x
+        ) * .035;
+
+
+    camera.position.y +=
+        (
+            cameraTargetY -
+            camera.position.y
+        ) * .035;
+
+
+    camera.position.z +=
+        (
+            cameraTargetZ -
+            camera.position.z
+        ) * .035;
+
+
+    camera.lookAt(
+        0,
+        .6,
+        0
+    );
+
+
+    /* -----------------------------------------
+       CHARACTER
+    ----------------------------------------- */
+
+    if (genie) {
+
+        const breathing =
+            Math.sin(
+                time * .0015
+            ) * .018;
+
+
+        genie.position.x =
+            pointerX * .28;
+
+
+        genie.position.y =
+            -1.05 +
+            breathing;
+
+
+        genie.rotation.y =
+            pointerX * -.12;
+
+
+        genie.rotation.x =
+            pointerY * .035;
+
+
+        /*
+         * As the user scrolls,
+         * the camera approaches the AI.
+         */
+
+        const scale =
+            1.65 +
+            heroProgress * .25;
+
+        genie.scale.setScalar(
+            scale
+        );
+
     }
 
 
-    /* =====================================================
-       ACTIVE NAVIGATION
-    ===================================================== */
+    /* -----------------------------------------
+       PARTICLES
+    ----------------------------------------- */
 
-    function updateNavigation() {
+    particles.rotation.y =
+        time * .000025;
 
-        const navItems =
-            document.querySelectorAll(
-                ".hero-nav-item"
-            );
-
-        if (!navItems.length) {
-            return;
-        }
+    particles.rotation.x =
+        Math.sin(
+            time * .00008
+        ) * .03;
 
 
-        const sections = [
+    /* -----------------------------------------
+       FLOOR RING
+    ----------------------------------------- */
 
-            document.querySelector(
-                "#home"
-            ),
+    floorRing.rotation.z =
+        time * .00025;
 
-            document.querySelector(
-                "#system"
-            ),
 
-            document.querySelector(
-                "#statement"
-            ),
+    floorRing.material.opacity =
+        .12 +
+        Math.sin(
+            time * .002
+        ) * .04;
 
-            document.querySelector(
-                "#contact"
+
+    /* -----------------------------------------
+       LIGHTS
+    ----------------------------------------- */
+
+    blueLight.position.x =
+        -3 +
+        pointerX * 2;
+
+    blueLight.position.y =
+        2 -
+        pointerY * 1.5;
+
+
+    orangeLight.position.x =
+        3 -
+        pointerX * 2;
+
+    orangeLight.position.y =
+        1 +
+        pointerY;
+
+
+    /* -----------------------------------------
+       SCROLL TASKS
+    ----------------------------------------- */
+
+    /*
+     * Hero progress is divided into
+     * intentional behavioral states.
+     */
+
+    let nextTask;
+
+
+    if (
+        heroProgress < .12
+    ) {
+
+        nextTask = 0;
+
+    } else if (
+        heroProgress < .28
+    ) {
+
+        nextTask = 1;
+
+    } else if (
+        heroProgress < .43
+    ) {
+
+        nextTask = 2;
+
+    } else if (
+        heroProgress < .60
+    ) {
+
+        nextTask = 3;
+
+    } else if (
+        heroProgress < .77
+    ) {
+
+        nextTask = 4;
+
+    } else if (
+        heroProgress < .92
+    ) {
+
+        nextTask = 5;
+
+    } else {
+
+        nextTask = 6;
+
+    }
+
+
+    if (
+        nextTask !==
+        currentTask
+    ) {
+
+        updateTask(
+            nextTask
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   RESIZE
+========================================================= */
+
+window.addEventListener(
+    "resize",
+    () => {
+
+        camera.aspect =
+            window.innerWidth /
+            window.innerHeight;
+
+        camera.updateProjectionMatrix();
+
+
+        renderer.setPixelRatio(
+            Math.min(
+                window.devicePixelRatio,
+                2
             )
-
-        ];
-
-
-        let activeIndex = 0;
-
-
-        sections.forEach(
-            (section, index) => {
-
-                if (!section) {
-                    return;
-                }
-
-                const rect =
-                    section.getBoundingClientRect();
-
-
-                if (
-                    rect.top <=
-                    window.innerHeight * .45
-                ) {
-
-                    activeIndex =
-                        index;
-
-                }
-
-            }
         );
 
 
-        navItems.forEach(
-            (item, index) => {
-
-                item.classList.toggle(
-                    "active",
-                    index === activeIndex
-                );
-
-            }
+        renderer.setSize(
+            window.innerWidth,
+            window.innerHeight
         );
 
     }
+);
 
 
-    /* =====================================================
-       REVEAL SECTIONS
-    ===================================================== */
+/* =========================================================
+   CLOCK
+========================================================= */
 
-    const revealElements =
-        document.querySelectorAll(
-            `
-            .system-heading,
-            .system-product,
-            .statement-section h2,
-            .statement-section p,
-            .final-cta h2,
-            .final-cta p,
-            .final-link
-            `
-        );
+const clock =
+    new THREE.Clock();
 
 
-    if (!reducedMotion) {
+/* =========================================================
+   RENDER LOOP
+========================================================= */
 
-        revealElements.forEach(
-            element => {
-
-                element.style.opacity =
-                    "0";
-
-                element.style.transform =
-                    "translate3d(0,40px,0)";
-
-                element.style.transition =
-                    "opacity .9s cubic-bezier(.22,1,.36,1), " +
-                    "transform .9s cubic-bezier(.22,1,.36,1)";
-
-            }
-        );
-
-
-        const observer =
-            new IntersectionObserver(
-                entries => {
-
-                    entries.forEach(
-                        entry => {
-
-                            if (
-                                !entry.isIntersecting
-                            ) {
-                                return;
-                            }
-
-                            entry.target.style.opacity =
-                                "1";
-
-                            entry.target.style.transform =
-                                "translate3d(0,0,0)";
-
-                            observer.unobserve(
-                                entry.target
-                            );
-
-                        }
-                    );
-
-                },
-                {
-                    threshold: .12,
-                    rootMargin:
-                        "0px 0px -8% 0px"
-                }
-            );
-
-
-        revealElements.forEach(
-            element => {
-
-                observer.observe(
-                    element
-                );
-
-            }
-        );
-
-    }
-
-
-    /* =====================================================
-       MAIN ANIMATION LOOP
-    ===================================================== */
-
-    function animationLoop(time) {
-
-        const delta =
-            time - lastTime;
-
-        lastTime = time;
-
-
-        /*
-         * Smooth scrolling value.
-         */
-
-        if (reducedMotion) {
-
-            smoothScroll =
-                scrollPosition;
-
-        } else {
-
-            smoothScroll +=
-                (
-                    scrollPosition -
-                    smoothScroll
-                ) * .075;
-
-        }
-
-
-        /*
-         * Smooth pointer movement.
-         */
-
-        if (!reducedMotion) {
-
-            mouseX +=
-                (
-                    targetMouseX -
-                    mouseX
-                ) * .055;
-
-            mouseY +=
-                (
-                    targetMouseY -
-                    mouseY
-                ) * .055;
-
-        } else {
-
-            mouseX = 0;
-            mouseY = 0;
-
-        }
-
-
-        const progress =
-            getHeroProgress();
-
-
-        updateHero(
-            progress
-        );
-
-
-        requestAnimationFrame(
-            animationLoop
-        );
-
-    }
-
+function render() {
 
     requestAnimationFrame(
-        animationLoop
+        render
     );
 
 
-    /* =====================================================
-       IMAGE PROTECTION
-    ===================================================== */
+    const delta =
+        clock.getDelta();
 
-    document
-        .querySelectorAll("img")
-        .forEach(
-            image => {
+    const elapsed =
+        clock.elapsedTime;
 
-                image.addEventListener(
-                    "dragstart",
-                    event => {
 
-                        event.preventDefault();
+    if (mixer) {
 
-                    }
-                );
-
-            }
+        mixer.update(
+            delta
         );
 
-
-    /* =====================================================
-       INITIAL UPDATE
-    ===================================================== */
-
-    updateNavigation();
+    }
 
 
-    window.addEventListener(
-        "scroll",
-        updateNavigation,
-        {
-            passive: true
-        }
+    updateScene(
+        elapsed * 1000
     );
 
 
-    /* =====================================================
-       RESIZE
-    ===================================================== */
-
-    window.addEventListener(
-        "resize",
-        () => {
-
-            updateNavigation();
-
-        },
-        {
-            passive: true
-        }
+    renderer.render(
+        scene,
+        camera
     );
 
-});
+}
+
+
+render();
+
+
+/* =========================================================
+   INITIAL TASK
+========================================================= */
+
+updateTask(
+    0
+);
