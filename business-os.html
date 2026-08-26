@@ -1,0 +1,2154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Business OS — Virtual Genie AI</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    margin:0;
+    background:#020304;
+    color:#f1f0eb;
+    font-family:"DM Sans",sans-serif;
+    overflow-x:hidden;
+}
+
+a{
+    color:inherit;
+    text-decoration:none;
+}
+
+
+/* =====================================================
+   NAV
+===================================================== */
+
+.nav{
+    position:fixed;
+    z-index:100;
+
+    top:0;
+    left:0;
+    right:0;
+
+    height:82px;
+
+    padding:0 32px;
+
+    display:flex;
+    align-items:center;
+
+    border-bottom:1px solid rgba(255,255,255,.08);
+
+    background:rgba(2,3,4,.75);
+
+    backdrop-filter:blur(18px);
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:14px;
+
+    font-size:14px;
+    font-weight:600;
+
+    letter-spacing:.18em;
+}
+
+.brand-mark{
+    width:43px;
+    height:43px;
+
+    display:grid;
+    place-items:center;
+
+    border-radius:10px;
+
+    background:#f1f0eb;
+    color:#050607;
+
+    font-size:21px;
+}
+
+.nav-links{
+    margin-left:auto;
+
+    display:flex;
+    gap:30px;
+
+    font-size:9px;
+    letter-spacing:.16em;
+}
+
+.nav-links a{
+    color:#858585;
+    transition:.25s;
+}
+
+.nav-links a:hover{
+    color:#fff;
+}
+
+.nav-cta{
+    margin-left:32px;
+
+    padding:13px 19px;
+
+    border:1px solid rgba(201,255,53,.45);
+
+    font-size:9px;
+    letter-spacing:.18em;
+}
+
+
+/* =====================================================
+   HERO
+===================================================== */
+
+.hero{
+    position:relative;
+
+    min-height:100svh;
+
+    display:flex;
+    align-items:center;
+
+    padding:
+        150px
+        7vw
+        100px;
+
+    overflow:hidden;
+}
+
+
+/* =====================================================
+   SYSTEM BACKGROUND
+===================================================== */
+
+.system-world{
+    position:absolute;
+    inset:0;
+
+    overflow:hidden;
+
+    pointer-events:none;
+}
+
+.grid{
+    position:absolute;
+
+    width:150%;
+    height:150%;
+
+    left:-25%;
+    top:-25%;
+
+    opacity:.35;
+
+    background-image:
+        linear-gradient(
+            rgba(255,255,255,.025) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.025) 1px,
+            transparent 1px
+        );
+
+    background-size:70px 70px;
+
+    transform:
+        perspective(800px)
+        rotateX(64deg)
+        translateY(18%);
+
+    transform-origin:center bottom;
+
+    animation:gridMove 12s linear infinite;
+}
+
+@keyframes gridMove{
+
+    from{
+        background-position:0 0,0 0;
+    }
+
+    to{
+        background-position:0 70px,70px 0;
+    }
+
+}
+
+
+/* =====================================================
+   SYSTEM CORE
+===================================================== */
+
+.core{
+    position:absolute;
+
+    left:66%;
+    top:50%;
+
+    width:420px;
+    height:420px;
+
+    transform:
+        translate(-50%,-50%);
+}
+
+.core-ring{
+    position:absolute;
+
+    inset:0;
+
+    border:1px solid
+        rgba(22,140,255,.22);
+
+    border-radius:50%;
+}
+
+.core-ring:nth-child(1){
+    animation:
+        rotate 20s linear infinite;
+}
+
+.core-ring:nth-child(2){
+    inset:45px;
+
+    border-color:
+        rgba(201,255,53,.16);
+
+    animation:
+        rotateReverse 15s linear infinite;
+}
+
+.core-ring:nth-child(3){
+    inset:95px;
+
+    border-color:
+        rgba(255,122,24,.18);
+
+    animation:
+        rotate 11s linear infinite;
+}
+
+@keyframes rotate{
+
+    to{
+        transform:rotate(360deg);
+    }
+
+}
+
+@keyframes rotateReverse{
+
+    to{
+        transform:rotate(-360deg);
+    }
+
+}
+
+.core-center{
+    position:absolute;
+
+    left:50%;
+    top:50%;
+
+    width:95px;
+    height:95px;
+
+    transform:
+        translate(-50%,-50%);
+
+    border:
+        1px solid
+        rgba(201,255,53,.7);
+
+    border-radius:50%;
+
+    display:grid;
+    place-items:center;
+
+    background:#050708;
+
+    box-shadow:
+        0 0 55px
+        rgba(201,255,53,.08);
+
+    animation:
+        corePulse 3s ease-in-out infinite;
+}
+
+.core-center::after{
+    content:"";
+
+    width:12px;
+    height:12px;
+
+    border-radius:50%;
+
+    background:#c9ff35;
+
+    box-shadow:
+        0 0 22px
+        rgba(201,255,53,.8);
+}
+
+@keyframes corePulse{
+
+    50%{
+        transform:
+            translate(-50%,-50%)
+            scale(1.08);
+    }
+
+}
+
+
+/* =====================================================
+   SYSTEM NODES
+===================================================== */
+
+.system-node{
+    position:absolute;
+
+    padding:13px 16px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.1);
+
+    background:
+        rgba(4,7,9,.8);
+
+    backdrop-filter:blur(12px);
+
+    font-size:8px;
+
+    letter-spacing:.12em;
+
+    color:#777;
+
+    animation:
+        nodeFloat 4s ease-in-out infinite;
+}
+
+.system-node strong{
+    display:block;
+
+    margin-bottom:7px;
+
+    color:#ddd;
+
+    font-size:11px;
+
+    font-weight:500;
+
+    letter-spacing:.03em;
+}
+
+.node-a{
+    left:42%;
+    top:28%;
+}
+
+.node-b{
+    left:82%;
+    top:35%;
+
+    animation-delay:.7s;
+}
+
+.node-c{
+    left:52%;
+    top:70%;
+
+    animation-delay:1.2s;
+}
+
+.node-d{
+    left:76%;
+    top:68%;
+
+    animation-delay:1.8s;
+}
+
+@keyframes nodeFloat{
+
+    50%{
+        transform:translateY(-7px);
+    }
+
+}
+
+
+/* =====================================================
+   CONNECTORS
+===================================================== */
+
+.connector{
+    position:absolute;
+
+    height:1px;
+
+    transform-origin:left center;
+
+    background:
+        rgba(22,140,255,.3);
+
+    overflow:hidden;
+}
+
+.connector::after{
+    content:"";
+
+    position:absolute;
+
+    left:-30%;
+
+    top:0;
+
+    width:30%;
+
+    height:100%;
+
+    background:#168cff;
+
+    box-shadow:
+        0 0 12px
+        rgba(22,140,255,.8);
+
+    animation:
+        dataFlow 2.4s linear infinite;
+}
+
+@keyframes dataFlow{
+
+    to{
+        left:100%;
+    }
+
+}
+
+.connector-a{
+    width:180px;
+
+    left:56%;
+    top:38%;
+
+    transform:rotate(15deg);
+}
+
+.connector-b{
+    width:160px;
+
+    left:70%;
+    top:48%;
+
+    transform:rotate(100deg);
+}
+
+.connector-c{
+    width:170px;
+
+    left:57%;
+    top:61%;
+
+    transform:rotate(-25deg);
+}
+
+
+/* =====================================================
+   HERO CONTENT
+===================================================== */
+
+.hero-content{
+    position:relative;
+    z-index:10;
+
+    max-width:720px;
+}
+
+.eyebrow{
+    display:flex;
+    align-items:center;
+
+    gap:10px;
+
+    margin-bottom:32px;
+
+    color:#777;
+
+    font-size:9px;
+
+    letter-spacing:.28em;
+}
+
+.online{
+    width:7px;
+    height:7px;
+
+    border-radius:50%;
+
+    background:#c9ff35;
+
+    box-shadow:
+        0 0 15px
+        rgba(201,255,53,.7);
+
+    animation:
+        pulse 1.8s infinite;
+}
+
+@keyframes pulse{
+
+    50%{
+        opacity:.3;
+        transform:scale(.65);
+    }
+
+}
+
+h1{
+    margin:0;
+
+    font-size:
+        clamp(
+            58px,
+            9vw,
+            130px
+        );
+
+    line-height:.86;
+
+    letter-spacing:-.07em;
+
+    font-weight:500;
+}
+
+h1 em{
+    display:block;
+
+    color:#858585;
+
+    font-family:
+        "Playfair Display",
+        serif;
+
+    font-style:italic;
+}
+
+.description{
+    max-width:600px;
+
+    margin-top:40px;
+
+    color:#8b8b8b;
+
+    font-size:18px;
+
+    line-height:1.6;
+}
+
+.action{
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:30px;
+
+    margin-top:40px;
+
+    padding-bottom:11px;
+
+    border-bottom:1px solid #c9ff35;
+
+    font-size:9px;
+
+    letter-spacing:.2em;
+}
+
+
+/* =====================================================
+   STATS
+===================================================== */
+
+.stats{
+    position:absolute;
+
+    bottom:42px;
+    left:7vw;
+
+    z-index:10;
+
+    display:flex;
+
+    gap:55px;
+}
+
+.stat strong{
+    display:block;
+
+    font-size:25px;
+
+    font-weight:500;
+}
+
+.stat span{
+    display:block;
+
+    margin-top:5px;
+
+    color:#666;
+
+    font-size:8px;
+
+    letter-spacing:.2em;
+}
+
+
+/* =====================================================
+   SECTION
+===================================================== */
+
+.section{
+    position:relative;
+
+    padding:
+        150px
+        7vw;
+
+    border-top:
+        1px solid
+        rgba(255,255,255,.08);
+}
+
+.label{
+    color:#666;
+
+    font-size:9px;
+
+    letter-spacing:.27em;
+}
+
+.section h2{
+    max-width:1000px;
+
+    margin:
+        28px
+        0
+        0;
+
+    font-size:
+        clamp(
+            46px,
+            7vw,
+            100px
+        );
+
+    line-height:.93;
+
+    letter-spacing:-.06em;
+
+    font-weight:500;
+}
+
+.section h2 em{
+    color:#858585;
+
+    font-family:
+        "Playfair Display",
+        serif;
+
+    font-style:italic;
+}
+
+.section-description{
+    max-width:620px;
+
+    margin-top:35px;
+
+    color:#7d7d7d;
+
+    font-size:17px;
+
+    line-height:1.7;
+}
+
+
+/* =====================================================
+   OS MODULES
+===================================================== */
+
+.modules{
+    margin-top:100px;
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(2,1fr);
+
+    border-top:
+        1px solid
+        rgba(255,255,255,.1);
+
+    border-left:
+        1px solid
+        rgba(255,255,255,.1);
+}
+
+.module{
+    min-height:300px;
+
+    padding:35px;
+
+    border-right:
+        1px solid
+        rgba(255,255,255,.1);
+
+    border-bottom:
+        1px solid
+        rgba(255,255,255,.1);
+
+    position:relative;
+
+    overflow:hidden;
+}
+
+.module::after{
+    content:"";
+
+    position:absolute;
+
+    width:120px;
+    height:120px;
+
+    right:-50px;
+    bottom:-50px;
+
+    border:
+        1px solid
+        rgba(22,140,255,.25);
+
+    border-radius:50%;
+
+    transition:.5s;
+}
+
+.module:hover::after{
+    transform:scale(2.2);
+
+    border-color:
+        rgba(201,255,53,.25);
+}
+
+.module-number{
+    color:#555;
+
+    font-size:9px;
+
+    letter-spacing:.2em;
+}
+
+.module h3{
+    margin:
+        70px
+        0
+        14px;
+
+    font-size:28px;
+
+    font-weight:500;
+
+    letter-spacing:-.035em;
+}
+
+.module p{
+    max-width:450px;
+
+    margin:0;
+
+    color:#727272;
+
+    line-height:1.6;
+}
+
+.module-tag{
+    position:absolute;
+
+    right:30px;
+    top:35px;
+
+    color:#c9ff35;
+
+    font-size:8px;
+
+    letter-spacing:.16em;
+}
+
+
+/* =====================================================
+   COMMAND CENTER
+===================================================== */
+
+.command{
+    min-height:100svh;
+
+    display:flex;
+
+    align-items:center;
+}
+
+.dashboard{
+    width:min(1050px,100%);
+
+    margin:
+        80px auto
+        0;
+
+    border:
+        1px solid
+        rgba(255,255,255,.1);
+
+    background:#050708;
+
+    box-shadow:
+        0 50px 140px
+        rgba(0,0,0,.5);
+}
+
+.dashboard-header{
+    height:58px;
+
+    padding:0 20px;
+
+    display:flex;
+    align-items:center;
+
+    justify-content:space-between;
+
+    border-bottom:
+        1px solid
+        rgba(255,255,255,.08);
+
+    color:#666;
+
+    font-size:8px;
+
+    letter-spacing:.18em;
+}
+
+.dashboard-body{
+    display:grid;
+
+    grid-template-columns:
+        190px
+        1fr;
+}
+
+.sidebar{
+    padding:25px 0;
+
+    border-right:
+        1px solid
+        rgba(255,255,255,.08);
+}
+
+.side-item{
+    padding:
+        12px
+        20px;
+
+    color:#555;
+
+    font-size:9px;
+
+    letter-spacing:.12em;
+}
+
+.side-item.active{
+    color:#fff;
+
+    border-left:
+        2px solid
+        #c9ff35;
+
+    background:
+        rgba(201,255,53,.035);
+}
+
+.main-panel{
+    padding:35px;
+}
+
+.panel-title{
+    font-size:18px;
+
+    font-weight:500;
+}
+
+.metric-grid{
+    margin-top:28px;
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap:12px;
+}
+
+.metric{
+    padding:20px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.08);
+}
+
+.metric span{
+    display:block;
+
+    color:#555;
+
+    font-size:8px;
+
+    letter-spacing:.15em;
+}
+
+.metric strong{
+    display:block;
+
+    margin-top:12px;
+
+    font-size:25px;
+
+    font-weight:500;
+}
+
+.chart{
+    height:180px;
+
+    margin-top:12px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.08);
+
+    position:relative;
+
+    overflow:hidden;
+}
+
+.chart-line{
+    position:absolute;
+
+    left:0;
+    bottom:35px;
+
+    width:100%;
+    height:100px;
+}
+
+.chart-line svg{
+    width:100%;
+    height:100%;
+}
+
+.chart-line polyline{
+    fill:none;
+
+    stroke:#168cff;
+
+    stroke-width:1.5;
+
+    vector-effect:non-scaling-stroke;
+
+    stroke-dasharray:7 7;
+
+    animation:
+        dash 5s linear infinite;
+}
+
+@keyframes dash{
+
+    to{
+        stroke-dashoffset:-70;
+    }
+
+}
+
+
+/* =====================================================
+   CTA
+===================================================== */
+
+.cta{
+    min-height:80svh;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    text-align:center;
+
+    padding:
+        100px 25px;
+}
+
+.cta-inner{
+    max-width:900px;
+}
+
+.cta h2{
+    margin:
+        25px 0 0;
+
+    font-size:
+        clamp(
+            50px,
+            8vw,
+            110px
+        );
+
+    line-height:.9;
+
+    letter-spacing:-.06em;
+
+    font-weight:500;
+}
+
+.cta h2 em{
+    color:#858585;
+
+    font-family:
+        "Playfair Display",
+        serif;
+
+    font-style:italic;
+}
+
+.cta p{
+    max-width:560px;
+
+    margin:
+        35px auto;
+
+    color:#777;
+
+    font-size:17px;
+
+    line-height:1.6;
+}
+
+.cta a{
+    display:inline-flex;
+
+    padding-bottom:12px;
+
+    border-bottom:
+        1px solid
+        #c9ff35;
+
+    font-size:9px;
+
+    letter-spacing:.2em;
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media(max-width:900px){
+
+    .nav{
+        height:70px;
+
+        padding:0 20px;
+    }
+
+    .nav-links,
+    .nav-cta{
+        display:none;
+    }
+
+    .hero{
+        min-height:930px;
+
+        padding:
+            130px
+            22px
+            80px;
+
+        align-items:flex-start;
+    }
+
+    h1{
+        font-size:
+            clamp(
+                54px,
+                15vw,
+                84px
+            );
+    }
+
+    .description{
+        font-size:16px;
+    }
+
+    .core{
+        width:280px;
+        height:280px;
+
+        left:50%;
+        top:auto;
+        bottom:30px;
+
+        transform:
+            translateX(-50%);
+    }
+
+    .system-node{
+        display:none;
+    }
+
+    .connector{
+        display:none;
+    }
+
+    .stats{
+        display:none;
+    }
+
+    .section{
+        padding:
+            100px
+            22px;
+    }
+
+    .section h2{
+        font-size:
+            clamp(
+                45px,
+                13vw,
+                75px
+            );
+    }
+
+    .modules{
+        grid-template-columns:1fr;
+    }
+
+    .module{
+        min-height:260px;
+    }
+
+    .dashboard-body{
+        grid-template-columns:1fr;
+    }
+
+    .sidebar{
+        display:flex;
+
+        overflow-x:auto;
+
+        border-right:0;
+
+        border-bottom:
+            1px solid
+            rgba(255,255,255,.08);
+
+        padding:10px;
+    }
+
+    .side-item{
+        white-space:nowrap;
+    }
+
+    .main-panel{
+        padding:20px;
+    }
+
+    .metric-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+
+<!-- =====================================================
+     NAV
+===================================================== -->
+
+<header class="nav">
+
+    <a
+        href="index.html"
+        class="brand"
+    >
+
+        <span class="brand-mark">
+            ✦
+        </span>
+
+        <span>
+            VIRTUAL GENIE
+        </span>
+
+    </a>
+
+
+    <nav class="nav-links">
+
+        <a href="index.html">
+            HOME
+        </a>
+
+        <a href="ai-receptionist.html">
+            AI RECEPTIONIST
+        </a>
+
+        <a href="ai-automations.html">
+            AI AUTOMATIONS
+        </a>
+
+        <a href="#demo">
+            DEMO
+        </a>
+
+    </nav>
+
+
+    <a
+        href="#contact"
+        class="nav-cta"
+    >
+        START A CONVERSATION ↗
+    </a>
+
+</header>
+
+
+<main>
+
+
+<!-- =====================================================
+     HERO
+===================================================== -->
+
+<section class="hero">
+
+
+    <div class="system-world">
+
+        <div class="grid"></div>
+
+
+        <div class="core">
+
+            <div class="core-ring"></div>
+            <div class="core-ring"></div>
+            <div class="core-ring"></div>
+
+            <div class="core-center"></div>
+
+        </div>
+
+
+        <div class="system-node node-a">
+
+            <strong>
+                SALES
+            </strong>
+
+            PIPELINE ACTIVE
+
+        </div>
+
+
+        <div class="system-node node-b">
+
+            <strong>
+                OPERATIONS
+            </strong>
+
+            24 TASKS RUNNING
+
+        </div>
+
+
+        <div class="system-node node-c">
+
+            <strong>
+                AI
+            </strong>
+
+            18 WORKFLOWS ACTIVE
+
+        </div>
+
+
+        <div class="system-node node-d">
+
+            <strong>
+                DATA
+            </strong>
+
+            SYNC COMPLETE
+
+        </div>
+
+
+        <div class="connector connector-a"></div>
+        <div class="connector connector-b"></div>
+        <div class="connector connector-c"></div>
+
+    </div>
+
+
+    <div class="hero-content">
+
+        <div class="eyebrow">
+
+            <span class="online"></span>
+
+            BUSINESS OS
+            •
+            SYSTEM ONLINE
+
+        </div>
+
+
+        <h1>
+
+            Your entire business.
+
+            <em>
+                One system.
+            </em>
+
+        </h1>
+
+
+        <p class="description">
+
+            Virtual Genie Business OS connects
+            your people, customers, operations,
+            AI and automations into one intelligent
+            operating layer.
+
+        </p>
+
+
+        <a
+            href="#demo"
+            class="action"
+        >
+            ENTER THE SYSTEM
+            <span>↓</span>
+        </a>
+
+    </div>
+
+
+    <div class="stats">
+
+        <div class="stat">
+
+            <strong>01</strong>
+
+            <span>
+                Operating layer
+            </span>
+
+        </div>
+
+
+        <div class="stat">
+
+            <strong>AI</strong>
+
+            <span>
+                Built in
+            </span>
+
+        </div>
+
+
+        <div class="stat">
+
+            <strong>∞</strong>
+
+            <span>
+                Workflows
+            </span>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     INTRO
+===================================================== -->
+
+<section class="section">
+
+    <div class="label">
+        01 / BUSINESS OS
+    </div>
+
+
+    <h2>
+
+        Stop running your business
+
+        <em>
+            across disconnected tools.
+        </em>
+
+    </h2>
+
+
+    <p class="section-description">
+
+        A Business OS gives your company one
+        operational layer where customer data,
+        sales, tasks, workflows, communication
+        and AI work together.
+
+    </p>
+
+
+    <div class="modules">
+
+
+        <article class="module">
+
+            <div class="module-number">
+                01 / CUSTOMER
+            </div>
+
+            <div class="module-tag">
+                CORE
+            </div>
+
+            <h3>
+                CRM
+            </h3>
+
+            <p>
+                Manage leads, customers,
+                conversations, opportunities
+                and relationships from one place.
+            </p>
+
+        </article>
+
+
+        <article class="module">
+
+            <div class="module-number">
+                02 / SALES
+            </div>
+
+            <div class="module-tag">
+                ACTIVE
+            </div>
+
+            <h3>
+                Sales Pipeline
+            </h3>
+
+            <p>
+                See every opportunity, stage,
+                follow-up and next action without
+                relying on spreadsheets.
+            </p>
+
+        </article>
+
+
+        <article class="module">
+
+            <div class="module-number">
+                03 / OPERATIONS
+            </div>
+
+            <div class="module-tag">
+                LIVE
+            </div>
+
+            <h3>
+                Operations
+            </h3>
+
+            <p>
+                Turn business processes into
+                repeatable workflows your team
+                can execute consistently.
+            </p>
+
+        </article>
+
+
+        <article class="module">
+
+            <div class="module-number">
+                04 / INTELLIGENCE
+            </div>
+
+            <div class="module-tag">
+                AI
+            </div>
+
+            <h3>
+                AI Layer
+            </h3>
+
+            <p>
+                Give your business an intelligence
+                layer capable of understanding,
+                deciding and executing actions.
+            </p>
+
+        </article>
+
+
+        <article class="module">
+
+            <div class="module-number">
+                05 / AUTOMATION
+            </div>
+
+            <div class="module-tag">
+                RUNNING
+            </div>
+
+            <h3>
+                Automations
+            </h3>
+
+            <p>
+                Connect triggers, decisions and
+                actions so repetitive work happens
+                automatically.
+            </p>
+
+        </article>
+
+
+        <article class="module">
+
+            <div class="module-number">
+                06 / CONTROL
+            </div>
+
+            <div class="module-tag">
+                CENTRAL
+            </div>
+
+            <h3>
+                Command Center
+            </h3>
+
+            <p>
+                See what is happening across
+                the business and identify what
+                needs attention.
+            </p>
+
+        </article>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     COMMAND CENTER
+===================================================== -->
+
+<section
+    class="section command"
+    id="demo"
+>
+
+    <div style="width:100%;">
+
+        <div class="label">
+            02 / COMMAND CENTER
+        </div>
+
+
+        <h2>
+
+            See the business
+
+            <em>
+                thinking.
+            </em>
+
+        </h2>
+
+
+        <div class="dashboard">
+
+
+            <div class="dashboard-header">
+
+                <span>
+                    VIRTUAL GENIE BUSINESS OS
+                </span>
+
+                <span>
+                    ALL SYSTEMS OPERATIONAL
+                </span>
+
+            </div>
+
+
+            <div class="dashboard-body">
+
+
+                <aside class="sidebar">
+
+                    <div class="side-item active">
+                        OVERVIEW
+                    </div>
+
+                    <div class="side-item">
+                        CRM
+                    </div>
+
+                    <div class="side-item">
+                        SALES
+                    </div>
+
+                    <div class="side-item">
+                        TASKS
+                    </div>
+
+                    <div class="side-item">
+                        AUTOMATIONS
+                    </div>
+
+                    <div class="side-item">
+                        AI
+                    </div>
+
+                </aside>
+
+
+                <div class="main-panel">
+
+                    <div class="panel-title">
+                        Business Overview
+                    </div>
+
+
+                    <div class="metric-grid">
+
+
+                        <div class="metric">
+
+                            <span>
+                                ACTIVE LEADS
+                            </span>
+
+                            <strong>
+                                184
+                            </strong>
+
+                        </div>
+
+
+                        <div class="metric">
+
+                            <span>
+                                OPEN DEALS
+                            </span>
+
+                            <strong>
+                                42
+                            </strong>
+
+                        </div>
+
+
+                        <div class="metric">
+
+                            <span>
+                                AUTOMATIONS
+                            </span>
+
+                            <strong>
+                                27
+                            </strong>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="chart">
+
+                        <div class="chart-line">
+
+                            <svg
+                                viewBox="0 0 800 150"
+                                preserveAspectRatio="none"
+                            >
+
+                                <polyline
+                                    points="
+                                    0,130
+                                    70,120
+                                    140,125
+                                    210,90
+                                    280,100
+                                    350,65
+                                    420,80
+                                    490,50
+                                    560,55
+                                    630,25
+                                    700,35
+                                    800,8
+                                    "
+                                />
+
+                            </svg>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     AI LAYER
+===================================================== -->
+
+<section class="section">
+
+    <div class="label">
+        03 / INTELLIGENCE
+    </div>
+
+
+    <h2>
+
+        Not another dashboard.
+
+        <em>
+            An intelligence layer.
+        </em>
+
+    </h2>
+
+
+    <p class="section-description">
+
+        The goal isn't to give your team another
+        screen to manage. It's to give the business
+        a system capable of understanding what is
+        happening and helping determine what should
+        happen next.
+
+    </p>
+
+
+    <div class="modules">
+
+
+        <article class="module">
+
+            <div class="module-number">
+                UNDERSTAND
+            </div>
+
+            <h3>
+                Context
+            </h3>
+
+            <p>
+                Bring customer, sales and operational
+                information together so actions are
+                based on context.
+            </p>
+
+        </article>
+
+
+        <article class="module">
+
+            <div class="module-number">
+                DECIDE
+            </div>
+
+            <h3>
+                Intelligence
+            </h3>
+
+            <p>
+                Identify patterns, priorities and
+                next actions across your business.
+            </p>
+
+        </article>
+
+
+        <article class="module">
+
+            <div class="module-number">
+                EXECUTE
+            </div>
+
+            <h3>
+                Action
+            </h3>
+
+            <p>
+                Connect decisions to automations,
+                tasks and workflows.
+            </p>
+
+        </article>
+
+
+        <article class="module">
+
+            <div class="module-number">
+                IMPROVE
+            </div>
+
+            <h3>
+                Feedback
+            </h3>
+
+            <p>
+                Use outcomes and business data to
+                continually improve how the system
+                operates.
+            </p>
+
+        </article>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     CTA
+===================================================== -->
+
+<section
+    class="cta"
+    id="contact"
+>
+
+    <div class="cta-inner">
+
+        <div class="label">
+            VIRTUAL GENIE AI
+        </div>
+
+
+        <h2>
+
+            Build your
+
+            <em>
+                operating system.
+            </em>
+
+        </h2>
+
+
+        <p>
+
+            Tell us how your business operates today.
+            We'll show you where AI, automation and
+            a unified Business OS can take it.
+
+        </p>
+
+
+        <a href="index.html#contact">
+            START A CONVERSATION ↗
+        </a>
+
+    </div>
+
+</section>
+
+
+</main>
+
+
+<script>
+
+    /* =================================================
+       HERO PARALLAX
+    ================================================= */
+
+    const core =
+        document.querySelector(".core");
+
+
+    window.addEventListener(
+        "pointermove",
+        event => {
+
+            if (
+                window.innerWidth <= 900 ||
+                !core
+            ){
+                return;
+            }
+
+
+            const x =
+                event.clientX /
+                window.innerWidth -
+                .5;
+
+            const y =
+                event.clientY /
+                window.innerHeight -
+                .5;
+
+
+            core.style.transform =
+                `
+                translate(
+                    calc(-50% + ${x * 18}px),
+                    calc(-50% + ${y * 18}px)
+                )
+                `;
+
+        },
+        {
+            passive:true
+        }
+    );
+
+
+    /* =================================================
+       MODULE REVEALS
+    ================================================= */
+
+    const modules =
+        document.querySelectorAll(
+            ".module"
+        );
+
+
+    const observer =
+        new IntersectionObserver(
+            entries => {
+
+                entries.forEach(
+                    entry => {
+
+                        if(
+                            entry.isIntersecting
+                        ){
+
+                            entry.target.animate(
+                                [
+                                    {
+                                        opacity:0,
+                                        transform:
+                                            "translateY(35px)"
+                                    },
+                                    {
+                                        opacity:1,
+                                        transform:
+                                            "translateY(0)"
+                                    }
+                                ],
+                                {
+                                    duration:750,
+                                    easing:
+                                        "cubic-bezier(.22,1,.36,1)",
+                                    fill:"forwards"
+                                }
+                            );
+
+                            observer.unobserve(
+                                entry.target
+                            );
+
+                        }
+
+                    }
+                );
+
+            },
+            {
+                threshold:.12
+            }
+        );
+
+
+    modules.forEach(
+        module => observer.observe(module)
+    );
+
+
+    /* =================================================
+       DASHBOARD LIVE METRICS
+    ================================================= */
+
+    const metrics =
+        document.querySelectorAll(
+            ".metric strong"
+        );
+
+
+    const targetValues = [
+        184,
+        42,
+        27
+    ];
+
+
+    let metricsStarted = false;
+
+
+    function animateMetrics(){
+
+        if(metricsStarted){
+            return;
+        }
+
+        metricsStarted = true;
+
+
+        metrics.forEach(
+            (metric,index) => {
+
+                const target =
+                    targetValues[index];
+
+                let value = 0;
+
+
+                const interval =
+                    setInterval(
+                        () => {
+
+                            value +=
+                                Math.ceil(
+                                    target / 25
+                                );
+
+
+                            if(
+                                value >= target
+                            ){
+
+                                value =
+                                    target;
+
+                                clearInterval(
+                                    interval
+                                );
+
+                            }
+
+
+                            metric.textContent =
+                                value;
+
+                        },
+                        35
+                    );
+
+            }
+        );
+
+    }
+
+
+    const dashboard =
+        document.querySelector(
+            ".dashboard"
+        );
+
+
+    if(dashboard){
+
+        const dashboardObserver =
+            new IntersectionObserver(
+                entries => {
+
+                    if(
+                        entries[0].isIntersecting
+                    ){
+
+                        animateMetrics();
+
+                        dashboardObserver.disconnect();
+
+                    }
+
+                },
+                {
+                    threshold:.25
+                }
+            );
+
+
+        dashboardObserver.observe(
+            dashboard
+        );
+
+    }
+
+</script>
+
+</body>
+</html>
