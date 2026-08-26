@@ -18,9 +18,7 @@
         content="Virtual Genie AI builds AI receptionists, business automation and intelligent business operating systems."
     >
 
-    <title>
-        Virtual Genie AI — Intelligence for Business
-    </title>
+    <title>Virtual Genie AI — Intelligence for Business</title>
 
     <link
         rel="preconnect"
@@ -29,7 +27,7 @@
 
     <link
         rel="preconnect"
-        href="https://fonts.gstatic.com"
+        href="https://fonts.googleapis.com"
         crossorigin
     >
 
@@ -48,16 +46,15 @@
 <body>
 
 
-<!-- =========================================================
+<!-- =====================================================
      HEADER
-========================================================= -->
+====================================================== -->
 
 <header class="site-header">
 
     <a
         href="index.html"
         class="brand"
-        aria-label="Virtual Genie AI home"
     >
 
         <span class="brand-mark">
@@ -71,28 +68,25 @@
     </a>
 
 
-    <nav
-        class="desktop-nav"
-        aria-label="Main navigation"
-    >
+    <nav class="desktop-nav">
 
-        <a href="ai-receptionist.html">
+        <a href="#receptionist">
             AI RECEPTIONIST
         </a>
 
-        <a href="ai-automations.html">
+        <a href="#automations">
             AI AUTOMATIONS
         </a>
 
-        <a href="business-os.html">
+        <a href="#business-os">
             BUSINESS OS
         </a>
 
-        <a href="about.html">
-            ABOUT
+        <a href="#system">
+            SYSTEM
         </a>
 
-        <a href="contact.html">
+        <a href="#contact">
             CONTACT
         </a>
 
@@ -100,15 +94,13 @@
 
 
     <a
-        href="contact.html"
+        href="#contact"
         class="header-cta"
     >
 
         START A CONVERSATION
 
-        <span>
-            ↗
-        </span>
+        <span>↗</span>
 
     </a>
 
@@ -119,7 +111,6 @@
         type="button"
         aria-label="Open navigation"
         aria-expanded="false"
-        aria-controls="mobileMenu"
     >
 
         <span></span>
@@ -131,9 +122,9 @@
 
 
 
-<!-- =========================================================
+<!-- =====================================================
      MOBILE MENU
-========================================================= -->
+====================================================== -->
 
 <div
     class="mobile-menu"
@@ -143,58 +134,29 @@
 
     <div class="mobile-menu-inner">
 
-        <a href="ai-receptionist.html">
-
-            <span>
-                01
-            </span>
-
+        <a href="#receptionist">
+            <span>01</span>
             AI RECEPTIONIST
-
         </a>
 
-
-        <a href="ai-automations.html">
-
-            <span>
-                02
-            </span>
-
+        <a href="#automations">
+            <span>02</span>
             AI AUTOMATIONS
-
         </a>
 
-
-        <a href="business-os.html">
-
-            <span>
-                03
-            </span>
-
+        <a href="#business-os">
+            <span>03</span>
             BUSINESS OS
-
         </a>
 
-
-        <a href="about.html">
-
-            <span>
-                04
-            </span>
-
-            ABOUT
-
+        <a href="#system">
+            <span>04</span>
+            SYSTEM
         </a>
 
-
-        <a href="contact.html">
-
-            <span>
-                05
-            </span>
-
+        <a href="#contact">
+            <span>05</span>
             CONTACT
-
         </a>
 
     </div>
@@ -203,16 +165,12 @@
 
 
 
-<!-- =========================================================
-     MAIN
-========================================================= -->
-
 <main>
 
 
-<!-- =========================================================
-     HERO
-========================================================= -->
+<!-- =====================================================
+     CINEMATIC 3D HERO
+====================================================== -->
 
 <section
     class="hero"
@@ -220,171 +178,36 @@
 >
 
 
-    <!-- =====================================================
-         3D / DEPTH SCENE
-    ====================================================== -->
+    <!-- =================================================
+         THREE.JS CANVAS
+    ================================================== -->
 
     <div
-        class="hero-3d-scene"
+        id="threeScene"
+        class="three-scene"
         aria-hidden="true"
     >
 
-
-        <!-- Deep background -->
-
         <div
-            class="depth-layer depth-bg"
-        ></div>
-
-
-        <!-- Atmospheric lights -->
-
-        <div
-            class="depth-light light-blue"
-        ></div>
-
-        <div
-            class="depth-light light-orange"
-        ></div>
-
-
-        <!-- =================================================
-             MAIN GENIE ARTWORK
-        ================================================== -->
-
-        <div
-            class="hero-art-wrap depth-character"
-            id="heroArt"
+            id="sceneLoader"
+            class="scene-loader"
         >
 
-            <img
-                src="hero-genie.png"
-                alt=""
-                class="hero-art"
-                draggable="false"
-            >
+            <span class="loader-dot"></span>
 
-        </div>
-
-
-        <!-- =================================================
-             FLOATING AI TASK — CALL
-        ================================================== -->
-
-        <div
-            class="floating-panel panel-call"
-        >
-
-            <span class="panel-label">
-                INCOMING CALL
-            </span>
-
-            <strong>
-                AI RECEIVING
-            </strong>
-
-            <span class="panel-icon">
-                ◉
+            <span>
+                INITIALIZING INTELLIGENCE
             </span>
 
         </div>
-
-
-        <!-- =================================================
-             FLOATING AI TASK — APPOINTMENT
-        ================================================== -->
-
-        <div
-            class="floating-panel panel-appointment"
-        >
-
-            <span class="panel-label">
-                APPOINTMENT
-            </span>
-
-            <strong>
-                BOOKED
-            </strong>
-
-            <small>
-                TOMORROW · 10:00 AM
-            </small>
-
-        </div>
-
-
-        <!-- =================================================
-             FLOATING AI TASK — CRM
-        ================================================== -->
-
-        <div
-            class="floating-panel panel-crm"
-        >
-
-            <span class="panel-label">
-                CRM UPDATED
-            </span>
-
-            <strong>
-                NEW CONTACT
-            </strong>
-
-            <small>
-                LEAD QUALIFIED
-            </small>
-
-        </div>
-
-
-        <!-- =================================================
-             FLOATING AI TASK — WORKFLOW
-        ================================================== -->
-
-        <div
-            class="floating-panel panel-workflow"
-        >
-
-            <span class="panel-label">
-                WORKFLOW
-            </span>
-
-            <strong>
-                AUTOMATED
-            </strong>
-
-            <div class="workflow-nodes">
-
-                <i></i>
-
-                <b></b>
-
-                <i></i>
-
-            </div>
-
-        </div>
-
-
-        <!-- =================================================
-             ENERGY RINGS
-        ================================================== -->
-
-        <div
-            class="energy-ring ring-one"
-        ></div>
-
-        <div
-            class="energy-ring ring-two"
-        ></div>
-
 
     </div>
 
 
 
-    <!-- =====================================================
-         HERO SIDE LABEL
-    ====================================================== -->
+    <!-- =================================================
+         HERO UI
+    ================================================== -->
 
     <div class="hero-side-label">
 
@@ -395,10 +218,6 @@
     </div>
 
 
-
-    <!-- =====================================================
-         HERO CONTENT
-    ====================================================== -->
 
     <div class="hero-content">
 
@@ -415,9 +234,7 @@
 
 
         <div class="hero-eyebrow">
-
             INTELLIGENCE SYSTEMS
-
         </div>
 
 
@@ -434,9 +251,9 @@
 
         <p class="hero-description">
 
-            Virtual Genie AI builds intelligent systems
-            that handle calls, automate workflows and
-            run your business behind the scenes.
+            A digital workforce that answers,
+            thinks, acts and keeps your business
+            moving while you focus on what matters.
 
         </p>
 
@@ -447,7 +264,7 @@
         >
 
             <span>
-                EXPLORE THE SYSTEM
+                ENTER THE SYSTEM
             </span>
 
             <span class="arrow">
@@ -456,10 +273,6 @@
 
         </a>
 
-
-        <!-- =================================================
-             HERO METRICS
-        ================================================== -->
 
         <div class="hero-metrics">
 
@@ -499,11 +312,11 @@
             <div class="metric">
 
                 <strong>
-                    100%
+                    01
                 </strong>
 
                 <span>
-                    SYSTEMS BUILT
+                    INTELLIGENT OS
                 </span>
 
             </div>
@@ -515,40 +328,87 @@
 
 
 
-    <!-- =====================================================
-         HERO SECTION NAVIGATION
-    ====================================================== -->
+    <!-- =================================================
+         LIVE TASK STATUS
+    ================================================== -->
+
+    <div
+        class="task-status"
+        id="taskStatus"
+    >
+
+        <span class="task-status-number">
+            01
+        </span>
+
+
+        <div>
+
+            <span class="task-status-label">
+                CURRENT TASK
+            </span>
+
+            <strong id="taskTitle">
+                OBSERVING
+            </strong>
+
+            <p id="taskDescription">
+                Monitoring your business environment.
+            </p>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         SCROLL INDICATOR
+    ================================================== -->
+
+    <div class="scroll-indicator">
+
+        <span>
+            SCROLL
+        </span>
+
+        <b>
+            ↓
+        </b>
+
+    </div>
+
+
+
+    <!-- =================================================
+         HERO NAVIGATION
+    ================================================== -->
 
     <div class="hero-navigation">
 
-
-        <div
+        <a
+            href="#home"
             class="hero-nav-item active"
-            data-section="home"
         >
 
-            <span>
-                01
-            </span>
+            <span>01</span>
 
             <small>
                 HOME
             </small>
 
-        </div>
+        </a>
 
 
         <div class="hero-nav-line"></div>
 
 
         <a
-            href="ai-receptionist.html"
+            href="#receptionist"
             class="hero-nav-item"
         >
 
-            <span>
-                02
-            </span>
+            <span>02</span>
 
             <small>
                 RECEPTIONIST
@@ -561,13 +421,11 @@
 
 
         <a
-            href="ai-automations.html"
+            href="#automations"
             class="hero-nav-item"
         >
 
-            <span>
-                03
-            </span>
+            <span>03</span>
 
             <small>
                 AUTOMATIONS
@@ -580,13 +438,11 @@
 
 
         <a
-            href="business-os.html"
+            href="#business-os"
             class="hero-nav-item"
         >
 
-            <span>
-                04
-            </span>
+            <span>04</span>
 
             <small>
                 BUSINESS OS
@@ -594,61 +450,16 @@
 
         </a>
 
-
-        <div class="hero-nav-line"></div>
-
-
-        <a
-            href="contact.html"
-            class="hero-nav-item"
-        >
-
-            <span>
-                05
-            </span>
-
-            <small>
-                CONTACT
-            </small>
-
-        </a>
-
-
     </div>
-
-
-
-    <!-- =====================================================
-         SCROLL INDICATOR
-    ====================================================== -->
-
-    <a
-        href="#system"
-        class="scroll-indicator"
-    >
-
-        <span>
-            SCROLL TO
-        </span>
-
-        <span>
-            SEE MORE
-        </span>
-
-        <b>
-            ↓
-        </b>
-
-    </a>
 
 
 </section>
 
 
 
-<!-- =========================================================
-     SYSTEM SECTION
-========================================================= -->
+<!-- =====================================================
+     SYSTEM INTRO
+====================================================== -->
 
 <section
     class="system-section"
@@ -657,14 +468,11 @@
 
 
     <div class="section-number">
-
         02 / THE SYSTEM
-
     </div>
 
 
     <div class="system-heading">
-
 
         <h2>
 
@@ -679,27 +487,23 @@
 
         <p>
 
-            Virtual Genie connects people, data,
-            software and AI into systems that move
-            work forward automatically.
+            Virtual Genie connects people,
+            systems and AI into one intelligent
+            operating layer.
 
         </p>
 
-
     </div>
-
 
 
     <div class="system-products">
 
 
-        <!-- =================================================
-             PRODUCT 01
-        ================================================== -->
+        <!-- AI RECEPTIONIST -->
 
-        <a
-            href="ai-receptionist.html"
+        <article
             class="system-product"
+            id="receptionist"
         >
 
             <span class="product-number">
@@ -718,9 +522,11 @@
                 </h3>
 
                 <p>
-                    Answer calls, qualify leads,
-                    book appointments and follow up
-                    automatically.
+
+                    Answers calls, understands
+                    conversations, qualifies leads,
+                    books appointments and follows up.
+
                 </p>
 
             </div>
@@ -730,17 +536,15 @@
                 ↗
             </span>
 
-        </a>
+        </article>
 
 
 
-        <!-- =================================================
-             PRODUCT 02
-        ================================================== -->
+        <!-- AUTOMATIONS -->
 
-        <a
-            href="ai-automations.html"
+        <article
             class="system-product"
+            id="automations"
         >
 
             <span class="product-number">
@@ -759,8 +563,11 @@
                 </h3>
 
                 <p>
-                    Connect your tools and eliminate
-                    repetitive manual work.
+
+                    Your AI worker moves information
+                    between the tools your business
+                    already uses.
+
                 </p>
 
             </div>
@@ -770,17 +577,15 @@
                 ↗
             </span>
 
-        </a>
+        </article>
 
 
 
-        <!-- =================================================
-             PRODUCT 03
-        ================================================== -->
+        <!-- BUSINESS OS -->
 
-        <a
-            href="business-os.html"
+        <article
             class="system-product"
+            id="business-os"
         >
 
             <span class="product-number">
@@ -799,8 +604,11 @@
                 </h3>
 
                 <p>
-                    One intelligent operating layer
-                    for sales, customers and operations.
+
+                    One intelligent layer connecting
+                    sales, customers, operations,
+                    data and automation.
+
                 </p>
 
             </div>
@@ -810,39 +618,33 @@
                 ↗
             </span>
 
-        </a>
+        </article>
 
 
     </div>
-
 
 </section>
 
 
 
-<!-- =========================================================
-     STATEMENT
-========================================================= -->
+<!-- =====================================================
+     SENTIENT AI STATEMENT
+====================================================== -->
 
-<section
-    class="statement-section"
-    id="statement"
->
+<section class="statement-section">
 
 
     <div class="section-number">
-
-        03 / VIRTUAL GENIE AI
-
+        03 / THE DIGITAL WORKER
     </div>
 
 
     <h2>
 
-        We don't just add AI
+        Don't just automate
 
         <em>
-            to your business.
+            the task.
         </em>
 
     </h2>
@@ -850,7 +652,8 @@
 
     <p>
 
-        We build the systems around it.
+        Build intelligence that understands
+        what needs to happen next.
 
     </p>
 
@@ -859,9 +662,9 @@
 
 
 
-<!-- =========================================================
+<!-- =====================================================
      FINAL CTA
-========================================================= -->
+====================================================== -->
 
 <section
     class="final-cta"
@@ -870,9 +673,7 @@
 
 
     <div class="section-number">
-
         04 / START
-
     </div>
 
 
@@ -889,15 +690,15 @@
 
     <p>
 
-        Tell us what you want to automate.
-        We'll show you what Virtual Genie AI
-        can build around your business.
+        Tell us what your business does.
+        We'll show you where an intelligent
+        system can take over.
 
     </p>
 
 
     <a
-        href="contact.html"
+        href="mailto:virtualgenieai@gmail.com"
         class="final-link"
     >
 
@@ -919,18 +720,17 @@
 
 
 
-<!-- =========================================================
+<!-- =====================================================
      FOOTER
-========================================================= -->
+====================================================== -->
 
 <footer>
-
 
     <div class="footer-top">
 
 
         <a
-            href="index.html"
+            href="#home"
             class="brand"
         >
 
@@ -956,33 +756,43 @@
     </div>
 
 
-
     <div class="footer-bottom">
-
 
         <span>
             © 2026 Virtual Genie AI
         </span>
 
-
         <span>
             INTELLIGENCE FOR BUSINESS
         </span>
 
-
     </div>
-
 
 </footer>
 
 
 
-<!-- =========================================================
-     JAVASCRIPT
-========================================================= -->
+<!-- =====================================================
+     THREE.JS
+====================================================== -->
 
-<script src="script.js"></script>
+<script
+    type="importmap"
+>
+{
+    "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+    }
+}
+</script>
+
+
+<script
+    type="module"
+    src="script.js"
+></script>
 
 
 </body>
-</html>
+            </html>
