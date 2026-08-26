@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>AI Automations — Virtual Genie AI</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    margin:0;
+    background:#020304;
+    color:#f2f1ec;
+    font-family:"DM Sans",sans-serif;
+    overflow-x:hidden;
+}
+
+a{
+    color:inherit;
+    text-decoration:none;
+}
+
+
+/* =====================================================
+   NAV
+===================================================== */
+
+.nav{
+    position:fixed;
+    z-index:100;
+
+    top:0;
+    left:0;
+    right:0;
+
+    height:82px;
+
+    padding:0 32px;
+
+    display:flex;
+    align-items:center;
+
+    border-bottom:1px solid rgba(255,255,255,.08);
+
+    background:rgba(2,3,4,.72);
+
+    backdrop-filter:blur(18px);
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:14px;
+
+    font-size:14px;
+    font-weight:600;
+
+    letter-spacing:.18em;
+}
+
+.brand-mark{
+    width:43px;
+    height:43px;
+
+    display:grid;
+    place-items:center;
+
+    border-radius:10px;
+
+    background:#f2f1ec;
+    color:#050607;
+
+    font-size:21px;
+}
+
+.nav-links{
+    margin-left:auto;
+
+    display:flex;
+    gap:32px;
+
+    font-size:10px;
+    letter-spacing:.16em;
+}
+
+.nav-links a{
+    color:#888;
+
+    transition:.25s;
+}
+
+.nav-links a:hover{
+    color:#fff;
+}
+
+.nav-cta{
+    margin-left:32px;
+
+    padding:13px 19px;
+
+    border:1px solid rgba(201,255,53,.45);
+
+    font-size:9px;
+    letter-spacing:.18em;
+}
+
+
+/* =====================================================
+   HERO
+===================================================== */
+
+.hero{
+    min-height:100svh;
+
+    position:relative;
+
+    padding:
+        150px
+        7vw
+        100px;
+
+    display:flex;
+    align-items:center;
+
+    overflow:hidden;
+}
+
+
+/* =====================================================
+   WORKFLOW BACKGROUND
+===================================================== */
+
+.workflow-world{
+    position:absolute;
+
+    inset:0;
+
+    overflow:hidden;
+
+    pointer-events:none;
+}
+
+.workflow-grid{
+    position:absolute;
+
+    width:120%;
+    height:120%;
+
+    left:-10%;
+    top:-10%;
+
+    background-image:
+        linear-gradient(
+            rgba(255,255,255,.025) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.025) 1px,
+            transparent 1px
+        );
+
+    background-size:80px 80px;
+
+    transform:
+        perspective(900px)
+        rotateX(63deg)
+        translateY(20%);
+
+    transform-origin:center bottom;
+
+    animation:gridMove 9s linear infinite;
+}
+
+@keyframes gridMove{
+
+    to{
+        background-position:
+            0 80px,
+            80px 0;
+    }
+
+}
+
+
+/* =====================================================
+   FLOW LINES
+===================================================== */
+
+.flow-line{
+    position:absolute;
+
+    height:1px;
+
+    transform-origin:left center;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(22,140,255,.65),
+            transparent
+        );
+
+    opacity:.45;
+}
+
+.flow-1{
+    width:470px;
+
+    left:52%;
+    top:37%;
+
+    transform:rotate(13deg);
+}
+
+.flow-2{
+    width:360px;
+
+    left:57%;
+    top:52%;
+
+    transform:rotate(-11deg);
+}
+
+.flow-3{
+    width:420px;
+
+    left:46%;
+    top:64%;
+
+    transform:rotate(8deg);
+}
+
+
+/* =====================================================
+   HERO CONTENT
+===================================================== */
+
+.hero-content{
+    position:relative;
+    z-index:10;
+
+    max-width:690px;
+}
+
+.eyebrow{
+    display:flex;
+    align-items:center;
+
+    gap:10px;
+
+    margin-bottom:32px;
+
+    color:#777;
+
+    font-size:9px;
+    letter-spacing:.28em;
+}
+
+.dot{
+    width:7px;
+    height:7px;
+
+    border-radius:50%;
+
+    background:#168cff;
+
+    box-shadow:
+        0 0 15px rgba(22,140,255,.7);
+
+    animation:pulse 1.8s infinite;
+}
+
+@keyframes pulse{
+
+    50%{
+        opacity:.3;
+        transform:scale(.65);
+    }
+
+}
+
+h1{
+    margin:0;
+
+    font-size:
+        clamp(58px,9vw,125px);
+
+    line-height:.88;
+
+    letter-spacing:-.065em;
+
+    font-weight:500;
+}
+
+h1 em{
+    display:block;
+
+    color:#858585;
+
+    font-family:"Playfair Display",serif;
+
+    font-style:italic;
+}
+
+.description{
+    max-width:560px;
+
+    margin-top:38px;
+
+    color:#929292;
+
+    font-size:18px;
+
+    line-height:1.6;
+}
+
+.action{
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:30px;
+
+    margin-top:40px;
+
+    padding-bottom:11px;
+
+    border-bottom:1px solid #c9ff35;
+
+    font-size:9px;
+
+    letter-spacing:.2em;
+}
+
+
+/* =====================================================
+   WORKFLOW GRAPH
+===================================================== */
+
+.workflow{
+    position:absolute;
+
+    z-index:5;
+
+    right:5vw;
+
+    top:50%;
+
+    width:470px;
+    height:520px;
+
+    transform:translateY(-50%);
+}
+
+
+/* =====================================================
+   NODE
+===================================================== */
+
+.node{
+    position:absolute;
+
+    width:190px;
+
+    min-height:100px;
+
+    padding:18px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.12);
+
+    background:
+        rgba(5,8,11,.86);
+
+    backdrop-filter:blur(14px);
+
+    box-shadow:
+        0 20px 80px
+        rgba(0,0,0,.4);
+
+    transition:
+        transform .5s ease,
+        border-color .5s ease;
+}
+
+.node:hover{
+    transform:translateY(-5px);
+
+    border-color:
+        rgba(201,255,53,.45);
+}
+
+.node-number{
+    color:#555;
+
+    font-size:8px;
+
+    letter-spacing:.2em;
+}
+
+.node-title{
+    margin-top:12px;
+
+    font-size:16px;
+
+    font-weight:500;
+}
+
+.node-status{
+    margin-top:9px;
+
+    color:#666;
+
+    font-size:8px;
+
+    letter-spacing:.12em;
+}
+
+.node-status::before{
+    content:"";
+
+    display:inline-block;
+
+    width:5px;
+    height:5px;
+
+    margin-right:7px;
+
+    border-radius:50%;
+
+    background:#c9ff35;
+}
+
+
+/* positions */
+
+.node-1{
+    left:0;
+    top:20px;
+}
+
+.node-2{
+    right:0;
+    top:105px;
+}
+
+.node-3{
+    left:35px;
+    top:225px;
+}
+
+.node-4{
+    right:5px;
+    top:330px;
+}
+
+.node-5{
+    left:100px;
+    bottom:0;
+}
+
+
+/* =====================================================
+   MOVING DATA DOT
+===================================================== */
+
+.data-particle{
+    position:absolute;
+
+    width:7px;
+    height:7px;
+
+    border-radius:50%;
+
+    background:#c9ff35;
+
+    box-shadow:
+        0 0 16px
+        rgba(201,255,53,.8);
+
+    animation:
+        dataMove 4s
+        linear infinite;
+}
+
+@keyframes dataMove{
+
+    0%{
+        left:15%;
+        top:18%;
+        opacity:0;
+    }
+
+    10%{
+        opacity:1;
+    }
+
+    45%{
+        left:78%;
+        top:28%;
+    }
+
+    65%{
+        left:30%;
+        top:53%;
+    }
+
+    85%{
+        left:78%;
+        top:72%;
+    }
+
+    100%{
+        left:45%;
+        top:94%;
+        opacity:0;
+    }
+
+}
+
+
+/* =====================================================
+   SECTION
+===================================================== */
+
+.section{
+    position:relative;
+
+    padding:
+        150px
+        7vw;
+
+    border-top:
+        1px solid
+        rgba(255,255,255,.08);
+}
+
+.label{
+    color:#666;
+
+    font-size:9px;
+
+    letter-spacing:.27em;
+}
+
+.section h2{
+    max-width:950px;
+
+    margin:
+        28px
+        0
+        0;
+
+    font-size:
+        clamp(46px,7vw,100px);
+
+    line-height:.94;
+
+    letter-spacing:-.06em;
+
+    font-weight:500;
+}
+
+.section h2 em{
+    color:#858585;
+
+    font-family:"Playfair Display",serif;
+
+    font-style:italic;
+}
+
+.section-description{
+    max-width:600px;
+
+    margin-top:35px;
+
+    color:#808080;
+
+    font-size:17px;
+
+    line-height:1.7;
+}
+
+
+/* =====================================================
+   AUTOMATION STEPS
+===================================================== */
+
+.steps{
+    margin-top:100px;
+
+    border-top:
+        1px solid
+        rgba(255,255,255,.1);
+}
+
+.step{
+    display:grid;
+
+    grid-template-columns:
+        70px
+        1fr
+        160px;
+
+    gap:25px;
+
+    padding:
+        38px
+        0;
+
+    border-bottom:
+        1px solid
+        rgba(255,255,255,.1);
+}
+
+.step-number{
+    color:#555;
+
+    font-size:9px;
+
+    letter-spacing:.2em;
+}
+
+.step h3{
+    margin:0;
+
+    font-size:28px;
+
+    font-weight:500;
+
+    letter-spacing:-.035em;
+}
+
+.step p{
+    max-width:520px;
+
+    margin:
+        10px
+        0
+        0;
+
+    color:#707070;
+
+    line-height:1.6;
+}
+
+.step-status{
+    align-self:center;
+
+    color:#c9ff35;
+
+    font-size:8px;
+
+    letter-spacing:.18em;
+
+    text-align:right;
+}
+
+
+/* =====================================================
+   LIVE WORKFLOW
+===================================================== */
+
+.live{
+    min-height:100svh;
+
+    display:flex;
+    align-items:center;
+}
+
+.live-board{
+    width:min(1000px,100%);
+
+    margin:
+        80px
+        auto
+        0;
+
+    border:
+        1px solid
+        rgba(255,255,255,.1);
+
+    overflow:hidden;
+}
+
+.board-header{
+    display:flex;
+    justify-content:space-between;
+
+    padding:16px 20px;
+
+    border-bottom:
+        1px solid
+        rgba(255,255,255,.1);
+
+    color:#666;
+
+    font-size:8px;
+
+    letter-spacing:.2em;
+}
+
+.board-body{
+    padding:50px;
+
+    display:flex;
+    align-items:center;
+
+    justify-content:center;
+
+    gap:18px;
+
+    flex-wrap:wrap;
+}
+
+.board-node{
+    width:145px;
+
+    padding:22px 15px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.1);
+
+    text-align:center;
+
+    animation:
+        nodePulse 3s
+        ease-in-out infinite;
+}
+
+.board-node:nth-child(2){
+    animation-delay:.35s;
+}
+
+.board-node:nth-child(3){
+    animation-delay:.7s;
+}
+
+.board-node:nth-child(4){
+    animation-delay:1.05s;
+}
+
+@keyframes nodePulse{
+
+    50%{
+        border-color:
+            rgba(22,140,255,.5);
+
+        transform:
+            translateY(-4px);
+    }
+
+}
+
+.board-node strong{
+    display:block;
+
+    font-size:13px;
+
+    font-weight:500;
+}
+
+.board-node span{
+    display:block;
+
+    margin-top:8px;
+
+    color:#666;
+
+    font-size:7px;
+
+    letter-spacing:.12em;
+}
+
+.board-arrow{
+    color:#168cff;
+
+    font-size:20px;
+}
+
+
+/* =====================================================
+   CTA
+===================================================== */
+
+.cta{
+    min-height:80svh;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    text-align:center;
+
+    padding:100px 25px;
+}
+
+.cta-inner{
+    max-width:850px;
+}
+
+.cta h2{
+    margin:25px 0 0;
+
+    font-size:
+        clamp(48px,8vw,110px);
+
+    line-height:.9;
+
+    letter-spacing:-.06em;
+
+    font-weight:500;
+}
+
+.cta h2 em{
+    color:#858585;
+
+    font-family:"Playfair Display",serif;
+
+    font-style:italic;
+}
+
+.cta p{
+    max-width:550px;
+
+    margin:35px auto;
+
+    color:#777;
+
+    font-size:17px;
+
+    line-height:1.6;
+}
+
+.cta a{
+    display:inline-flex;
+
+    padding:
+        15px
+        0;
+
+    border-bottom:
+        1px solid
+        #c9ff35;
+
+    font-size:9px;
+
+    letter-spacing:.2em;
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media(max-width:900px){
+
+    .nav{
+        height:70px;
+
+        padding:0 20px;
+    }
+
+    .nav-links,
+    .nav-cta{
+        display:none;
+    }
+
+    .hero{
+        min-height:950px;
+
+        padding:
+            130px
+            22px
+            80px;
+
+        align-items:flex-start;
+    }
+
+    h1{
+        font-size:
+            clamp(
+                54px,
+                15vw,
+                82px
+            );
+    }
+
+    .description{
+        font-size:16px;
+    }
+
+    .workflow{
+        width:340px;
+        height:410px;
+
+        top:auto;
+        bottom:20px;
+
+        right:50%;
+
+        transform:
+            translateX(50%);
+    }
+
+    .node{
+        width:145px;
+
+        min-height:82px;
+
+        padding:13px;
+    }
+
+    .node-title{
+        font-size:13px;
+    }
+
+    .node-status{
+        font-size:7px;
+    }
+
+    .node-1{
+        left:0;
+    }
+
+    .node-2{
+        right:0;
+        top:80px;
+    }
+
+    .node-3{
+        left:25px;
+        top:175px;
+    }
+
+    .node-4{
+        right:0;
+        top:260px;
+    }
+
+    .node-5{
+        left:85px;
+        bottom:0;
+    }
+
+    .section{
+        padding:
+            100px
+            22px;
+    }
+
+    .section h2{
+        font-size:
+            clamp(
+                45px,
+                13vw,
+                75px
+            );
+    }
+
+    .step{
+        grid-template-columns:
+            35px
+            1fr;
+
+        gap:12px;
+    }
+
+    .step-status{
+        grid-column:2;
+
+        text-align:left;
+    }
+
+    .board-body{
+        padding:30px 15px;
+
+        gap:10px;
+    }
+
+    .board-node{
+        width:125px;
+    }
+
+    .board-arrow{
+        display:none;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+
+<!-- =====================================================
+     NAV
+===================================================== -->
+
+<header class="nav">
+
+    <a
+        href="index.html"
+        class="brand"
+    >
+
+        <span class="brand-mark">
+            ✦
+        </span>
+
+        <span>
+            VIRTUAL GENIE
+        </span>
+
+    </a>
+
+
+    <nav class="nav-links">
+
+        <a href="index.html">
+            HOME
+        </a>
+
+        <a href="ai-receptionist.html">
+            AI RECEPTIONIST
+        </a>
+
+        <a href="business-os.html">
+            BUSINESS OS
+        </a>
+
+        <a href="#demo">
+            DEMO
+        </a>
+
+    </nav>
+
+
+    <a
+        href="#contact"
+        class="nav-cta"
+    >
+        START A CONVERSATION ↗
+    </a>
+
+</header>
+
+
+<main>
+
+
+<!-- =====================================================
+     HERO
+===================================================== -->
+
+<section class="hero">
+
+
+    <div class="workflow-world">
+
+        <div class="workflow-grid"></div>
+
+        <div class="flow-line flow-1"></div>
+
+        <div class="flow-line flow-2"></div>
+
+        <div class="flow-line flow-3"></div>
+
+    </div>
+
+
+    <div class="hero-content">
+
+        <div class="eyebrow">
+
+            <span class="dot"></span>
+
+            AI AUTOMATIONS
+            •
+            SYSTEM ACTIVE
+
+        </div>
+
+
+        <h1>
+
+            Make your business
+
+            <em>
+                move itself.
+            </em>
+
+        </h1>
+
+
+        <p class="description">
+
+            Connect your tools, data and people
+            into intelligent workflows that execute
+            work automatically from trigger to outcome.
+
+        </p>
+
+
+        <a
+            href="#demo"
+            class="action"
+        >
+            WATCH THE SYSTEM WORK
+            <span>↓</span>
+        </a>
+
+    </div>
+
+
+    <!-- =================================================
+         WORKFLOW
+    ================================================== -->
+
+    <div class="workflow">
+
+
+        <div class="node node-1">
+
+            <div class="node-number">
+                01 / TRIGGER
+            </div>
+
+            <div class="node-title">
+                New Lead
+            </div>
+
+            <div class="node-status">
+                DETECTED
+            </div>
+
+        </div>
+
+
+        <div class="node node-2">
+
+            <div class="node-number">
+                02 / AI
+            </div>
+
+            <div class="node-title">
+                Qualify Lead
+            </div>
+
+            <div class="node-status">
+                PROCESSING
+            </div>
+
+        </div>
+
+
+        <div class="node node-3">
+
+            <div class="node-number">
+                03 / CRM
+            </div>
+
+            <div class="node-title">
+                Update Customer
+            </div>
+
+            <div class="node-status">
+                SYNCING
+            </div>
+
+        </div>
+
+
+        <div class="node node-4">
+
+            <div class="node-number">
+                04 / ACTION
+            </div>
+
+            <div class="node-title">
+                Book Appointment
+            </div>
+
+            <div class="node-status">
+                EXECUTING
+            </div>
+
+        </div>
+
+
+        <div class="node node-5">
+
+            <div class="node-number">
+                05 / COMPLETE
+            </div>
+
+            <div class="node-title">
+                Follow-up
+            </div>
+
+            <div class="node-status">
+                AUTOMATED
+            </div>
+
+        </div>
+
+
+        <span class="data-particle"></span>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     INTRO
+===================================================== -->
+
+<section class="section">
+
+    <div class="label">
+        01 / AUTOMATION
+    </div>
+
+
+    <h2>
+
+        Stop moving information
+
+        <em>
+            by hand.
+        </em>
+
+    </h2>
+
+
+    <p class="section-description">
+
+        Virtual Genie connects the repetitive
+        steps inside your business and lets AI
+        execute them without waiting for someone
+        to remember what happens next.
+
+    </p>
+
+
+    <div class="steps">
+
+
+        <article class="step">
+
+            <div class="step-number">
+                01
+            </div>
+
+            <div>
+
+                <h3>
+                    A trigger happens
+                </h3>
+
+                <p>
+                    A new lead arrives,
+                    a customer submits a form,
+                    an appointment changes or
+                    another business event occurs.
+                </p>
+
+            </div>
+
+            <div class="step-status">
+                DETECT
+            </div>
+
+        </article>
+
+
+        <article class="step">
+
+            <div class="step-number">
+                02
+            </div>
+
+            <div>
+
+                <h3>
+                    AI decides what happens next
+                </h3>
+
+                <p>
+                    The system interprets the event
+                    and determines which action,
+                    workflow or team member is required.
+                </p>
+
+            </div>
+
+            <div class="step-status">
+                THINK
+            </div>
+
+        </article>
+
+
+        <article class="step">
+
+            <div class="step-number">
+                03
+            </div>
+
+            <div>
+
+                <h3>
+                    The system executes
+                </h3>
+
+                <p>
+                    CRM records are updated,
+                    messages are sent, appointments
+                    are created and tasks are assigned.
+                </p>
+
+            </div>
+
+            <div class="step-status">
+                ACT
+            </div>
+
+        </article>
+
+
+        <article class="step">
+
+            <div class="step-number">
+                04
+            </div>
+
+            <div>
+
+                <h3>
+                    Your team sees the result
+                </h3>
+
+                <p>
+                    Instead of managing the process,
+                    your people receive the information
+                    and outcomes they actually need.
+                </p>
+
+            </div>
+
+            <div class="step-status">
+                COMPLETE
+            </div>
+
+        </article>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     LIVE DEMO
+===================================================== -->
+
+<section
+    class="section live"
+    id="demo"
+>
+
+    <div style="width:100%;">
+
+        <div class="label">
+            02 / LIVE WORKFLOW
+        </div>
+
+
+        <h2>
+
+            Watch work
+
+            <em>
+                move itself.
+            </em>
+
+        </h2>
+
+
+        <div class="live-board">
+
+            <div class="board-header">
+
+                <span>
+                    VIRTUAL GENIE AUTOMATION ENGINE
+                </span>
+
+                <span>
+                    LIVE
+                </span>
+
+            </div>
+
+
+            <div class="board-body">
+
+
+                <div class="board-node">
+
+                    <strong>
+                        LEAD
+                    </strong>
+
+                    <span>
+                        RECEIVED
+                    </span>
+
+                </div>
+
+
+                <div class="board-arrow">
+                    →
+                </div>
+
+
+                <div class="board-node">
+
+                    <strong>
+                        AI
+                    </strong>
+
+                    <span>
+                        QUALIFIED
+                    </span>
+
+                </div>
+
+
+                <div class="board-arrow">
+                    →
+                </div>
+
+
+                <div class="board-node">
+
+                    <strong>
+                        CRM
+                    </strong>
+
+                    <span>
+                        UPDATED
+                    </span>
+
+                </div>
+
+
+                <div class="board-arrow">
+                    →
+                </div>
+
+
+                <div class="board-node">
+
+                    <strong>
+                        ACTION
+                    </strong>
+
+                    <span>
+                        COMPLETE
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     CTA
+===================================================== -->
+
+<section
+    class="cta"
+    id="contact"
+>
+
+    <div class="cta-inner">
+
+        <div class="label">
+            VIRTUAL GENIE AI
+        </div>
+
+
+        <h2>
+
+            Build the workflow
+
+            <em>
+                once.
+            </em>
+
+        </h2>
+
+
+        <p>
+
+            Tell us what your team does repeatedly.
+            We'll show you what can be automated.
+
+        </p>
+
+
+        <a href="index.html#contact">
+            START A CONVERSATION ↗
+        </a>
+
+    </div>
+
+</section>
+
+
+</main>
+
+
+<script>
+
+    /*
+        Scroll reveals the workflow steps.
+    */
+
+    const steps =
+        document.querySelectorAll(
+            ".step"
+        );
+
+
+    const observer =
+        new IntersectionObserver(
+            entries => {
+
+                entries.forEach(
+                    entry => {
+
+                        if (
+                            entry.isIntersecting
+                        ) {
+
+                            entry.target.animate(
+                                [
+                                    {
+                                        opacity:0,
+                                        transform:
+                                            "translateY(30px)"
+                                    },
+                                    {
+                                        opacity:1,
+                                        transform:
+                                            "translateY(0)"
+                                    }
+                                ],
+                                {
+                                    duration:700,
+                                    easing:
+                                        "cubic-bezier(.22,1,.36,1)",
+                                    fill:"forwards"
+                                }
+                            );
+
+                            observer.unobserve(
+                                entry.target
+                            );
+
+                        }
+
+                    }
+                );
+
+            },
+            {
+                threshold:.15
+            }
+        );
+
+
+    steps.forEach(
+        step => observer.observe(step)
+    );
+
+
+    /*
+        Workflow follows the pointer
+        very subtly on desktop.
+    */
+
+    const workflow =
+        document.querySelector(
+            ".workflow"
+        );
+
+
+    window.addEventListener(
+        "pointermove",
+        event => {
+
+            if (
+                window.innerWidth <= 900 ||
+                !workflow
+            ) {
+                return;
+            }
+
+
+            const x =
+                event.clientX /
+                window.innerWidth -
+                .5;
+
+            const y =
+                event.clientY /
+                window.innerHeight -
+                .5;
+
+
+            workflow.style.transform =
+                `
+                translateY(-50%)
+                translate(
+                    ${x * 12}px,
+                    ${y * 12}px
+                )
+                `;
+
+        },
+        {
+            passive:true
+        }
+    );
+
+</script>
+
+
+</body>
+</html>
