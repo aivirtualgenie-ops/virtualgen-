@@ -1,50 +1,72 @@
 /* =========================================================
    VIRTUAL GENIE
-   WEBGL EXPERIENCE ENGINE
-   MOBILE FIRST
+   NEURAL LATTICE EXPERIENCE
+   MOBILE-FIRST WEBGL
 ========================================================= */
 
 (() => {
-
     "use strict";
 
-
-    /* =====================================================
-       BASIC SETUP
-    ===================================================== */
-
-    const canvas =
-        document.getElementById("experience");
+    const canvas = document.getElementById("experience");
 
     if (!canvas || typeof THREE === "undefined") {
-        console.error("Virtual Genie: Three.js or canvas missing.");
+        console.error("Virtual Genie: WebGL initialization failed.");
         return;
     }
 
+    /* =====================================================
+       DEVICE / PERFORMANCE
+    ===================================================== */
 
-    const isMobile =
+    const mobile =
         window.matchMedia("(max-width: 700px)").matches;
 
-    const isTouch =
+    const reducedMotion =
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const touch =
         "ontouchstart" in window ||
         navigator.maxTouchPoints > 0;
 
-
-    const pixelRatio = Math.min(
+    const DPR = Math.min(
         window.devicePixelRatio || 1,
-        isMobile ? 1.35 : 1.8
+        mobile ? 1.25 : 1.7
     );
+
+    const NODE_COUNT = mobile ? 520 : 1050;
+    const CONNECTION_COUNT = mobile ? 650 : 1700;
+    const SIGNAL_COUNT = mobile ? 10 : 24;
+
+    const BG = 0x050505;
+    const WHITE = 0xf1f0eb;
+    const SOFT = 0x858581;
+    const ACCENT = 0xd8ff5a;
+
+
+    /* =====================================================
+       HELPERS
+    ===================================================== */
+
+    const clamp = (value, min, max) =>
+        Math.max(min, Math.min(max, value));
+
+    const lerp = (a, b, t) =>
+        a + (b - a) * t;
+
+    const smoothstep = (a, b, x) => {
+        const t = clamp((x - a) / (b - a), 0, 1);
+        return t * t * (3 - 2 * t);
+    };
 
 
     /* =====================================================
        SCENE
     ===================================================== */
 
-    const scene =
-        new THREE.Scene();
+    const scene = new THREE.Scene();
 
     scene.background =
-        new THREE.Color(0x050505);
+        new THREE.Color(BG);
 
 
     /* =====================================================
@@ -53,18 +75,16 @@
 
     const camera =
         new THREE.PerspectiveCamera(
-            isMobile ? 54 : 48,
-            window.innerWidth /
-            window.innerHeight,
+            mobile ? 58 : 48,
+            window.innerWidth / window.innerHeight,
             0.1,
-            1000
+            200
         );
-
 
     camera.position.set(
         0,
         0,
-        isMobile ? 9 : 10
+        mobile ? 9.5 : 11
     );
 
 
@@ -75,13 +95,12 @@
     const renderer =
         new THREE.WebGLRenderer({
             canvas,
-            antialias: !isMobile,
+            antialias: !mobile,
             alpha: false,
             powerPreference: "high-performance"
         });
 
-
-    renderer.setPixelRatio(pixelRatio);
+    renderer.setPixelRatio(DPR);
 
     renderer.setSize(
         window.innerWidth,
@@ -89,258 +108,209 @@
         false
     );
 
-
     renderer.outputColorSpace =
         THREE.SRGBColorSpace;
 
 
     /* =====================================================
-       GROUPS
+       MASTER WORLD
     ===================================================== */
 
     const world =
         new THREE.Group();
 
-    const coreGroup =
-        new THREE.Group();
-
-    const panelGroup =
-        new THREE.Group();
-
-    const particleGroup =
-        new THREE.Group();
-
-
     scene.add(world);
 
-    world.add(coreGroup);
-    world.add(panelGroup);
-    world.add(particleGroup);
-
 
     /* =====================================================
-       UTILITY
+       NEURAL LATTICE
     ===================================================== */
 
-    const clamp = (
-        value,
-        min,
-        max
-    ) =>
-        Math.max(
-            min,
-            Math.min(max, value)
-        );
+    const nodes = [];
 
-
-    const lerp = (
-        a,
-        b,
-        amount
-    ) =>
-        a + (b - a) * amount;
-
-
-    /* =====================================================
-       PARTICLE FIELD
-    ===================================================== */
-
-    const particleCount =
-        isMobile ? 950 : 1900;
-
-
-    const particlePositions =
+    const nodePositions =
         new Float32Array(
-            particleCount * 3
+            NODE_COUNT * 3
         );
 
-
-    const particleColors =
+    const nodeColors =
         new Float32Array(
-            particleCount * 3
+            NODE_COUNT * 3
         );
 
-
-    const particleSizes =
+    const nodeSizes =
         new Float32Array(
-            particleCount
+            NODE_COUNT
         );
 
 
-    const particleData = [];
+    /*
+       Instead of random stars, build a
+       structured 3D intelligence field.
 
+       Nodes are distributed around a
+       distorted cylindrical / spherical
+       volume.
+    */
 
-    for (
-        let i = 0;
-        i < particleCount;
-        i++
-    ) {
+    for (let i = 0; i < NODE_COUNT; i++) {
 
         const i3 = i * 3;
 
+        const depth =
+            Math.random() * 2 - 1;
 
-        /*
-           Large 3D cloud.
-           We deliberately keep it sparse
-           on mobile.
-        */
-
-        const radius =
-            4.5 +
-            Math.random() * 7;
-
-
-        const theta =
+        const angle =
             Math.random() *
             Math.PI *
             2;
 
+        const radius =
+            1.8 +
+            Math.pow(
+                Math.random(),
+                0.55
+            ) * 5.8;
 
-        const phi =
-            Math.acos(
-                2 *
-                Math.random() -
-                1
-            );
+        const vertical =
+            depth * 5.2;
 
+        /*
+           Organic distortion.
+        */
+
+        const wave =
+            Math.sin(
+                angle * 3 +
+                depth * 5
+            ) * 0.45;
 
         const x =
-            radius *
-            Math.sin(phi) *
-            Math.cos(theta);
-
+            Math.cos(angle) *
+            radius +
+            wave;
 
         const y =
-            radius *
-            Math.sin(phi) *
-            Math.sin(theta);
-
+            vertical +
+            Math.sin(
+                angle * 2
+            ) * 0.55;
 
         const z =
-            radius *
-            Math.cos(phi);
+            Math.sin(angle) *
+            radius;
 
 
-        particlePositions[i3] =
-            x;
-
-        particlePositions[i3 + 1] =
-            y;
-
-        particlePositions[i3 + 2] =
-            z;
+        nodePositions[i3] = x;
+        nodePositions[i3 + 1] = y;
+        nodePositions[i3 + 2] = z;
 
 
         /*
-           Mostly white/grey particles.
-           A very small number get a
-           restrained cool accent.
+           Mostly monochrome.
+
+           A restrained number of nodes
+           use the Virtual Genie accent.
         */
 
-        const accent =
-            Math.random() > 0.9;
+        if (Math.random() > 0.93) {
 
-
-        if (accent) {
-
-            particleColors[i3] =
-                0.55;
-
-            particleColors[i3 + 1] =
-                0.50;
-
-            particleColors[i3 + 2] =
+            nodeColors[i3] =
                 0.72;
+
+            nodeColors[i3 + 1] =
+                0.92;
+
+            nodeColors[i3 + 2] =
+                0.25;
 
         } else {
 
             const brightness =
-                0.35 +
-                Math.random() * 0.65;
+                0.28 +
+                Math.random() * 0.55;
 
-
-            particleColors[i3] =
+            nodeColors[i3] =
                 brightness;
 
-            particleColors[i3 + 1] =
+            nodeColors[i3 + 1] =
                 brightness;
 
-            particleColors[i3 + 2] =
-                brightness * 0.98;
-
+            nodeColors[i3 + 2] =
+                brightness * 0.96;
         }
 
 
-        particleSizes[i] =
-            isMobile
-                ? 1.1 + Math.random() * 1.8
-                : 1.0 + Math.random() * 2.3;
+        nodeSizes[i] =
+            mobile
+                ? 0.045 + Math.random() * 0.065
+                : 0.04 + Math.random() * 0.075;
 
 
-        particleData.push({
-            baseX: x,
-            baseY: y,
-            baseZ: z,
-            speed:
-                0.15 +
-                Math.random() * 0.45,
+        nodes.push({
+            x,
+            y,
+            z,
+
             phase:
                 Math.random() *
                 Math.PI *
-                2
-        });
+                2,
 
+            speed:
+                0.08 +
+                Math.random() *
+                0.25
+        });
     }
 
 
-    const particleGeometry =
+    const nodeGeometry =
         new THREE.BufferGeometry();
 
 
-    particleGeometry.setAttribute(
+    nodeGeometry.setAttribute(
         "position",
         new THREE.BufferAttribute(
-            particlePositions,
+            nodePositions,
             3
         )
     );
 
 
-    particleGeometry.setAttribute(
+    nodeGeometry.setAttribute(
         "color",
         new THREE.BufferAttribute(
-            particleColors,
+            nodeColors,
             3
         )
     );
 
 
-    particleGeometry.setAttribute(
+    nodeGeometry.setAttribute(
         "size",
         new THREE.BufferAttribute(
-            particleSizes,
+            nodeSizes,
             1
         )
     );
 
 
-    /*
-       Small circular particle texture.
-    */
+    /* =====================================================
+       NODE TEXTURE
+    ===================================================== */
 
-    const particleCanvas =
+    const nodeCanvas =
         document.createElement("canvas");
 
-    particleCanvas.width = 32;
-    particleCanvas.height = 32;
+    nodeCanvas.width = 32;
+    nodeCanvas.height = 32;
 
+    const nodeContext =
+        nodeCanvas.getContext("2d");
 
-    const particleContext =
-        particleCanvas.getContext("2d");
-
-
-    const particleGradient =
-        particleContext.createRadialGradient(
+    const nodeGradient =
+        nodeContext.createRadialGradient(
             16,
             16,
             0,
@@ -349,30 +319,30 @@
             16
         );
 
-
-    particleGradient.addColorStop(
+    nodeGradient.addColorStop(
         0,
         "rgba(255,255,255,1)"
     );
 
-
-    particleGradient.addColorStop(
-        0.35,
-        "rgba(255,255,255,.75)"
+    nodeGradient.addColorStop(
+        0.25,
+        "rgba(255,255,255,.9)"
     );
 
+    nodeGradient.addColorStop(
+        0.55,
+        "rgba(255,255,255,.25)"
+    );
 
-    particleGradient.addColorStop(
+    nodeGradient.addColorStop(
         1,
         "rgba(255,255,255,0)"
     );
 
+    nodeContext.fillStyle =
+        nodeGradient;
 
-    particleContext.fillStyle =
-        particleGradient;
-
-
-    particleContext.fillRect(
+    nodeContext.fillRect(
         0,
         0,
         32,
@@ -380,24 +350,24 @@
     );
 
 
-    const particleTexture =
+    const nodeTexture =
         new THREE.CanvasTexture(
-            particleCanvas
+            nodeCanvas
         );
 
 
-    const particleMaterial =
+    const nodeMaterial =
         new THREE.PointsMaterial({
             size:
-                isMobile
-                    ? 0.055
-                    : 0.065,
+                mobile
+                    ? 0.08
+                    : 0.095,
 
-            map: particleTexture,
+            map: nodeTexture,
 
             transparent: true,
 
-            opacity: 0.78,
+            opacity: 0.72,
 
             vertexColors: true,
 
@@ -408,655 +378,465 @@
         });
 
 
-    const particles =
+    const nodeCloud =
         new THREE.Points(
-            particleGeometry,
-            particleMaterial
+            nodeGeometry,
+            nodeMaterial
         );
 
 
-    particleGroup.add(
-        particles
-    );
+    world.add(nodeCloud);
 
 
     /* =====================================================
-       CENTRAL CORE
+       CONNECTIONS
     ===================================================== */
 
-    const coreMaterial =
-        new THREE.MeshBasicMaterial({
-            color: 0xf1f0eb,
-            wireframe: true,
+    /*
+       We connect nearby nodes.
+
+       Doing this only once keeps the
+       animation cheap enough for phones.
+    */
+
+    const connectionPositions =
+        new Float32Array(
+            CONNECTION_COUNT * 6
+        );
+
+
+    for (
+        let i = 0;
+        i < CONNECTION_COUNT;
+        i++
+    ) {
+
+        /*
+           Choose a source node.
+        */
+
+        const a =
+            Math.floor(
+                Math.random() *
+                NODE_COUNT
+            );
+
+
+        /*
+           Look for a nearby node.
+
+           We don't perform a full
+           nearest-neighbour calculation
+           because that is expensive on
+           mobile.
+        */
+
+        let b =
+            a +
+            Math.floor(
+                (Math.random() * 50) -
+                25
+            );
+
+
+        if (b < 0) {
+            b += NODE_COUNT;
+        }
+
+        if (b >= NODE_COUNT) {
+            b -= NODE_COUNT;
+        }
+
+
+        const aNode =
+            nodes[a];
+
+        const bNode =
+            nodes[b];
+
+
+        const i6 =
+            i * 6;
+
+
+        connectionPositions[i6] =
+            aNode.x;
+
+        connectionPositions[i6 + 1] =
+            aNode.y;
+
+        connectionPositions[i6 + 2] =
+            aNode.z;
+
+        connectionPositions[i6 + 3] =
+            bNode.x;
+
+        connectionPositions[i6 + 4] =
+            bNode.y;
+
+        connectionPositions[i6 + 5] =
+            bNode.z;
+
+    }
+
+
+    const connectionGeometry =
+        new THREE.BufferGeometry();
+
+
+    connectionGeometry.setAttribute(
+        "position",
+        new THREE.BufferAttribute(
+            connectionPositions,
+            3
+        )
+    );
+
+
+    const connectionMaterial =
+        new THREE.LineBasicMaterial({
+            color: SOFT,
+
             transparent: true,
-            opacity: 0.58
+
+            opacity:
+                mobile
+                    ? 0.09
+                    : 0.13,
+
+            depthWrite: false
         });
 
 
+    const connections =
+        new THREE.LineSegments(
+            connectionGeometry,
+            connectionMaterial
+        );
+
+
+    world.add(connections);
+
+
+    /* =====================================================
+       CENTRAL INTELLIGENCE CORE
+    ===================================================== */
+
+    const core =
+        new THREE.Group();
+
+    world.add(core);
+
+
+    /*
+       Main wireframe sphere.
+    */
+
     const coreGeometry =
         new THREE.IcosahedronGeometry(
-            isMobile ? 0.72 : 0.9,
+            mobile
+                ? 0.82
+                : 1.05,
             2
         );
 
 
-    const core =
+    const coreMaterial =
+        new THREE.MeshBasicMaterial({
+            color: WHITE,
+
+            wireframe: true,
+
+            transparent: true,
+
+            opacity: 0.42
+        });
+
+
+    const coreMesh =
         new THREE.Mesh(
             coreGeometry,
             coreMaterial
         );
 
 
-    coreGroup.add(core);
+    core.add(coreMesh);
 
 
     /* =====================================================
-       CENTRAL RINGS
+       CORE RINGS
     ===================================================== */
 
-    const ringMaterial =
-        new THREE.MeshBasicMaterial({
-            color: 0xcfcfc8,
-            transparent: true,
-            opacity: 0.32
-        });
-
-
-    function createRing(
+    function ring(
         radius,
-        rotationX,
-        rotationY,
+        rotation,
         opacity
     ) {
 
         const geometry =
             new THREE.TorusGeometry(
                 radius,
-                isMobile
-                    ? 0.008
-                    : 0.012,
+                mobile
+                    ? 0.009
+                    : 0.014,
                 8,
-                96
+                128
             );
 
 
         const material =
-            ringMaterial.clone();
+            new THREE.MeshBasicMaterial({
+                color: WHITE,
+
+                transparent: true,
+
+                opacity
+            });
 
 
-        material.opacity =
-            opacity;
-
-
-        const ring =
+        const mesh =
             new THREE.Mesh(
                 geometry,
                 material
             );
 
 
-        ring.rotation.x =
-            rotationX;
-
-        ring.rotation.y =
-            rotationY;
+        mesh.rotation.set(
+            ...rotation
+        );
 
 
-        coreGroup.add(ring);
+        core.add(mesh);
 
-
-        return ring;
-
+        return mesh;
     }
 
 
-    const ringA =
-        createRing(
-            1.05,
-            Math.PI / 2,
-            0,
+    const ring1 =
+        ring(
+            1.15,
+            [
+                Math.PI / 2,
+                0,
+                0
+            ],
             0.42
         );
 
 
-    const ringB =
-        createRing(
-            1.35,
-            0.8,
-            0.5,
-            0.20
+    const ring2 =
+        ring(
+            1.48,
+            [
+                0.7,
+                0.3,
+                0.2
+            ],
+            0.18
         );
 
 
-    const ringC =
-        createRing(
-            1.7,
-            1.4,
-            -0.3,
-            0.12
+    const ring3 =
+        ring(
+            1.85,
+            [
+                1.3,
+                -0.5,
+                0.3
+            ],
+            0.10
         );
 
 
     /* =====================================================
-       INNER LIGHT
+       CORE POINT
     ===================================================== */
 
-    const lightGeometry =
+    const pointGeometry =
         new THREE.SphereGeometry(
-            0.12,
+            0.11,
             16,
             16
         );
 
 
-    const lightMaterial =
+    const pointMaterial =
         new THREE.MeshBasicMaterial({
-            color: 0xf4f2ec
+            color: ACCENT
         });
 
 
-    const coreLight =
+    const corePoint =
         new THREE.Mesh(
-            lightGeometry,
-            lightMaterial
+            pointGeometry,
+            pointMaterial
         );
 
 
-    coreGroup.add(
-        coreLight
+    core.add(
+        corePoint
     );
 
 
     /* =====================================================
-       PANEL TEXTURE CREATOR
+       SIGNAL PARTICLES
     ===================================================== */
 
-    function createPanelTexture(
-        eyebrow,
-        title,
-        lines,
-        accentText
+    const signalGeometry =
+        new THREE.BufferGeometry();
+
+
+    const signalPositions =
+        new Float32Array(
+            SIGNAL_COUNT * 3
+        );
+
+
+    const signalColors =
+        new Float32Array(
+            SIGNAL_COUNT * 3
+        );
+
+
+    const signals = [];
+
+
+    for (
+        let i = 0;
+        i < SIGNAL_COUNT;
+        i++
     ) {
 
-        const width =
-            isMobile ? 720 : 900;
-
-
-        const height =
-            isMobile ? 460 : 520;
-
-
-        const c =
-            document.createElement(
-                "canvas"
+        const a =
+            Math.floor(
+                Math.random() *
+                NODE_COUNT
             );
 
 
-        c.width = width;
-        c.height = height;
+        const b =
+            Math.floor(
+                Math.random() *
+                NODE_COUNT
+            );
 
 
-        const ctx =
-            c.getContext("2d");
+        const start =
+            nodes[a];
+
+        const end =
+            nodes[b];
 
 
-        ctx.fillStyle =
-            "#0a0a0a";
+        signals.push({
+            start,
+            end,
+
+            progress:
+                Math.random(),
+
+            speed:
+                0.12 +
+                Math.random() *
+                0.22
+        });
 
 
-        ctx.fillRect(
-            0,
-            0,
-            width,
-            height
-        );
+        const i3 =
+            i * 3;
 
 
-        /*
-           Outer border
-        */
+        signalPositions[i3] =
+            start.x;
 
-        ctx.strokeStyle =
-            "rgba(241,240,235,.28)";
+        signalPositions[i3 + 1] =
+            start.y;
 
-
-        ctx.lineWidth = 2;
-
-
-        ctx.strokeRect(
-            1,
-            1,
-            width - 2,
-            height - 2
-        );
+        signalPositions[i3 + 2] =
+            start.z;
 
 
-        /*
-           Eyebrow
-        */
+        signalColors[i3] =
+            0.85;
 
-        ctx.fillStyle =
-            "#777773";
+        signalColors[i3 + 1] =
+            1;
 
-
-        ctx.font =
-            "700 18px Arial";
-
-
-        ctx.letterSpacing =
-            "4px";
-
-
-        ctx.fillText(
-            eyebrow.toUpperCase(),
-            42,
-            55
-        );
-
-
-        /*
-           Main title
-        */
-
-        ctx.fillStyle =
-            "#f1f0eb";
-
-
-        ctx.font =
-            "600 47px Arial";
-
-
-        const titleLines =
-            title.split("\n");
-
-
-        titleLines.forEach(
-            (line, index) => {
-
-                ctx.fillText(
-                    line,
-                    42,
-                    130 +
-                    index * 58
-                );
-
-            }
-        );
-
-
-        /*
-           Divider
-        */
-
-        ctx.strokeStyle =
-            "rgba(241,240,235,.14)";
-
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            42,
-            245
-        );
-
-        ctx.lineTo(
-            width - 42,
-            245
-        );
-
-        ctx.stroke();
-
-
-        /*
-           Body lines
-        */
-
-        ctx.fillStyle =
-            "#8b8b86";
-
-
-        ctx.font =
-            "22px Arial";
-
-
-        lines.forEach(
-            (line, index) => {
-
-                ctx.fillText(
-                    line,
-                    42,
-                    300 +
-                    index * 38
-                );
-
-            }
-        );
-
-
-        /*
-           Accent/result
-        */
-
-        ctx.fillStyle =
-            "#d8ff5a";
-
-
-        ctx.font =
-            "700 16px Arial";
-
-
-        ctx.fillText(
-            accentText.toUpperCase(),
-            42,
-            height - 35
-        );
-
-
-        return new THREE.CanvasTexture(
-            c
-        );
+        signalColors[i3 + 2] =
+            0.3;
 
     }
 
 
-    /* =====================================================
-       FLOATING PANELS
-    ===================================================== */
-
-    const panelDefinitions = [
-
-        {
-            eyebrow:
-                "AI RECEPTIONIST",
-
-            title:
-                "EVERY CALL\nBECOMES ACTION.",
-
-            lines: [
-                "ANSWER",
-                "QUALIFY",
-                "BOOK",
-                "FOLLOW UP"
-            ],
-
-            accent:
-                "LIVE SYSTEM",
-
-            position:
-                [-2.7, 0.8, -0.7],
-
-            rotation:
-                [0.05, 0.25, -0.06],
-
-            scale:
-                1
-        },
-
-
-        {
-            eyebrow:
-                "LEAD GENERATION",
-
-            title:
-                "FIND THE SIGNAL\nIN THE NOISE.",
-
-            lines: [
-                "DISCOVER",
-                "STRUCTURE",
-                "QUALIFY",
-                "DELIVER"
-            ],
-
-            accent:
-                "128 OPPORTUNITIES",
-
-            position:
-                [2.6, -0.3, -2],
-
-            rotation:
-                [-0.04, -0.25, 0.05],
-
-            scale:
-                0.86
-        },
-
-
-        {
-            eyebrow:
-                "AI INFRASTRUCTURE",
-
-            title:
-                "CONNECT\nEVERYTHING.",
-
-            lines: [
-                "CRM",
-                "PHONE",
-                "DATA",
-                "AUTOMATION"
-            ],
-
-            accent:
-                "SYSTEM CONNECTED",
-
-            position:
-                [-2.2, -1.8, -3.4],
-
-            rotation:
-                [0.08, 0.18, 0.04],
-
-            scale:
-                0.74
-        },
-
-
-        {
-            eyebrow:
-                "BUSINESS OS",
-
-            title:
-                "ONE SYSTEM.\nONE COMMAND CENTER.",
-
-            lines: [
-                "SALES",
-                "OPERATIONS",
-                "CUSTOMERS",
-                "INTELLIGENCE"
-            ],
-
-            accent:
-                "SYSTEM ONLINE",
-
-            position:
-                [2.5, 1.8, -4.2],
-
-            rotation:
-                [-0.08, -0.18, -0.04],
-
-            scale:
-                0.68
-        }
-
-    ];
-
-
-    const panelObjects = [];
-
-
-    panelDefinitions.forEach(
-        definition => {
-
-            const texture =
-                createPanelTexture(
-                    definition.eyebrow,
-                    definition.title,
-                    definition.lines,
-                    definition.accent
-                );
-
-
-            const geometry =
-                new THREE.PlaneGeometry(
-                    3.8,
-                    2.42
-                );
-
-
-            const material =
-                new THREE.MeshBasicMaterial({
-                    map: texture,
-                    transparent: true,
-                    opacity: 0,
-                    side: THREE.DoubleSide
-                });
-
-
-            const mesh =
-                new THREE.Mesh(
-                    geometry,
-                    material
-                );
-
-
-            mesh.position.set(
-                ...definition.position
-            );
-
-
-            mesh.rotation.set(
-                ...definition.rotation
-            );
-
-
-            mesh.scale.setScalar(
-                definition.scale
-            );
-
-
-            panelGroup.add(
-                mesh
-            );
-
-
-            panelObjects.push({
-                mesh,
-                material,
-                basePosition:
-                    new THREE.Vector3(
-                        ...definition.position
-                    ),
-
-                baseRotation:
-                    new THREE.Euler(
-                        ...definition.rotation
-                    ),
-
-                phase:
-                    Math.random() *
-                    Math.PI *
-                    2
-            });
-
-        }
+    signalGeometry.setAttribute(
+        "position",
+        new THREE.BufferAttribute(
+            signalPositions,
+            3
+        )
     );
 
 
-    /* =====================================================
-       ORBITING WIRES
-    ===================================================== */
+    signalGeometry.setAttribute(
+        "color",
+        new THREE.BufferAttribute(
+            signalColors,
+            3
+        )
+    );
 
-    const wireMaterial =
-        new THREE.LineBasicMaterial({
-            color: 0x70706a,
+
+    const signalMaterial =
+        new THREE.PointsMaterial({
+            size:
+                mobile
+                    ? 0.12
+                    : 0.14,
+
+            map: nodeTexture,
+
             transparent: true,
-            opacity: 0.16
+
+            opacity: 1,
+
+            vertexColors: true,
+
+            depthWrite: false,
+
+            blending:
+                THREE.AdditiveBlending
         });
 
 
-    const wireGroup =
-        new THREE.Group();
+    const signalCloud =
+        new THREE.Points(
+            signalGeometry,
+            signalMaterial
+        );
 
 
     world.add(
-        wireGroup
-    );
-
-
-    function createWire(
-        start,
-        end
-    ) {
-
-        const points = [
-
-            new THREE.Vector3(
-                ...start
-            ),
-
-            new THREE.Vector3(
-                ...end
-            )
-
-        ];
-
-
-        const geometry =
-            new THREE.BufferGeometry()
-                .setFromPoints(points);
-
-
-        const line =
-            new THREE.Line(
-                geometry,
-                wireMaterial.clone()
-            );
-
-
-        wireGroup.add(line);
-
-    }
-
-
-    createWire(
-        [0, 0, 0],
-        [-2.7, 0.8, -0.7]
-    );
-
-
-    createWire(
-        [0, 0, 0],
-        [2.6, -0.3, -2]
-    );
-
-
-    createWire(
-        [0, 0, 0],
-        [-2.2, -1.8, -3.4]
-    );
-
-
-    createWire(
-        [0, 0, 0],
-        [2.5, 1.8, -4.2]
+        signalCloud
     );
 
 
     /* =====================================================
-       INTERACTION
+       POINTER / TOUCH
     ===================================================== */
 
     let pointerX = 0;
     let pointerY = 0;
 
-    let targetPointerX = 0;
-    let targetPointerY = 0;
+    let targetX = 0;
+    let targetY = 0;
 
 
-    function updatePointer(
+    function setPointer(
         x,
         y
     ) {
 
-        targetPointerX =
+        targetX =
             (
                 x /
                 window.innerWidth -
@@ -1064,13 +844,12 @@
             );
 
 
-        targetPointerY =
+        targetY =
             (
                 y /
                 window.innerHeight -
                 0.5
             );
-
     }
 
 
@@ -1078,7 +857,7 @@
         "mousemove",
         event => {
 
-            updatePointer(
+            setPointer(
                 event.clientX,
                 event.clientY
             );
@@ -1099,7 +878,7 @@
                 event.touches[0]
             ) {
 
-                updatePointer(
+                setPointer(
                     event.touches[0].clientX,
                     event.touches[0].clientY
                 );
@@ -1114,6 +893,45 @@
 
 
     /* =====================================================
+       SCROLL
+    ===================================================== */
+
+    let scrollTarget = 0;
+    let scrollCurrent = 0;
+
+
+    function readScroll() {
+
+        const max =
+            Math.max(
+                1,
+                document.documentElement.scrollHeight -
+                window.innerHeight
+            );
+
+
+        scrollTarget =
+            clamp(
+                window.scrollY / max,
+                0,
+                1
+            );
+    }
+
+
+    window.addEventListener(
+        "scroll",
+        readScroll,
+        {
+            passive: true
+        }
+    );
+
+
+    readScroll();
+
+
+    /* =====================================================
        MENU
     ===================================================== */
 
@@ -1121,7 +939,6 @@
         document.getElementById(
             "menuToggle"
         );
-
 
     const menu =
         document.getElementById(
@@ -1225,53 +1042,29 @@
                     );
 
                 }
-
             }
         );
-
     }
 
 
     /* =====================================================
-       SCROLL STATE
+       HERO HTML MOTION
     ===================================================== */
 
-    let scrollTarget = 0;
-    let scrollCurrent = 0;
+    const heroContent =
+        document.querySelector(
+            ".hero-content"
+        );
 
+    const heroIndex =
+        document.querySelector(
+            ".hero-index"
+        );
 
-    function updateScroll() {
-
-        const maxScroll =
-            Math.max(
-                1,
-                document.documentElement
-                    .scrollHeight -
-                window.innerHeight
-            );
-
-
-        scrollTarget =
-            clamp(
-                window.scrollY /
-                maxScroll,
-                0,
-                1
-            );
-
-    }
-
-
-    window.addEventListener(
-        "scroll",
-        updateScroll,
-        {
-            passive: true
-        }
-    );
-
-
-    updateScroll();
+    const heroStatus =
+        document.querySelector(
+            ".hero-status"
+        );
 
 
     /* =====================================================
@@ -1287,7 +1080,7 @@
 
         camera.fov =
             window.innerWidth < 700
-                ? 54
+                ? 58
                 : 48;
 
 
@@ -1298,8 +1091,8 @@
             Math.min(
                 window.devicePixelRatio || 1,
                 window.innerWidth < 700
-                    ? 1.35
-                    : 1.8
+                    ? 1.25
+                    : 1.7
             )
         );
 
@@ -1320,16 +1113,12 @@
 
 
     /* =====================================================
-       ANIMATION CLOCK
+       ANIMATION
     ===================================================== */
 
     const clock =
         new THREE.Clock();
 
-
-    /* =====================================================
-       ANIMATION
-    ===================================================== */
 
     function animate() {
 
@@ -1338,18 +1127,18 @@
         );
 
 
-        const elapsed =
+        const time =
             clock.getElapsedTime();
 
 
-        /*
-           Smooth input
-        */
+        /* ================================================
+           INPUT
+        ================================================ */
 
         pointerX =
             lerp(
                 pointerX,
-                targetPointerX,
+                targetX,
                 0.035
             );
 
@@ -1357,29 +1146,64 @@
         pointerY =
             lerp(
                 pointerY,
-                targetPointerY,
+                targetY,
                 0.035
             );
 
-
-        /*
-           Smooth scroll
-        */
 
         scrollCurrent =
             lerp(
                 scrollCurrent,
                 scrollTarget,
-                0.045
+                0.035
             );
 
 
         /* ================================================
-           PARTICLES
+           WORLD MOVEMENT
+        ================================================ */
+
+        const movement =
+            reducedMotion
+                ? 0
+                : 1;
+
+
+        world.rotation.y =
+            pointerX *
+            0.10 +
+            time *
+            0.012 *
+            movement;
+
+
+        world.rotation.x =
+            pointerY *
+            0.045;
+
+
+        /*
+           Slowly push the entire field
+           through the camera as the page
+           progresses.
+        */
+
+        world.position.z =
+            scrollCurrent *
+            3.2;
+
+
+        world.position.y =
+            -scrollCurrent *
+            1.3;
+
+
+        /* ================================================
+           NODE BREATHING
         ================================================ */
 
         const positions =
-            particleGeometry
+            nodeGeometry
                 .attributes
                 .position
                 .array;
@@ -1387,288 +1211,299 @@
 
         for (
             let i = 0;
-            i < particleCount;
+            i < NODE_COUNT;
             i++
         ) {
+
+            const node =
+                nodes[i];
 
             const i3 =
                 i * 3;
 
 
-            const p =
-                particleData[i];
-
-
             const wave =
                 Math.sin(
-                    elapsed *
-                    p.speed +
-                    p.phase
+                    time *
+                    node.speed +
+                    node.phase
                 );
 
 
             positions[i3] =
-                p.baseX +
+                node.x +
                 Math.sin(
-                    elapsed * 0.15 +
-                    p.phase
+                    time * 0.10 +
+                    node.phase
                 ) *
-                0.12;
+                0.10;
 
 
             positions[i3 + 1] =
-                p.baseY +
+                node.y +
                 wave *
-                0.09;
+                0.08;
 
 
             positions[i3 + 2] =
-                p.baseZ +
+                node.z +
                 Math.cos(
-                    elapsed * 0.12 +
-                    p.phase
+                    time * 0.08 +
+                    node.phase
                 ) *
-                0.12;
-
+                0.10;
         }
 
 
-        particleGeometry
+        nodeGeometry
             .attributes
             .position
             .needsUpdate = true;
 
 
-        /*
-           Particle field rotates.
-        */
+        /* ================================================
+           CONNECTION MOVEMENT
+        ================================================ */
 
-        particleGroup.rotation.y =
-            elapsed * 0.018 +
-            pointerX * 0.08;
+        connections.rotation.y =
+            Math.sin(
+                time * 0.08
+            ) *
+            0.05;
 
 
-        particleGroup.rotation.x =
-            pointerY * 0.04;
+        connections.rotation.x =
+            Math.cos(
+                time * 0.06
+            ) *
+            0.025;
 
 
         /* ================================================
-           CENTRAL CORE
+           CORE
         ================================================ */
 
         core.rotation.x =
-            elapsed * 0.18;
+            time *
+            0.16 *
+            movement;
 
 
         core.rotation.y =
-            elapsed * 0.28;
+            time *
+            0.25 *
+            movement;
 
 
-        ringA.rotation.z =
-            elapsed * 0.32;
+        core.position.x =
+            pointerX *
+            0.25;
 
 
-        ringB.rotation.x =
-            elapsed * 0.21;
-
-
-        ringB.rotation.z =
-            elapsed * -0.18;
-
-
-        ringC.rotation.y =
-            elapsed * -0.12;
-
-
-        coreGroup.rotation.y =
-            pointerX * 0.25;
-
-
-        coreGroup.rotation.x =
-            pointerY * 0.15;
+        core.position.y =
+            pointerY *
+            0.16;
 
 
         /*
-           Core slowly moves backwards
-           as the user scrolls.
+           The core becomes smaller as
+           the camera travels deeper.
         */
 
-        coreGroup.position.z =
-            scrollCurrent * 3.2;
-
-
-        coreGroup.position.y =
-            -scrollCurrent * 0.5;
-
-
-        coreGroup.scale.setScalar(
+        const coreScale =
             1 -
-            scrollCurrent * 0.28
+            scrollCurrent *
+            0.32;
+
+
+        core.scale.setScalar(
+            coreScale
+        );
+
+
+        ring1.rotation.z =
+            time *
+            0.35 *
+            movement;
+
+
+        ring2.rotation.x =
+            time *
+            -0.22 *
+            movement;
+
+
+        ring2.rotation.z =
+            time *
+            0.17 *
+            movement;
+
+
+        ring3.rotation.y =
+            time *
+            -0.11 *
+            movement;
+
+
+        /*
+           Core pulse.
+        */
+
+        const pulse =
+            1 +
+            Math.sin(
+                time * 1.7
+            ) *
+            0.035;
+
+
+        corePoint.scale.setScalar(
+            pulse
         );
 
 
         /* ================================================
-           PANELS
+           SIGNALS
         ================================================ */
 
-        panelObjects.forEach(
-            (object, index) => {
-
-                const mesh =
-                    object.mesh;
-
-
-                const phase =
-                    object.phase;
+        const signalPositions =
+            signalGeometry
+                .attributes
+                .position
+                .array;
 
 
-                /*
-                   Floating movement
-                */
+        signals.forEach(
+            (signal, index) => {
 
-                mesh.position.x =
-                    object.basePosition.x +
-                    Math.sin(
-                        elapsed * 0.45 +
-                        phase
-                    ) *
-                    0.06;
+                signal.progress +=
+                    signal.speed *
+                    0.01 *
+                    movement;
 
 
-                mesh.position.y =
-                    object.basePosition.y +
-                    Math.cos(
-                        elapsed * 0.35 +
-                        phase
-                    ) *
-                    0.07;
+                if (
+                    signal.progress >= 1
+                ) {
+
+                    signal.progress = 0;
 
 
-                /*
-                   Slight rotation
-                */
-
-                mesh.rotation.x =
-                    object.baseRotation.x +
-                    Math.sin(
-                        elapsed * 0.3 +
-                        phase
-                    ) *
-                    0.015;
+                    const randomNode =
+                        nodes[
+                            Math.floor(
+                                Math.random() *
+                                NODE_COUNT
+                            )
+                        ];
 
 
-                mesh.rotation.y =
-                    object.baseRotation.y +
-                    Math.cos(
-                        elapsed * 0.25 +
-                        phase
-                    ) *
-                    0.02;
+                    signal.start =
+                        randomNode;
+
+
+                    signal.end =
+                        nodes[
+                            Math.floor(
+                                Math.random() *
+                                NODE_COUNT
+                            )
+                        ];
+
+                }
+
+
+                const p =
+                    signal.progress;
 
 
                 /*
-                   Scroll-driven reveal.
-
-                   Each panel enters at a
-                   different point in the journey.
+                   Smooth movement rather
+                   than linear movement.
                 */
 
-                const start =
-                    0.14 +
-                    index * 0.12;
+                const eased =
+                    p * p *
+                    (3 - 2 * p);
 
 
-                const reveal =
-                    clamp(
-                        (
-                            scrollCurrent -
-                            start
-                        ) / 0.18,
-                        0,
-                        1
+                const x =
+                    lerp(
+                        signal.start.x,
+                        signal.end.x,
+                        eased
                     );
 
 
-                object.material.opacity =
-                    reveal * 0.92;
+                const y =
+                    lerp(
+                        signal.start.y,
+                        signal.end.y,
+                        eased
+                    );
 
 
-                /*
-                   Panels move toward camera
-                   during their reveal.
-                */
-
-                mesh.position.z =
-                    object.basePosition.z +
-                    (1 - reveal) *
-                    -2;
+                const z =
+                    lerp(
+                        signal.start.z,
+                        signal.end.z,
+                        eased
+                    );
 
 
-                mesh.rotation.z +=
-                    pointerX *
-                    0.005;
+                const i3 =
+                    index * 3;
+
+
+                signalPositions[i3] =
+                    x;
+
+                signalPositions[i3 + 1] =
+                    y;
+
+                signalPositions[i3 + 2] =
+                    z;
 
             }
         );
 
 
-        /* ================================================
-           WIRES
-        ================================================ */
-
-        wireGroup.rotation.y =
-            elapsed * 0.025 +
-            pointerX * 0.08;
-
-
-        wireGroup.rotation.x =
-            pointerY * 0.04;
-
-
-        /*
-           Fade wires as scene progresses.
-        */
-
-        wireGroup.children
-            .forEach(
-                line => {
-
-                    line.material.opacity =
-                        0.16 *
-                        (
-                            1 -
-                            scrollCurrent *
-                            0.5
-                        );
-
-                }
-            );
+        signalGeometry
+            .attributes
+            .position
+            .needsUpdate = true;
 
 
         /* ================================================
-           CAMERA
+           CAMERA JOURNEY
         ================================================ */
 
         /*
-           The camera doesn't simply scroll
-           vertically.
+           This is important.
 
-           It travels through the scene.
+           The animation isn't simply
+           "scrolling a background."
+
+           The camera actually travels
+           into the system.
         */
 
-        const cameraZ =
-            (
-                isMobile
-                    ? 9
-                    : 10
-            ) -
-            scrollCurrent * 5.8;
+        const baseZ =
+            mobile
+                ? 9.5
+                : 11;
+
+
+        const targetCameraZ =
+            baseZ -
+            scrollCurrent *
+            7.0;
 
 
         camera.position.z =
             lerp(
                 camera.position.z,
-                cameraZ,
+                targetCameraZ,
                 0.035
             );
 
@@ -1676,7 +1511,8 @@
         camera.position.x =
             lerp(
                 camera.position.x,
-                pointerX * 0.7,
+                pointerX *
+                0.75,
                 0.035
             );
 
@@ -1684,28 +1520,89 @@
         camera.position.y =
             lerp(
                 camera.position.y,
-                -pointerY * 0.45 +
-                scrollCurrent * 0.7,
+                -pointerY *
+                0.45 +
+                scrollCurrent *
+                0.8,
                 0.035
             );
 
 
         /*
-           Look slightly forward through
-           the environment.
+           Camera looks deeper into the
+           lattice as the user scrolls.
         */
 
-        const lookTarget =
+        const target =
             new THREE.Vector3(
-                pointerX * 0.2,
-                -scrollCurrent * 0.15,
-                -1.5
+                pointerX *
+                0.15,
+
+                scrollCurrent *
+                -0.4,
+
+                -2.0
             );
 
 
         camera.lookAt(
-            lookTarget
+            target
         );
+
+
+        /* ================================================
+           HERO TEXT FADES INTO THE SYSTEM
+        ================================================ */
+
+        if (heroContent) {
+
+            const opacity =
+                1 -
+                smoothstep(
+                    0.02,
+                    0.20,
+                    scrollCurrent
+                );
+
+
+            heroContent.style.opacity =
+                opacity;
+
+
+            heroContent.style.transform =
+                `translate3d(
+                    0,
+                    ${scrollCurrent * -45}px,
+                    0
+                )`;
+
+        }
+
+
+        if (heroIndex) {
+
+            heroIndex.style.opacity =
+                1 -
+                smoothstep(
+                    0.01,
+                    0.16,
+                    scrollCurrent
+                );
+
+        }
+
+
+        if (heroStatus) {
+
+            heroStatus.style.opacity =
+                1 -
+                smoothstep(
+                    0.01,
+                    0.16,
+                    scrollCurrent
+                );
+
+        }
 
 
         /* ================================================
@@ -1724,7 +1621,8 @@
        START
     ===================================================== */
 
-    animate();
+    resize();
 
+    animate();
 
 })();
