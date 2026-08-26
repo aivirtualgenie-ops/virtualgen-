@@ -12,7 +12,7 @@
 
     <meta
         name="description"
-        content="Virtual Genie AI — AI receptionists, business automation and intelligent business operating systems."
+        content="Virtual Genie AI — AI receptionists, intelligent automations and Business OS."
     >
 
     <meta
@@ -24,10 +24,6 @@
         Virtual Genie AI — Intelligence That Works
     </title>
 
-
-    <!-- =================================================
-         FONTS
-    ================================================== -->
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -42,20 +38,11 @@
         rel="stylesheet"
     >
 
-
-    <!-- =================================================
-         STYLES
-    ================================================== -->
-
     <link
         rel="stylesheet"
         href="styles.css"
     >
 
-
-    <!-- =================================================
-         THREE.JS IMPORT MAP
-    ================================================== -->
 
     <script type="importmap">
     {
@@ -71,24 +58,15 @@
 <body>
 
 
-<!-- =====================================================
-     HEADER
-===================================================== -->
-
 <header class="header">
-
-
-    <!-- LOGO -->
 
     <a
         href="#home"
         class="logo"
-        aria-label="Virtual Genie AI home"
+        aria-label="Virtual Genie AI"
     >
 
-        <span class="logo-mark">
-            ✦
-        </span>
+        <span class="logo-mark">✦</span>
 
         <span>
             VIRTUAL GENIE
@@ -97,11 +75,7 @@
     </a>
 
 
-    <!-- DESKTOP NAV -->
-
-    <nav
-        aria-label="Main navigation"
-    >
+    <nav>
 
         <a
             href="ai-receptionist.html"
@@ -110,14 +84,12 @@
             RECEPTIONIST
         </a>
 
-
         <a
             href="ai-automations.html"
             data-product="automation"
         >
             AUTOMATION
         </a>
-
 
         <a
             href="business-os.html"
@@ -129,23 +101,14 @@
     </nav>
 
 
-    <!-- HEADER CTA -->
-
     <a
         href="#contact"
         class="header-button"
     >
-
         START A CONVERSATION
-
-        <span>
-            ↗
-        </span>
-
+        <span>↗</span>
     </a>
 
-
-    <!-- MOBILE MENU BUTTON -->
 
     <button
         class="menu"
@@ -154,453 +117,334 @@
         aria-label="Open menu"
         aria-expanded="false"
     >
-
         <i></i>
         <i></i>
-
     </button>
 
 </header>
 
-
-
-<!-- =====================================================
-     MOBILE MENU
-===================================================== -->
 
 <div
     class="mobile-menu"
     id="mobileMenu"
 >
 
-
     <a
         href="ai-receptionist.html"
         data-product="receptionist"
     >
-
-        01 —
-        AI RECEPTIONIST
-
+        01 — AI RECEPTIONIST
     </a>
-
 
     <a
         href="ai-automations.html"
         data-product="automation"
     >
-
-        02 —
-        AI AUTOMATIONS
-
+        02 — AI AUTOMATIONS
     </a>
-
 
     <a
         href="business-os.html"
         data-product="os"
     >
-
-        03 —
-        BUSINESS OS
-
+        03 — BUSINESS OS
     </a>
 
-
     <a href="#contact">
-
-        04 —
-        CONTACT
-
+        04 — CONTACT
     </a>
 
 </div>
 
 
-
-<!-- =====================================================
-     MAIN
-===================================================== -->
-
 <main>
 
 
-    <!-- =================================================
-         3D WORLD
-    ================================================== -->
+<div
+    id="world"
+    aria-hidden="true"
+>
 
-    <div
-        id="world"
-        aria-hidden="true"
-    >
+    <div id="loading">
 
-        <div id="loading">
+        <span></span>
 
-            <span></span>
-
-            INITIALIZING SYSTEM
-
-        </div>
+        INITIALIZING SYSTEM
 
     </div>
 
+</div>
 
 
-    <!-- =================================================
-         HERO
-    ================================================== -->
+<section
+    class="hero"
+    id="home"
+>
 
-    <section
-        class="hero"
-        id="home"
-    >
+    <div class="hero-copy">
 
+        <div class="eyebrow">
 
-        <div class="hero-copy">
+            <span></span>
 
-
-            <div class="eyebrow">
-
-                <span></span>
-
-                VIRTUAL GENIE AI
-
-            </div>
-
-
-            <p class="kicker">
-
-                INTELLIGENCE SYSTEMS
-
-            </p>
-
-
-            <h1>
-
-                AI that works
-
-                <em>
-                    like magic.
-                </em>
-
-            </h1>
-
-
-            <p class="intro">
-
-                Intelligent systems that answer calls,
-                automate workflows and keep your business
-                moving without constant human intervention.
-
-            </p>
-
-
-            <a
-                href="ai-receptionist.html"
-                data-product="receptionist"
-                class="hero-link"
-            >
-
-                ENTER THE SYSTEM
-
-                <b>
-                    ↓
-                </b>
-
-            </a>
-
+            VIRTUAL GENIE AI
 
         </div>
 
 
-        <div class="hero-corner">
+        <p class="kicker">
+            INTELLIGENCE SYSTEMS
+        </p>
 
-            SYSTEM / 001
 
-        </div>
+        <h1>
 
-
-        <div class="scroll-hint">
-
-            SCROLL TO ENTER
-
-            <strong>
-                ↓
-            </strong>
-
-        </div>
-
-
-    </section>
-
-
-
-    <!-- =================================================
-         SECTION 01 — AI RECEPTIONIST
-    ================================================== -->
-
-    <section
-        class="tunnel-section"
-        id="receptionist"
-    >
-
-
-        <div class="section-copy">
-
-
-            <span class="section-number">
-
-                01
-
-            </span>
-
-
-            <span class="section-label">
-
-                AI VOICE
-
-            </span>
-
-
-            <h2>
-
-                Your business
-
-                <em>
-                    answers itself.
-                </em>
-
-            </h2>
-
-
-            <p>
-
-                An AI receptionist that answers calls,
-                understands conversations, qualifies
-                leads and books appointments around
-                the clock.
-
-            </p>
-
-
-            <a
-                href="ai-receptionist.html"
-                data-product="receptionist"
-            >
-
-                EXPLORE RECEPTIONIST
-
-                <span>
-                    →
-                </span>
-
-            </a>
-
-
-        </div>
-
-
-    </section>
-
-
-
-    <!-- =================================================
-         SECTION 02 — AUTOMATIONS
-    ================================================== -->
-
-    <section
-        class="tunnel-section"
-        id="automation"
-    >
-
-
-        <div class="section-copy">
-
-
-            <span class="section-number">
-
-                02
-
-            </span>
-
-
-            <span class="section-label">
-
-                AUTOMATION
-
-            </span>
-
-
-            <h2>
-
-                Work moves
-
-                <em>
-                    without you.
-                </em>
-
-            </h2>
-
-
-            <p>
-
-                Connect your tools and let intelligent
-                workflows move information, trigger
-                actions and follow up automatically.
-
-            </p>
-
-
-            <a
-                href="ai-automations.html"
-                data-product="automation"
-            >
-
-                EXPLORE AUTOMATION
-
-                <span>
-                    →
-                </span>
-
-            </a>
-
-
-        </div>
-
-
-    </section>
-
-
-
-    <!-- =================================================
-         SECTION 03 — BUSINESS OS
-    ================================================== -->
-
-    <section
-        class="tunnel-section"
-        id="os"
-    >
-
-
-        <div class="section-copy">
-
-
-            <span class="section-number">
-
-                03
-
-            </span>
-
-
-            <span class="section-label">
-
-                OPERATIONS
-
-            </span>
-
-
-            <h2>
-
-                Your business
-
-                <em>
-                    gets an OS.
-                </em>
-
-            </h2>
-
-
-            <p>
-
-                One intelligent operating layer connecting
-                customers, sales, operations, data and
-                automation.
-
-            </p>
-
-
-            <a
-                href="business-os.html"
-                data-product="os"
-            >
-
-                EXPLORE BUSINESS OS
-
-                <span>
-                    →
-                </span>
-
-            </a>
-
-
-        </div>
-
-
-    </section>
-
-
-
-    <!-- =================================================
-         CTA
-    ================================================== -->
-
-    <section
-        class="cta"
-        id="contact"
-    >
-
-
-        <span class="section-number">
-
-            04 / START
-
-        </span>
-
-
-        <h2>
-
-            Give your business
+            AI that works
 
             <em>
-                a digital workforce.
+                like magic.
             </em>
 
-        </h2>
+        </h1>
 
 
-        <p>
+        <p class="intro">
 
-            Tell us what your business does.
-            We'll show you where intelligent systems
-            can take over.
+            Intelligent systems that answer calls,
+            automate workflows and keep your business
+            moving without constant human intervention.
 
         </p>
 
 
         <a
-            href="mailto:virtualgenieai@gmail.com"
-            class="cta-button"
+            href="ai-receptionist.html"
+            data-product="receptionist"
+            class="hero-link"
         >
 
-            START A CONVERSATION
+            ENTER THE SYSTEM
 
-            <span>
-                ↗
-            </span>
+            <b>↓</b>
 
         </a>
 
+    </div>
 
-    </section>
+
+    <div class="hero-corner">
+        SYSTEM / 001
+    </div>
+
+
+    <div class="scroll-hint">
+
+        SCROLL TO ENTER
+
+        <strong>↓</strong>
+
+    </div>
+
+</section>
+
+
+<section
+    class="tunnel-section"
+    id="receptionist"
+    data-world="receptionist"
+>
+
+    <div class="section-copy">
+
+        <span class="section-number">
+            01
+        </span>
+
+        <span class="section-label">
+            AI VOICE / SYSTEM 01
+        </span>
+
+        <h2>
+
+            Your business
+
+            <em>
+                answers itself.
+            </em>
+
+        </h2>
+
+        <p>
+
+            An AI receptionist that answers calls,
+            understands conversations, qualifies
+            leads and books appointments around
+            the clock.
+
+        </p>
+
+        <a
+            href="ai-receptionist.html"
+            data-product="receptionist"
+        >
+
+            EXPLORE RECEPTIONIST
+
+            <span>→</span>
+
+        </a>
+
+    </div>
+
+</section>
+
+
+<section
+    class="tunnel-section"
+    id="automation"
+    data-world="automation"
+>
+
+    <div class="section-copy">
+
+        <span class="section-number">
+            02
+        </span>
+
+        <span class="section-label">
+            INTELLIGENT WORKFLOW / SYSTEM 02
+        </span>
+
+        <h2>
+
+            Work moves
+
+            <em>
+                without you.
+            </em>
+
+        </h2>
+
+        <p>
+
+            Connect your tools and let intelligent
+            workflows move information, trigger
+            actions and follow up automatically.
+
+        </p>
+
+        <a
+            href="ai-automations.html"
+            data-product="automation"
+        >
+
+            EXPLORE AUTOMATION
+
+            <span>→</span>
+
+        </a>
+
+    </div>
+
+</section>
+
+
+<section
+    class="tunnel-section"
+    id="os"
+    data-world="os"
+>
+
+    <div class="section-copy">
+
+        <span class="section-number">
+            03
+        </span>
+
+        <span class="section-label">
+            BUSINESS INTELLIGENCE / SYSTEM 03
+        </span>
+
+        <h2>
+
+            Your business
+
+            <em>
+                gets an OS.
+            </em>
+
+        </h2>
+
+        <p>
+
+            One intelligent operating layer connecting
+            customers, sales, operations, data and
+            automation.
+
+        </p>
+
+        <a
+            href="business-os.html"
+            data-product="os"
+        >
+
+            ENTER BUSINESS OS
+
+            <span>→</span>
+
+        </a>
+
+    </div>
+
+</section>
+
+
+<section
+    class="cta"
+    id="contact"
+>
+
+    <span class="section-number">
+        04 / START
+    </span>
+
+
+    <h2>
+
+        Give your business
+
+        <em>
+            a digital workforce.
+        </em>
+
+    </h2>
+
+
+    <p>
+
+        Tell us what your business does.
+        We'll show you where intelligent systems
+        can take over.
+
+    </p>
+
+
+    <a
+        href="mailto:virtualgenieai@gmail.com"
+        class="cta-button"
+    >
+
+        START A CONVERSATION
+
+        <span>↗</span>
+
+    </a>
+
+</section>
 
 
 </main>
 
-
-
-<!-- =====================================================
-     JAVASCRIPT
-===================================================== -->
 
 <script
     type="module"
@@ -609,5 +453,4 @@
 
 
 </body>
-
 </html>
