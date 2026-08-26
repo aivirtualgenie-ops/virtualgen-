@@ -1534,3 +1534,530 @@ footer {
     }
 
 }
+/* =========================================================
+   CINEMATIC 3D SCENE
+========================================================= */
+
+.hero {
+    perspective: 1400px;
+    perspective-origin: 50% 45%;
+}
+
+
+.hero-3d-scene {
+    position: absolute;
+    inset: 0;
+
+    overflow: hidden;
+
+    transform-style: preserve-3d;
+
+    pointer-events: none;
+}
+
+
+/* Deep space */
+
+.depth-bg {
+    position: absolute;
+    inset: -15%;
+
+    background:
+        radial-gradient(
+            circle at 65% 45%,
+            rgba(35,100,170,.12),
+            transparent 32%
+        ),
+        #030303;
+
+    transform:
+        translateZ(-500px)
+        scale(1.5);
+
+    will-change: transform;
+}
+
+
+/* =========================================================
+   LIGHT SOURCES
+========================================================= */
+
+.depth-light {
+    position: absolute;
+
+    width: 500px;
+    height: 500px;
+
+    border-radius: 50%;
+
+    filter: blur(110px);
+
+    opacity: .18;
+
+    transform-style: preserve-3d;
+
+    will-change: transform;
+}
+
+.light-blue {
+    right: 25%;
+    top: 20%;
+
+    background: rgba(40,130,255,.18);
+
+    transform:
+        translateZ(-250px);
+}
+
+.light-orange {
+    right: 20%;
+    bottom: 15%;
+
+    background: rgba(255,100,25,.11);
+
+    transform:
+        translateZ(-180px);
+}
+
+
+/* =========================================================
+   CHARACTER
+========================================================= */
+
+.depth-character {
+    transform-style: preserve-3d;
+
+    will-change:
+        transform,
+        filter;
+}
+
+
+.hero-art {
+    transform-style: preserve-3d;
+
+    backface-visibility: hidden;
+
+    will-change: transform;
+}
+
+
+/* =========================================================
+   FLOATING AI INTERFACE
+========================================================= */
+
+.floating-panel {
+    position: absolute;
+
+    z-index: 15;
+
+    width: 190px;
+
+    padding: 17px 19px;
+
+    border: 1px solid rgba(120,190,255,.35);
+
+    border-radius: 7px;
+
+    background: rgba(5,12,20,.55);
+
+    box-shadow:
+        0 15px 50px rgba(0,0,0,.5),
+        inset 0 0 25px rgba(80,160,255,.04);
+
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    transform-style: preserve-3d;
+
+    will-change: transform;
+
+    animation:
+        panelFloat 5s ease-in-out infinite;
+}
+
+
+.floating-panel::before {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    width: 3px;
+    height: 100%;
+
+    background: #55a8ff;
+
+    opacity: .8;
+}
+
+
+.panel-label {
+    display: block;
+
+    margin-bottom: 9px;
+
+    color: #8a9bad;
+
+    font-size: 8px;
+    letter-spacing: .2em;
+}
+
+
+.floating-panel strong {
+    display: block;
+
+    color: #f4f3ee;
+
+    font-size: 14px;
+    font-weight: 500;
+}
+
+
+.floating-panel small {
+    display: block;
+
+    margin-top: 7px;
+
+    color: #7f8790;
+
+    font-size: 8px;
+}
+
+
+.panel-icon {
+    position: absolute;
+
+    right: 17px;
+    top: 17px;
+
+    color: #c8ff32;
+
+    font-size: 17px;
+}
+
+
+/* =========================================================
+   PANEL POSITIONS
+========================================================= */
+
+.panel-call {
+    left: 34%;
+    top: 18%;
+
+    transform:
+        translateZ(160px)
+        rotateY(-5deg);
+
+    border-color: rgba(80,160,255,.4);
+}
+
+
+.panel-appointment {
+    right: 10%;
+    top: 18%;
+
+    transform:
+        translateZ(220px)
+        rotateY(5deg);
+
+    border-color: rgba(255,140,50,.4);
+
+    animation-delay: -1.2s;
+}
+
+
+.panel-crm {
+    right: 12%;
+    top: 55%;
+
+    transform:
+        translateZ(180px)
+        rotateY(-4deg);
+
+    border-color: rgba(80,170,255,.4);
+
+    animation-delay: -2.1s;
+}
+
+
+.panel-workflow {
+    left: 40%;
+    bottom: 15%;
+
+    transform:
+        translateZ(240px)
+        rotateY(4deg);
+
+    border-color: rgba(180,100,255,.35);
+
+    animation-delay: -3s;
+}
+
+
+/* =========================================================
+   WORKFLOW NODES
+========================================================= */
+
+.workflow-nodes {
+    display: flex;
+    align-items: center;
+
+    margin-top: 14px;
+}
+
+
+.workflow-nodes i,
+.workflow-nodes b {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: #a86cff;
+
+    box-shadow:
+        0 0 12px rgba(168,108,255,.7);
+}
+
+
+.workflow-nodes b {
+    width: 35px;
+    height: 1px;
+
+    border-radius: 0;
+
+    margin: 0 5px;
+
+    background: rgba(168,108,255,.6);
+
+    box-shadow: none;
+}
+
+
+/* =========================================================
+   PANEL FLOAT
+========================================================= */
+
+@keyframes panelFloat {
+
+    0%,
+    100% {
+        margin-top: 0;
+    }
+
+    50% {
+        margin-top: -12px;
+    }
+
+}
+
+
+/* =========================================================
+   ENERGY RINGS
+========================================================= */
+
+.energy-ring {
+    position: absolute;
+
+    z-index: 8;
+
+    width: 560px;
+    height: 150px;
+
+    border: 1px solid rgba(70,160,255,.28);
+
+    border-radius: 50%;
+
+    transform-style: preserve-3d;
+
+    pointer-events: none;
+
+    will-change: transform;
+}
+
+
+.ring-one {
+    right: 15%;
+    top: 48%;
+
+    transform:
+        rotateX(72deg)
+        rotateZ(-12deg)
+        translateZ(70px);
+
+    animation:
+        ringRotate 16s linear infinite;
+}
+
+
+.ring-two {
+    right: 19%;
+    top: 51%;
+
+    width: 480px;
+    height: 120px;
+
+    border-color: rgba(255,130,40,.22);
+
+    transform:
+        rotateX(72deg)
+        rotateZ(18deg)
+        translateZ(120px);
+
+    animation:
+        ringRotateReverse 13s linear infinite;
+}
+
+
+@keyframes ringRotate {
+
+    from {
+        rotate: 0deg;
+    }
+
+    to {
+        rotate: 360deg;
+    }
+
+}
+
+
+@keyframes ringRotateReverse {
+
+    from {
+        rotate: 360deg;
+    }
+
+    to {
+        rotate: 0deg;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE 3D SCENE
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .hero-3d-scene {
+        perspective: 900px;
+    }
+
+
+    .hero-art-wrap {
+        width: 145vw;
+
+        right: -40%;
+        top: 8%;
+
+        transform:
+            translateZ(100px);
+    }
+
+
+    .floating-panel {
+        width: 130px;
+
+        padding: 11px 12px;
+    }
+
+
+    .floating-panel strong {
+        font-size: 10px;
+    }
+
+
+    .floating-panel small {
+        font-size: 7px;
+    }
+
+
+    .panel-label {
+        font-size: 6px;
+    }
+
+
+    .panel-call {
+        left: 10%;
+        top: 23%;
+
+        transform:
+            translateZ(100px)
+            rotateY(-5deg);
+    }
+
+
+    .panel-appointment {
+        right: 3%;
+        top: 25%;
+
+        transform:
+            translateZ(150px)
+            rotateY(5deg);
+    }
+
+
+    .panel-crm {
+        right: 4%;
+        top: 47%;
+
+        transform:
+            translateZ(120px);
+    }
+
+
+    .panel-workflow {
+        left: 8%;
+        bottom: 29%;
+
+        transform:
+            translateZ(140px);
+    }
+
+
+    .energy-ring {
+        width: 360px;
+        height: 90px;
+
+        right: -5%;
+        top: 42%;
+    }
+
+
+    .ring-two {
+        width: 300px;
+        height: 75px;
+
+        right: 2%;
+    }
+
+
+    .depth-light {
+        width: 300px;
+        height: 300px;
+
+        filter: blur(80px);
+    }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .floating-panel,
+    .energy-ring,
+    .status-dot,
+    .scroll-indicator b {
+        animation: none !important;
+    }
+
+}
