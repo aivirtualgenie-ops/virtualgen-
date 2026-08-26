@@ -1493,3 +1493,731 @@ updateScroll();
 console.log(
     "Virtual Genie AI — 3D tunnel initialized."
 );
+/* =========================================================
+   PRODUCT JOURNEY TRANSITIONS
+   ========================================================= */
+
+const productRoutes = {
+    receptionist: "ai-receptionist.html",
+    automation: "ai-automations.html",
+    os: "business-os.html"
+};
+
+
+/* =========================================================
+   TRANSITION OVERLAY
+========================================================= */
+
+const transitionStyle = document.createElement("style");
+
+transitionStyle.textContent = `
+    #vg-transition {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background: #020304;
+
+        opacity: 0;
+        visibility: hidden;
+
+        pointer-events: none;
+
+        transition:
+            opacity .35s ease,
+            visibility .35s ease;
+    }
+
+    #vg-transition.active {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: all;
+    }
+
+    .vg-transition-inner {
+        width: min(430px, 82vw);
+
+        text-align: center;
+
+        color: #f1f0eb;
+    }
+
+    .vg-transition-label {
+        margin-bottom: 34px;
+
+        color: #777;
+
+        font-family: "DM Sans", sans-serif;
+
+        font-size: 9px;
+
+        letter-spacing: .28em;
+    }
+
+    .vg-phone {
+        position: relative;
+
+        width: 92px;
+        height: 92px;
+
+        margin: 0 auto 35px;
+
+        display: grid;
+        place-items: center;
+
+        border: 1px solid rgba(201,255,53,.55);
+
+        border-radius: 50%;
+
+        color: #c9ff35;
+
+        font-size: 35px;
+
+        box-shadow:
+            0 0 0 0 rgba(201,255,53,.3);
+
+        animation:
+            vg-ring 1.25s infinite;
+    }
+
+    .vg-phone::before,
+    .vg-phone::after {
+        content: "";
+
+        position: absolute;
+
+        inset: -14px;
+
+        border: 1px solid rgba(201,255,53,.18);
+
+        border-radius: 50%;
+
+        animation:
+            vg-wave 1.7s infinite;
+    }
+
+    .vg-phone::after {
+        inset: -30px;
+
+        animation-delay: .45s;
+    }
+
+    @keyframes vg-ring {
+
+        0% {
+            transform: rotate(0deg) scale(1);
+        }
+
+        8% {
+            transform: rotate(-12deg) scale(1.05);
+        }
+
+        16% {
+            transform: rotate(12deg) scale(1.05);
+        }
+
+        24% {
+            transform: rotate(-9deg) scale(1.03);
+        }
+
+        32% {
+            transform: rotate(9deg) scale(1.03);
+        }
+
+        40% {
+            transform: rotate(0deg) scale(1);
+        }
+
+        100% {
+            transform: rotate(0deg) scale(1);
+        }
+
+    }
+
+    @keyframes vg-wave {
+
+        0% {
+            transform: scale(.65);
+            opacity: .8;
+        }
+
+        100% {
+            transform: scale(1.35);
+            opacity: 0;
+        }
+
+    }
+
+    .vg-transition-title {
+        font-family: "DM Sans", sans-serif;
+
+        font-size: clamp(
+            28px,
+            6vw,
+            44px
+        );
+
+        font-weight: 500;
+
+        letter-spacing: -.04em;
+    }
+
+    .vg-transition-status {
+        margin-top: 15px;
+
+        color: #777;
+
+        font-size: 12px;
+
+        line-height: 1.6;
+    }
+
+    .vg-progress {
+        width: 100%;
+        height: 1px;
+
+        margin-top: 35px;
+
+        background: rgba(255,255,255,.12);
+
+        overflow: hidden;
+    }
+
+    .vg-progress span {
+        display: block;
+
+        width: 0%;
+        height: 100%;
+
+        background: #c9ff35;
+
+        animation:
+            vg-progress 1.65s
+            cubic-bezier(.65,0,.35,1)
+            forwards;
+    }
+
+    @keyframes vg-progress {
+
+        from {
+            width: 0%;
+        }
+
+        to {
+            width: 100%;
+        }
+
+    }
+
+    .vg-transition-system {
+        display: none;
+    }
+
+    .vg-transition.system .vg-phone {
+        display: none;
+    }
+
+    .vg-transition.system .vg-transition-system {
+        display: block;
+    }
+
+    .vg-system-core {
+        width: 90px;
+        height: 90px;
+
+        margin: 0 auto 35px;
+
+        border: 1px solid rgba(22,140,255,.7);
+
+        border-radius: 50%;
+
+        position: relative;
+
+        animation:
+            vg-core 2s linear infinite;
+    }
+
+    .vg-system-core::before,
+    .vg-system-core::after {
+        content: "";
+
+        position: absolute;
+
+        inset: 15px;
+
+        border:
+            1px solid
+            rgba(22,140,255,.45);
+
+        border-radius: 50%;
+    }
+
+    .vg-system-core::after {
+        inset: 30px;
+
+        background: #168cff;
+
+        box-shadow:
+            0 0 25px
+            rgba(22,140,255,.8);
+    }
+
+    @keyframes vg-core {
+
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+
+    }
+
+    @media (max-width: 800px) {
+
+        .vg-phone {
+            width: 78px;
+            height: 78px;
+        }
+
+        .vg-transition-title {
+            font-size: 32px;
+        }
+
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+        .vg-phone,
+        .vg-phone::before,
+        .vg-phone::after,
+        .vg-system-core,
+        .vg-progress span {
+            animation: none;
+        }
+
+        .vg-progress span {
+            width: 100%;
+        }
+
+    }
+`;
+
+document.head.appendChild(
+    transitionStyle
+);
+
+
+/* =========================================================
+   CREATE TRANSITION DOM
+========================================================= */
+
+const transition =
+    document.createElement("div");
+
+transition.id =
+    "vg-transition";
+
+transition.innerHTML = `
+
+    <div class="vg-transition-inner">
+
+        <div class="vg-phone">
+            ☎
+        </div>
+
+        <div class="vg-transition-system">
+            <div class="vg-system-core"></div>
+        </div>
+
+        <div class="vg-transition-label">
+            VIRTUAL GENIE AI
+        </div>
+
+        <div class="vg-transition-title">
+            Connecting your system.
+        </div>
+
+        <div class="vg-transition-status">
+            Initializing intelligent workflow...
+        </div>
+
+        <div class="vg-progress">
+            <span></span>
+        </div>
+
+    </div>
+
+`;
+
+document.body.appendChild(
+    transition
+);
+
+
+/* =========================================================
+   START PRODUCT TRANSITION
+========================================================= */
+
+function openProduct(
+    product,
+    event
+) {
+
+    if (event) {
+        event.preventDefault();
+    }
+
+    const destination =
+        productRoutes[product];
+
+    if (!destination) {
+        return;
+    }
+
+
+    /*
+        Different visual language
+        for different products.
+    */
+
+    const title =
+        transition.querySelector(
+            ".vg-transition-title"
+        );
+
+    const status =
+        transition.querySelector(
+            ".vg-transition-status"
+        );
+
+
+    transition.classList.remove(
+        "system"
+    );
+
+
+    if (product === "receptionist") {
+
+        title.textContent =
+            "Your AI receptionist is calling.";
+
+        status.textContent =
+            "Connecting voice intelligence...";
+
+    }
+
+
+    if (product === "automation") {
+
+        transition.classList.add(
+            "system"
+        );
+
+        title.textContent =
+            "Activating automation.";
+
+        status.textContent =
+            "Connecting workflows and business systems...";
+
+    }
+
+
+    if (product === "os") {
+
+        transition.classList.add(
+            "system"
+        );
+
+        title.textContent =
+            "Booting your Business OS.";
+
+        status.textContent =
+            "Connecting your intelligent operating layer...";
+
+    }
+
+
+    /*
+        Restart progress animation.
+    */
+
+    const progress =
+        transition.querySelector(
+            ".vg-progress span"
+        );
+
+    progress.style.animation =
+        "none";
+
+    void progress.offsetWidth;
+
+    progress.style.animation =
+        "";
+
+
+    /*
+        Stop background scrolling.
+    */
+
+    document.body.style.overflow =
+        "hidden";
+
+
+    /*
+        Show transition.
+    */
+
+    transition.classList.add(
+        "active"
+    );
+
+
+    /*
+        Navigate after animation.
+    */
+
+    setTimeout(
+        () => {
+
+            window.location.href =
+                destination;
+
+        },
+        1750
+    );
+}
+
+
+/* =========================================================
+   NAVIGATION HOOKS
+========================================================= */
+
+
+/*
+    Header navigation
+*/
+
+document
+    .querySelectorAll(
+        'nav a[href="#receptionist"]'
+    )
+    .forEach(
+        link => {
+
+            link.addEventListener(
+                "click",
+                event => {
+
+                    openProduct(
+                        "receptionist",
+                        event
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+document
+    .querySelectorAll(
+        'nav a[href="#automation"]'
+    )
+    .forEach(
+        link => {
+
+            link.addEventListener(
+                "click",
+                event => {
+
+                    openProduct(
+                        "automation",
+                        event
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+document
+    .querySelectorAll(
+        'nav a[href="#os"]'
+    )
+    .forEach(
+        link => {
+
+            link.addEventListener(
+                "click",
+                event => {
+
+                    openProduct(
+                        "os",
+                        event
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+/* =========================================================
+   MOBILE MENU LINKS
+========================================================= */
+
+document
+    .querySelectorAll(
+        '.mobile-menu a[href="#receptionist"]'
+    )
+    .forEach(
+        link => {
+
+            link.addEventListener(
+                "click",
+                event => {
+
+                    openProduct(
+                        "receptionist",
+                        event
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+document
+    .querySelectorAll(
+        '.mobile-menu a[href="#automation"]'
+    )
+    .forEach(
+        link => {
+
+            link.addEventListener(
+                "click",
+                event => {
+
+                    openProduct(
+                        "automation",
+                        event
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+document
+    .querySelectorAll(
+        '.mobile-menu a[href="#os"]'
+    )
+    .forEach(
+        link => {
+
+            link.addEventListener(
+                "click",
+                event => {
+
+                    openProduct(
+                        "os",
+                        event
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+/* =========================================================
+   HERO / SECTION CTA LINKS
+========================================================= */
+
+document
+    .querySelectorAll(
+        'a[href="#receptionist"]'
+    )
+    .forEach(
+        link => {
+
+            link.addEventListener(
+                "click",
+                event => {
+
+                    openProduct(
+                        "receptionist",
+                        event
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+document
+    .querySelectorAll(
+        'a[href="#automation"]'
+    )
+    .forEach(
+        link => {
+
+            link.addEventListener(
+                "click",
+                event => {
+
+                    openProduct(
+                        "automation",
+                        event
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+document
+    .querySelectorAll(
+        'a[href="#os"]'
+    )
+    .forEach(
+        link => {
+
+            link.addEventListener(
+                "click",
+                event => {
+
+                    openProduct(
+                        "os",
+                        event
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+console.log(
+    "Virtual Genie AI — product journeys enabled."
+);
