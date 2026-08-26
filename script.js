@@ -1,765 +1,185 @@
 /* =========================================================
-   VIRTUAL GENIE
-   INTERACTION + WEBGL EXPERIENCE
+   VIRTUAL GENIE AI
+   INTERACTION + VISUAL ENGINE
+   NO FRAMEWORKS REQUIRED
 ========================================================= */
 
 (() => {
     "use strict";
 
-
     /* =====================================================
-       BASIC SETUP
-    ====================================================== */
+       ELEMENTS
+    ===================================================== */
 
-    const body = document.body;
-    const canvas = document.getElementById("experience");
+    const canvas = document.getElementById("scene");
+    const menuButton = document.querySelector(".menu-button");
+    const mobileMenu = document.querySelector(".mobile-menu");
+    const mobileLinks = document.querySelectorAll(".mobile-links a");
 
     if (!canvas) {
+        console.warn("Virtual Genie: #scene canvas not found.");
+        return;
+    }
+
+    const ctx = canvas.getContext("2d", {
+        alpha: true,
+        desynchronized: true
+    });
+
+    if (!ctx) {
+        console.warn("Virtual Genie: Canvas unavailable.");
         return;
     }
 
 
     /* =====================================================
-       REDUCED MOTION
-    ====================================================== */
+       STATE
+    ===================================================== */
 
-    const reduceMotion = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-    ).matches;
+    let width = 0;
+    let height = 0;
+    let dpr = 1;
+
+    let scrollY = window.scrollY || 0;
+    let targetScroll = scrollY;
+
+    let mouseX = 0.5;
+    let mouseY = 0.5;
+
+    let targetMouseX = 0.5;
+    let targetMouseY = 0.5;
+
+    let time = 0;
+
+    let reducedMotion =
+        window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+        ).matches;
 
 
     /* =====================================================
-       MOBILE MENU
-    ====================================================== */
+       PARTICLE SYSTEM
+    ===================================================== */
 
-    const menuToggle = document.getElementById("menuToggle");
-    const mobileMenu = document.getElementById("mobileMenu");
+    const particles = [];
 
-    if (menuToggle && mobileMenu) {
+    const PARTICLE_COUNT =
+        window.innerWidth < 700
+            ? 85
+            : 150;
 
-        const closeMenu = () => {
 
-            menuToggle.classList.remove("active");
+    function random(min, max) {
+        return Math.random() * (max - min) + min;
+    }
 
-            menuToggle.setAttribute(
-                "aria-expanded",
-                "false"
-            );
 
-            mobileMenu.classList.remove("open");
+    function createParticle() {
 
-            mobileMenu.setAttribute(
-                "aria-hidden",
-                "true"
-            );
+        return {
+            x: random(-1, 1),
+            y: random(-1, 1),
+            z: random(0.1, 1),
 
-            body.classList.remove("menu-open");
+            size: random(0.4, 1.5),
+
+            speed:
+                random(0.0008, 0.0022),
+
+            phase:
+                random(0, Math.PI * 2),
+
+            drift:
+                random(0.3, 1),
+
+            brightness:
+                random(0.25, 0.9)
         };
+    }
 
 
-        const openMenu = () => {
-
-            menuToggle.classList.add("active");
-
-            menuToggle.setAttribute(
-                "aria-expanded",
-                "true"
-            );
-
-            mobileMenu.classList.add("open");
-
-            mobileMenu.setAttribute(
-                "aria-hidden",
-                "false"
-            );
-
-            body.classList.add("menu-open");
-        };
-
-
-        menuToggle.addEventListener(
-            "click",
-            () => {
-
-                const isOpen =
-                    menuToggle.classList.contains("active");
-
-                if (isOpen) {
-                    closeMenu();
-                } else {
-                    openMenu();
-                }
-
-            }
-        );
-
-
-        mobileMenu
-            .querySelectorAll("a")
-            .forEach(link => {
-
-                link.addEventListener(
-                    "click",
-                    closeMenu
-                );
-
-            });
-
-
-        document.addEventListener(
-            "keydown",
-            event => {
-
-                if (
-                    event.key === "Escape" &&
-                    menuToggle.classList.contains("active")
-                ) {
-                    closeMenu();
-                }
-
-            }
-        );
-
-
-        window.addEventListener(
-            "resize",
-            () => {
-
-                if (
-                    window.innerWidth > 900 &&
-                    menuToggle.classList.contains("active")
-                ) {
-                    closeMenu();
-                }
-
-            }
+    for (
+        let i = 0;
+        i < PARTICLE_COUNT;
+        i++
+    ) {
+        particles.push(
+            createParticle()
         );
     }
 
 
     /* =====================================================
-       SMOOTH INTERNAL LINKS
-    ====================================================== */
+       RESIZE
+    ===================================================== */
 
-    document
-        .querySelectorAll('a[href^="#"]')
-        .forEach(link => {
+    function resize() {
 
-            link.addEventListener(
-                "click",
-                event => {
+        width =
+            window.innerWidth;
 
-                    const targetId =
-                        link.getAttribute("href");
+        height =
+            window.innerHeight;
 
-                    if (
-                        !targetId ||
-                        targetId === "#"
-                    ) {
-                        return;
-                    }
-
-                    const target =
-                        document.querySelector(targetId);
-
-                    if (!target) {
-                        return;
-                    }
-
-                    event.preventDefault();
-
-                    target.scrollIntoView({
-                        behavior: reduceMotion
-                            ? "auto"
-                            : "smooth",
-                        block: "start"
-                    });
-
-                }
+        dpr =
+            Math.min(
+                window.devicePixelRatio || 1,
+                2
             );
 
-        });
+        canvas.width =
+            width * dpr;
+
+        canvas.height =
+            height * dpr;
+
+        canvas.style.width =
+            width + "px";
+
+        canvas.style.height =
+            height + "px";
+
+        ctx.setTransform(
+            dpr,
+            0,
+            0,
+            dpr,
+            0,
+            0
+        );
+    }
 
 
-    /* =====================================================
-       SCROLL STATE
-    ====================================================== */
-
-    let scrollY = window.scrollY || 0;
-    let targetScroll = scrollY;
-
-    let viewportWidth =
-        window.innerWidth;
-
-    let viewportHeight =
-        window.innerHeight;
-
+    resize();
 
     window.addEventListener(
-        "scroll",
-        () => {
-
-            targetScroll =
-                window.scrollY || 0;
-
-        },
+        "resize",
+        resize,
         {
             passive: true
         }
     );
 
 
-    window.addEventListener(
-        "resize",
-        () => {
-
-            viewportWidth =
-                window.innerWidth;
-
-            viewportHeight =
-                window.innerHeight;
-
-        }
-    );
-
-
     /* =====================================================
-       HERO PARALLAX
-    ====================================================== */
+       POINTER
+    ===================================================== */
 
-    const heroContent =
-        document.querySelector(".hero-content");
-
-    const heroTop =
-        document.querySelector(".hero-top");
-
-    const heroBottom =
-        document.querySelector(".hero-bottom");
-
-
-    const updateHero = () => {
-
-        if (!heroContent) {
-            return;
-        }
-
-        const heroHeight =
-            viewportHeight;
-
-        const progress =
-            Math.min(
-                Math.max(
-                    scrollY / heroHeight,
-                    0
-                ),
-                1
-            );
-
-
-        if (reduceMotion) {
-            return;
-        }
-
-
-        const contentY =
-            progress * -90;
-
-        const opacity =
-            1 - progress * 1.15;
-
-
-        heroContent.style.transform =
-            `translate3d(0, ${contentY}px, 0)`;
-
-        heroContent.style.opacity =
-            Math.max(opacity, 0);
-
-
-        if (heroTop) {
-
-            heroTop.style.transform =
-                `translate3d(0, ${progress * -25}px, 0)`;
-
-            heroTop.style.opacity =
-                Math.max(
-                    1 - progress * 1.5,
-                    0
-                );
-        }
-
-
-        if (heroBottom) {
-
-            heroBottom.style.transform =
-                `translate3d(0, ${progress * 25}px, 0)`;
-
-            heroBottom.style.opacity =
-                Math.max(
-                    1 - progress * 2,
-                    0
-                );
-        }
-
-    };
-
-
-    /* =====================================================
-       INTERSECTION OBSERVER
-    ====================================================== */
-
-    const revealItems =
-        document.querySelectorAll(
-            ".system-intro-content, " +
-            ".system-product, " +
-            ".process-item, " +
-            ".final-cta"
-        );
-
-
-    if (
-        !reduceMotion &&
-        "IntersectionObserver" in window
+    function updatePointer(
+        x,
+        y
     ) {
 
-        const observer =
-            new IntersectionObserver(
-                entries => {
+        targetMouseX =
+            x / width;
 
-                    entries.forEach(entry => {
-
-                        if (
-                            entry.isIntersecting
-                        ) {
-
-                            entry.target.classList.add(
-                                "is-visible"
-                            );
-
-                        }
-
-                    });
-
-                },
-                {
-                    threshold: 0.12,
-                    rootMargin: "0px 0px -8% 0px"
-                }
-            );
-
-
-        revealItems.forEach(
-            element => observer.observe(element)
-        );
-
-    } else {
-
-        revealItems.forEach(
-            element =>
-                element.classList.add(
-                    "is-visible"
-                )
-        );
-
+        targetMouseY =
+            y / height;
     }
-
-
-    /* =====================================================
-       THREE.JS CHECK
-    ====================================================== */
-
-    if (
-        typeof THREE === "undefined"
-    ) {
-
-        console.warn(
-            "Three.js was not loaded."
-        );
-
-        return;
-
-    }
-
-
-    /* =====================================================
-       THREE.JS SCENE
-    ====================================================== */
-
-    const scene =
-        new THREE.Scene();
-
-
-    const camera =
-        new THREE.PerspectiveCamera(
-            45,
-            viewportWidth / viewportHeight,
-            0.1,
-            100
-        );
-
-
-    camera.position.z =
-        viewportWidth < 700
-            ? 7
-            : 6;
-
-
-    const renderer =
-        new THREE.WebGLRenderer({
-            canvas,
-            antialias: true,
-            alpha: true,
-            powerPreference: "high-performance"
-        });
-
-
-    renderer.setPixelRatio(
-        Math.min(
-            window.devicePixelRatio || 1,
-            viewportWidth < 700 ? 1.5 : 2
-        )
-    );
-
-
-    renderer.setSize(
-        viewportWidth,
-        viewportHeight,
-        false
-    );
-
-
-    renderer.setClearColor(
-        0x000000,
-        0
-    );
-
-
-    /* =====================================================
-       PARTICLE SYSTEM
-    ====================================================== */
-
-    const particleCount =
-        viewportWidth < 700
-            ? 650
-            : 1200;
-
-
-    const positions =
-        new Float32Array(
-            particleCount * 3
-        );
-
-
-    const basePositions =
-        new Float32Array(
-            particleCount * 3
-        );
-
-
-    const particleSizes =
-        new Float32Array(
-            particleCount
-        );
-
-
-    const randoms =
-        new Float32Array(
-            particleCount
-        );
-
-
-    for (
-        let i = 0;
-        i < particleCount;
-        i++
-    ) {
-
-        const i3 =
-            i * 3;
-
-
-        /*
-         * Wide, architectural field.
-         *
-         * The points are deliberately sparse.
-         * This is not a "glowing AI cloud".
-         */
-
-        const x =
-            (Math.random() - 0.5) * 9;
-
-        const y =
-            (Math.random() - 0.5) * 6;
-
-        const z =
-            (Math.random() - 0.5) * 5;
-
-
-        positions[i3] =
-            x;
-
-        positions[i3 + 1] =
-            y;
-
-        positions[i3 + 2] =
-            z;
-
-
-        basePositions[i3] =
-            x;
-
-        basePositions[i3 + 1] =
-            y;
-
-        basePositions[i3 + 2] =
-            z;
-
-
-        particleSizes[i] =
-            Math.random() *
-            1.2 +
-            0.35;
-
-
-        randoms[i] =
-            Math.random();
-
-    }
-
-
-    const particleGeometry =
-        new THREE.BufferGeometry();
-
-
-    particleGeometry.setAttribute(
-        "position",
-        new THREE.BufferAttribute(
-            positions,
-            3
-        )
-    );
-
-
-    particleGeometry.setAttribute(
-        "size",
-        new THREE.BufferAttribute(
-            particleSizes,
-            1
-        )
-    );
-
-
-    /*
-     * Simple white material.
-     *
-     * No colored gradients.
-     */
-
-    const particleMaterial =
-        new THREE.PointsMaterial({
-
-            color: 0xf2f1ec,
-
-            size:
-                viewportWidth < 700
-                    ? 0.018
-                    : 0.022,
-
-            transparent: true,
-
-            opacity:
-                viewportWidth < 700
-                    ? 0.26
-                    : 0.32,
-
-            depthWrite: false,
-
-            blending:
-                THREE.NormalBlending
-
-        });
-
-
-    const particles =
-        new THREE.Points(
-            particleGeometry,
-            particleMaterial
-        );
-
-
-    scene.add(particles);
-
-
-    /* =====================================================
-       ARCHITECTURAL LINES
-    ====================================================== */
-
-    const lineGroup =
-        new THREE.Group();
-
-
-    scene.add(lineGroup);
-
-
-    const lineMaterial =
-        new THREE.LineBasicMaterial({
-            color: 0xf2f1ec,
-            transparent: true,
-            opacity:
-                viewportWidth < 700
-                    ? 0.06
-                    : 0.085
-        });
-
-
-    const lineCount =
-        viewportWidth < 700
-            ? 10
-            : 18;
-
-
-    for (
-        let i = 0;
-        i < lineCount;
-        i++
-    ) {
-
-        const geometry =
-            new THREE.BufferGeometry();
-
-
-        const points = [];
-
-
-        const y =
-            -3.2 +
-            (i / lineCount) * 6.4;
-
-
-        points.push(
-            new THREE.Vector3(
-                -5,
-                y,
-                -1
-            )
-        );
-
-
-        points.push(
-            new THREE.Vector3(
-                5,
-                y,
-                -1
-            )
-        );
-
-
-        geometry.setFromPoints(
-            points
-        );
-
-
-        const line =
-            new THREE.Line(
-                geometry,
-                lineMaterial
-            );
-
-
-        lineGroup.add(line);
-
-    }
-
-
-    /* =====================================================
-       VERTICAL STRUCTURE LINES
-    ====================================================== */
-
-    const verticalCount =
-        viewportWidth < 700
-            ? 5
-            : 9;
-
-
-    for (
-        let i = 0;
-        i < verticalCount;
-        i++
-    ) {
-
-        const geometry =
-            new THREE.BufferGeometry();
-
-
-        const points = [];
-
-
-        const x =
-            -4.5 +
-            (i / (verticalCount - 1)) * 9;
-
-
-        points.push(
-            new THREE.Vector3(
-                x,
-                -3,
-                -1
-            )
-        );
-
-
-        points.push(
-            new THREE.Vector3(
-                x,
-                3,
-                -1
-            )
-        );
-
-
-        geometry.setFromPoints(
-            points
-        );
-
-
-        const line =
-            new THREE.Line(
-                geometry,
-                lineMaterial
-            );
-
-
-        lineGroup.add(line);
-
-    }
-
-
-    /* =====================================================
-       INTERACTION
-    ====================================================== */
-
-    let pointerX = 0;
-    let pointerY = 0;
-
-    let smoothPointerX = 0;
-    let smoothPointerY = 0;
-
-
-    const updatePointer =
-        (x, y) => {
-
-            pointerX =
-                (x / viewportWidth - 0.5) *
-                2;
-
-            pointerY =
-                (y / viewportHeight - 0.5) *
-                2;
-
-        };
 
 
     window.addEventListener(
-        "pointermove",
+        "mousemove",
         event => {
 
             updatePointer(
@@ -779,16 +199,18 @@
         event => {
 
             if (
-                !event.touches ||
-                !event.touches[0]
+                event.touches &&
+                event.touches.length
             ) {
-                return;
-            }
 
-            updatePointer(
-                event.touches[0].clientX,
-                event.touches[0].clientY
-            );
+                const touch =
+                    event.touches[0];
+
+                updatePointer(
+                    touch.clientX,
+                    touch.clientY
+                );
+            }
 
         },
         {
@@ -798,437 +220,644 @@
 
 
     /* =====================================================
-       PRODUCT STATE
-    ====================================================== */
+       SCROLL
+    ===================================================== */
 
-    const products =
-        document.querySelectorAll(
-            ".system-product"
+    window.addEventListener(
+        "scroll",
+        () => {
+
+            targetScroll =
+                window.scrollY || 0;
+
+        },
+        {
+            passive: true
+        }
+    );
+
+
+    /* =====================================================
+       SMOOTH VALUES
+    ===================================================== */
+
+    function lerp(
+        current,
+        target,
+        amount
+    ) {
+
+        return (
+            current +
+            (target - current) *
+            amount
         );
-
-
-    let activeProduct =
-        "receptionist";
-
-
-    const productObserver =
-        "IntersectionObserver" in window
-            ? new IntersectionObserver(
-                entries => {
-
-                    entries.forEach(entry => {
-
-                        if (
-                            entry.isIntersecting &&
-                            entry.intersectionRatio > 0.35
-                        ) {
-
-                            const system =
-                                entry.target.dataset.system;
-
-                            if (system) {
-
-                                activeProduct =
-                                    system;
-
-                            }
-
-                        }
-
-                    });
-
-                },
-                {
-                    threshold: [
-                        0.35,
-                        0.55,
-                        0.75
-                    ]
-                }
-            )
-            : null;
-
-
-    if (productObserver) {
-
-        products.forEach(
-            product =>
-                productObserver.observe(product)
-        );
-
     }
 
 
     /* =====================================================
-       SYSTEM VISUAL STATE
-    ====================================================== */
+       BACKGROUND
+    ===================================================== */
 
-    const systemTargets = {
+    function drawBackground() {
 
-        receptionist: {
-            rotation: 0.18,
-            spread: 0.82
-        },
+        ctx.fillStyle =
+            "#050505";
 
-        leads: {
-            rotation: 0.45,
-            spread: 1.18
-        },
-
-        infrastructure: {
-            rotation: 0.75,
-            spread: 1.42
-        },
-
-        "business-os": {
-            rotation: 1.05,
-            spread: 1.68
-        }
-
-    };
-
-
-    let currentSpread = 1;
-    let targetSpread = 1;
-
-    let currentRotation = 0;
-    let targetRotation = 0;
+        ctx.fillRect(
+            0,
+            0,
+            width,
+            height
+        );
+    }
 
 
     /* =====================================================
-       SCROLL → SYSTEM STATE
-    ====================================================== */
+       PARTICLES
+    ===================================================== */
 
-    const updateSystemTarget =
-        () => {
+    function drawParticles() {
 
-            const target =
-                systemTargets[
-                    activeProduct
-                ] ||
-                systemTargets.receptionist;
+        const centerX =
+            width * 0.68;
 
+        const centerY =
+            height * 0.48;
 
-            targetSpread =
-                target.spread;
-
-            targetRotation =
-                target.rotation;
-
-        };
+        const radius =
+            Math.min(
+                width,
+                height
+            ) * 0.42;
 
 
-    /* =====================================================
-       ANIMATION
-    ====================================================== */
+        particles.forEach(
+            particle => {
 
-    let time = 0;
+                const rotation =
+                    time *
+                    particle.speed *
+                    100;
 
+                const px =
+                    particle.x *
+                    radius;
 
-    const animate =
-        () => {
+                const py =
+                    particle.y *
+                    radius;
 
-            requestAnimationFrame(
-                animate
-            );
+                const wobble =
+                    Math.sin(
+                        time * 0.0007 +
+                        particle.phase
+                    ) *
+                    particle.drift *
+                    7;
 
+                const depth =
+                    0.35 +
+                    particle.z *
+                    0.65;
 
-            /*
-             * Smooth scroll value.
-             */
+                const parallaxX =
+                    (
+                        targetMouseX -
+                        0.5
+                    ) *
+                    35 *
+                    depth;
 
-            scrollY +=
-                (
-                    targetScroll -
-                    scrollY
-                ) *
-                (
-                    reduceMotion
-                        ? 1
-                        : 0.085
-                );
-
-
-            time +=
-                reduceMotion
-                    ? 0.001
-                    : 0.006;
-
-
-            updateHero();
-
-            updateSystemTarget();
-
-
-            /*
-             * Smooth pointer.
-             */
-
-            smoothPointerX +=
-                (
-                    pointerX -
-                    smoothPointerX
-                ) * 0.035;
+                const parallaxY =
+                    (
+                        targetMouseY -
+                        0.5
+                    ) *
+                    25 *
+                    depth;
 
 
-            smoothPointerY +=
-                (
-                    pointerY -
-                    smoothPointerY
-                ) * 0.035;
+                const x =
+                    centerX +
+                    px +
+                    wobble +
+                    parallaxX;
 
-
-            /*
-             * Smooth visual system state.
-             */
-
-            currentSpread +=
-                (
-                    targetSpread -
-                    currentSpread
-                ) * 0.025;
-
-
-            currentRotation +=
-                (
-                    targetRotation -
-                    currentRotation
-                ) * 0.025;
-
-
-            /* ---------------------------------------------
-               PARTICLES
-            --------------------------------------------- */
-
-            const positionAttribute =
-                particleGeometry.attributes.position;
-
-
-            const array =
-                positionAttribute.array;
-
-
-            for (
-                let i = 0;
-                i < particleCount;
-                i++
-            ) {
-
-                const i3 =
-                    i * 3;
-
-
-                const baseX =
-                    basePositions[i3];
-
-                const baseY =
-                    basePositions[i3 + 1];
-
-                const baseZ =
-                    basePositions[i3 + 2];
-
-
-                const random =
-                    randoms[i];
+                const y =
+                    centerY +
+                    py +
+                    parallaxY;
 
 
                 /*
-                 * Very restrained movement.
-                 * More like a living system than particles.
-                 */
+                    Fade visual away from the centre.
+                */
 
-                const wave =
-                    Math.sin(
-                        time * 0.75 +
-                        random * 12
-                    ) * 0.018;
+                const distance =
+                    Math.sqrt(
+                        px * px +
+                        py * py
+                    );
 
-
-                const drift =
-                    Math.cos(
-                        time * 0.45 +
-                        random * 8
-                    ) * 0.012;
-
-
-                array[i3] =
-                    baseX *
-                    currentSpread +
-                    smoothPointerX *
-                    0.12 +
-                    wave;
+                const fade =
+                    Math.max(
+                        0,
+                        1 -
+                        distance /
+                        (radius * 1.15)
+                    );
 
 
-                array[i3 + 1] =
-                    baseY *
-                    currentSpread -
-                    smoothPointerY *
-                    0.10 +
-                    drift;
+                const alpha =
+                    particle.brightness *
+                    fade *
+                    0.42;
 
 
-                array[i3 + 2] =
-                    baseZ *
-                    currentSpread;
+                if (
+                    alpha <= 0
+                ) {
+                    return;
+                }
 
+
+                const size =
+                    particle.size *
+                    depth;
+
+
+                ctx.beginPath();
+
+                ctx.arc(
+                    x,
+                    y,
+                    size,
+                    0,
+                    Math.PI * 2
+                );
+
+                ctx.fillStyle =
+                    `rgba(243,242,237,${alpha})`;
+
+                ctx.fill();
             }
-
-
-            positionAttribute.needsUpdate =
-                true;
-
-
-            /* ---------------------------------------------
-               PARTICLE ROTATION
-            --------------------------------------------- */
-
-            particles.rotation.y =
-                currentRotation * 0.16 +
-                smoothPointerX * 0.035;
-
-
-            particles.rotation.x =
-                smoothPointerY * 0.018;
-
-
-            /* ---------------------------------------------
-               LINE SYSTEM
-            --------------------------------------------- */
-
-            lineGroup.rotation.y =
-                currentRotation * 0.045 +
-                smoothPointerX * 0.025;
-
-
-            lineGroup.rotation.x =
-                smoothPointerY * 0.012;
-
-
-            /*
-             * Slow system movement.
-             */
-
-            lineGroup.position.y =
-                Math.sin(
-                    time * 0.4
-                ) * 0.025;
-
-
-            /* ---------------------------------------------
-               CAMERA
-            --------------------------------------------- */
-
-            camera.position.x +=
-                (
-                    smoothPointerX * 0.20 -
-                    camera.position.x
-                ) * 0.018;
-
-
-            camera.position.y +=
-                (
-                    -smoothPointerY * 0.12 -
-                    camera.position.y
-                ) * 0.018;
-
-
-            camera.lookAt(
-                0,
-                0,
-                0
-            );
-
-
-            renderer.render(
-                scene,
-                camera
-            );
-
-        };
-
-
-    animate();
+        );
+    }
 
 
     /* =====================================================
-       RESIZE
-    ====================================================== */
+       SYSTEM CORE
+    ===================================================== */
 
-    window.addEventListener(
-        "resize",
-        () => {
+    function drawCore() {
 
-            viewportWidth =
-                window.innerWidth;
+        const mobile =
+            width < 700;
 
-            viewportHeight =
-                window.innerHeight;
-
-
-            camera.aspect =
-                viewportWidth /
-                viewportHeight;
+        const coreSize =
+            mobile
+                ? Math.min(width * 0.30, 130)
+                : Math.min(width * 0.20, 210);
 
 
-            camera.fov =
-                viewportWidth < 700
-                    ? 48
-                    : 45;
+        const x =
+            width * 0.70;
+
+        const y =
+            height * 0.49;
 
 
-            camera.updateProjectionMatrix();
+        const movementX =
+            (
+                mouseX -
+                0.5
+            ) *
+            (mobile ? 10 : 28);
+
+        const movementY =
+            (
+                mouseY -
+                0.5
+            ) *
+            (mobile ? 8 : 20);
 
 
-            renderer.setPixelRatio(
-                Math.min(
-                    window.devicePixelRatio || 1,
-                    viewportWidth < 700
-                        ? 1.5
-                        : 2
-                )
+        const cx =
+            x + movementX;
+
+        const cy =
+            y + movementY;
+
+
+        /* Outer ring */
+
+        ctx.beginPath();
+
+        ctx.arc(
+            cx,
+            cy,
+            coreSize,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.strokeStyle =
+            "rgba(243,242,237,0.08)";
+
+        ctx.lineWidth = 1;
+
+        ctx.stroke();
+
+
+        /* Second ring */
+
+        ctx.beginPath();
+
+        ctx.arc(
+            cx,
+            cy,
+            coreSize * 0.72,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.strokeStyle =
+            "rgba(243,242,237,0.11)";
+
+        ctx.stroke();
+
+
+        /* Core */
+
+        const pulse =
+            1 +
+            Math.sin(
+                time * 0.002
+            ) *
+            0.025;
+
+
+        const coreRadius =
+            coreSize *
+            0.30 *
+            pulse;
+
+
+        ctx.beginPath();
+
+        ctx.arc(
+            cx,
+            cy,
+            coreRadius,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fillStyle =
+            "rgba(243,242,237,0.035)";
+
+        ctx.fill();
+
+
+        ctx.strokeStyle =
+            "rgba(243,242,237,0.28)";
+
+        ctx.stroke();
+
+
+        /* Small central point */
+
+        ctx.beginPath();
+
+        ctx.arc(
+            cx,
+            cy,
+            2.5,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fillStyle =
+            "#b9ff35";
+
+        ctx.fill();
+    }
+
+
+    /* =====================================================
+       SYSTEM LINES
+    ===================================================== */
+
+    function drawSystemLines() {
+
+        const mobile =
+            width < 700;
+
+        if (mobile) {
+            return;
+        }
+
+
+        const cx =
+            width * 0.70;
+
+        const cy =
+            height * 0.49;
+
+        const size =
+            Math.min(
+                width,
+                height
+            ) * 0.25;
+
+
+        ctx.strokeStyle =
+            "rgba(243,242,237,0.045)";
+
+        ctx.lineWidth = 1;
+
+
+        for (
+            let i = 0;
+            i < 8;
+            i++
+        ) {
+
+            const angle =
+                (
+                    i /
+                    8
+                ) *
+                Math.PI *
+                2 +
+                time * 0.0001;
+
+
+            const x1 =
+                cx +
+                Math.cos(angle) *
+                size *
+                0.65;
+
+            const y1 =
+                cy +
+                Math.sin(angle) *
+                size *
+                0.65;
+
+
+            const x2 =
+                cx +
+                Math.cos(angle) *
+                size *
+                1.25;
+
+            const y2 =
+                cy +
+                Math.sin(angle) *
+                size *
+                1.25;
+
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                x1,
+                y1
+            );
+
+            ctx.lineTo(
+                x2,
+                y2
+            );
+
+            ctx.stroke();
+        }
+    }
+
+
+    /* =====================================================
+       HERO DEPTH
+    ===================================================== */
+
+    function updateHeroDepth() {
+
+        const hero =
+            document.querySelector(
+                ".hero"
+            );
+
+        if (!hero) {
+            return;
+        }
+
+
+        const progress =
+            Math.min(
+                scrollY /
+                Math.max(
+                    height,
+                    1
+                ),
+                1
             );
 
 
-            renderer.setSize(
-                viewportWidth,
-                viewportHeight,
-                false
+        const copy =
+            document.querySelector(
+                ".hero-copy"
+            );
+
+        if (copy) {
+
+            copy.style.transform =
+                `translate3d(
+                    0,
+                    ${progress * -70}px,
+                    0
+                )`;
+
+            copy.style.opacity =
+                Math.max(
+                    0,
+                    1 -
+                    progress *
+                    1.25
+                );
+        }
+    }
+
+
+    /* =====================================================
+       ANIMATION LOOP
+    ===================================================== */
+
+    function render(timestamp) {
+
+        time =
+            timestamp || 0;
+
+
+        /* Smooth pointer */
+
+        mouseX =
+            lerp(
+                mouseX,
+                targetMouseX,
+                reducedMotion
+                    ? 1
+                    : 0.055
+            );
+
+        mouseY =
+            lerp(
+                mouseY,
+                targetMouseY,
+                reducedMotion
+                    ? 1
+                    : 0.055
             );
 
 
-            particleMaterial.size =
-                viewportWidth < 700
-                    ? 0.018
-                    : 0.022;
+        /* Smooth scroll */
+
+        scrollY =
+            lerp(
+                scrollY,
+                targetScroll,
+                0.08
+            );
 
 
-            particleMaterial.opacity =
-                viewportWidth < 700
-                    ? 0.26
-                    : 0.32;
+        drawBackground();
+
+        drawParticles();
+
+        drawSystemLines();
+
+        drawCore();
+
+        updateHeroDepth();
+
+
+        requestAnimationFrame(
+            render
+        );
+    }
+
+
+    requestAnimationFrame(
+        render
+    );
+
+
+    /* =====================================================
+       MOBILE MENU
+    ===================================================== */
+
+    function openMenu() {
+
+        if (!menuButton || !mobileMenu) {
+            return;
+        }
+
+        menuButton.classList.add(
+            "active"
+        );
+
+        mobileMenu.classList.add(
+            "open"
+        );
+
+        document.body.classList.add(
+            "menu-open"
+        );
+
+        menuButton.setAttribute(
+            "aria-expanded",
+            "true"
+        );
+    }
+
+
+    function closeMenu() {
+
+        if (!menuButton || !mobileMenu) {
+            return;
+        }
+
+        menuButton.classList.remove(
+            "active"
+        );
+
+        mobileMenu.classList.remove(
+            "open"
+        );
+
+        document.body.classList.remove(
+            "menu-open"
+        );
+
+        menuButton.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+    }
+
+
+    function toggleMenu() {
+
+        if (
+            mobileMenu &&
+            mobileMenu.classList.contains(
+                "open"
+            )
+        ) {
+
+            closeMenu();
+
+        } else {
+
+            openMenu();
+        }
+    }
+
+
+    if (menuButton) {
+
+        menuButton.addEventListener(
+            "click",
+            toggleMenu
+        );
+    }
+
+
+    /* Close after selecting a page */
+
+    mobileLinks.forEach(
+        link => {
+
+            link.addEventListener(
+                "click",
+                closeMenu
+            );
 
         }
     );
 
 
-    /* =====================================================
-       PAGE VISIBILITY
-    ====================================================== */
+    /* Escape closes menu */
 
     document.addEventListener(
-        "visibilitychange",
-        () => {
+        "keydown",
+        event => {
 
             if (
-                document.hidden
+                event.key === "Escape"
             ) {
-                renderer.setAnimationLoop(
-                    null
-                );
-            } else {
-                renderer.setAnimationLoop(
-                    null
-                );
+
+                closeMenu();
             }
 
         }
@@ -1236,10 +865,155 @@
 
 
     /* =====================================================
-       INITIAL STATE
-    ====================================================== */
+       INTERSECTION ANIMATIONS
+    ===================================================== */
 
-    updateHero();
-    updateSystemTarget();
+    const revealElements =
+        document.querySelectorAll(
+            ".section-copy, .product-copy, .process-flow, .final-section > *"
+        );
+
+
+    if (
+        "IntersectionObserver"
+        in window
+    ) {
+
+        const observer =
+            new IntersectionObserver(
+                entries => {
+
+                    entries.forEach(
+                        entry => {
+
+                            if (
+                                entry.isIntersecting
+                            ) {
+
+                                entry.target.classList.add(
+                                    "is-visible"
+                                );
+
+                                observer.unobserve(
+                                    entry.target
+                                );
+                            }
+
+                        }
+                    );
+
+                },
+                {
+                    threshold: 0.12
+                }
+            );
+
+
+        revealElements.forEach(
+            element => {
+
+                element.classList.add(
+                    "reveal"
+                );
+
+                observer.observe(
+                    element
+                );
+            }
+        );
+    }
+
+
+    /* =====================================================
+       SMOOTH INTERNAL LINKS
+    ===================================================== */
+
+    document.querySelectorAll(
+        'a[href^="#"]'
+    ).forEach(
+        link => {
+
+            link.addEventListener(
+                "click",
+                event => {
+
+                    const targetId =
+                        link.getAttribute(
+                            "href"
+                        );
+
+                    if (
+                        !targetId ||
+                        targetId === "#"
+                    ) {
+                        return;
+                    }
+
+
+                    const target =
+                        document.querySelector(
+                            targetId
+                        );
+
+                    if (!target) {
+                        return;
+                    }
+
+
+                    event.preventDefault();
+
+
+                    const offset =
+                        parseInt(
+                            getComputedStyle(
+                                document.documentElement
+                            )
+                                .getPropertyValue(
+                                    "--nav-height"
+                                )
+                        ) || 76;
+
+
+                    const position =
+                        target.getBoundingClientRect()
+                            .top +
+                        window.scrollY -
+                        offset;
+
+
+                    window.scrollTo({
+                        top: position,
+                        behavior:
+                            reducedMotion
+                                ? "auto"
+                                : "smooth"
+                    });
+
+                }
+            );
+
+        }
+    );
+
+
+    /* =====================================================
+       PAGE LOAD
+    ===================================================== */
+
+    window.addEventListener(
+        "load",
+        () => {
+
+            document.body.classList.add(
+                "loaded"
+            );
+
+        }
+    );
+
+
+    console.log(
+        "Virtual Genie AI — system online."
+    );
 
 })();
