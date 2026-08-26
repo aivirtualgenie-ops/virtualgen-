@@ -1,312 +1,458 @@
 import * as THREE from "three";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 /* =========================================================
    VIRTUAL GENIE AI
-   THREE.JS SENTIENT DIGITAL WORKER
+   3D SCROLL TUNNEL
+   ---------------------------------------------------------
+   - Procedural 3D tunnel
+   - Scroll = camera travel
+   - Floating AI task interfaces
+   - Animated lights
+   - Mobile optimized
+   - Touch compatible
+   - No GLB / Blender required
 ========================================================= */
 
 
 /* =========================================================
-   DOM
+   SETUP
 ========================================================= */
 
-const container =
-    document.getElementById("threeScene");
+const world = document.getElementById("world");
+const loading = document.getElementById("loading");
 
-const loaderElement =
-    document.getElementById("sceneLoader");
+const scene = new THREE.Scene();
 
-const taskStatus =
-    document.getElementById("taskStatus");
+scene.background = new THREE.Color(0x020304);
 
-const taskTitle =
-    document.getElementById("taskTitle");
-
-const taskDescription =
-    document.getElementById("taskDescription");
-
-
-/* =========================================================
-   BASIC CHECK
-========================================================= */
-
-if (!container) {
-    throw new Error("Three.js container not found.");
-}
-
-
-/* =========================================================
-   SCENE
-========================================================= */
-
-const scene =
-    new THREE.Scene();
-
-scene.background =
-    new THREE.Color(0x030303);
-
-
-/* =========================================================
-   CAMERA
-========================================================= */
-
-const camera =
-    new THREE.PerspectiveCamera(
-        38,
-        window.innerWidth /
-            window.innerHeight,
-        0.1,
-        100
-    );
-
-camera.position.set(
-    0,
-    1.25,
-    7
+scene.fog = new THREE.FogExp2(
+    0x020304,
+    0.018
 );
 
 
-/* =========================================================
-   RENDERER
-========================================================= */
+const camera = new THREE.PerspectiveCamera(
+    62,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    250
+);
 
-const renderer =
-    new THREE.WebGLRenderer({
-        antialias: true,
-        alpha: false,
-        powerPreference: "high-performance"
-    });
+camera.position.set(0, 0, 8);
 
+
+const renderer = new THREE.WebGLRenderer({
+    antialias: window.devicePixelRatio < 2,
+    alpha: false,
+    powerPreference: "high-performance"
+});
 
 renderer.setPixelRatio(
-    Math.min(
-        window.devicePixelRatio,
-        2
-    )
+    Math.min(window.devicePixelRatio, 1.5)
 );
-
 
 renderer.setSize(
     window.innerWidth,
     window.innerHeight
 );
 
+renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-renderer.outputColorSpace =
-    THREE.SRGBColorSpace;
-
-
-renderer.shadowMap.enabled = true;
-
-renderer.shadowMap.type =
-    THREE.PCFSoftShadowMap;
+world.appendChild(renderer.domElement);
 
 
-container.appendChild(
-    renderer.domElement
-);
+/* =========================================================
+   QUALITY
+========================================================= */
+
+const isMobile = window.innerWidth <= 800;
+
+const quality = {
+    rings: isMobile ? 90 : 150,
+    ringSegments: isMobile ? 10 : 16,
+    stars: isMobile ? 250 : 550,
+    panels: isMobile ? 8 : 12
+};
 
 
 /* =========================================================
    LIGHTING
 ========================================================= */
 
-const ambientLight =
-    new THREE.HemisphereLight(
-        0x9dbdff,
-        0x050505,
-        1.5
-    );
-
-scene.add(
-    ambientLight
+const ambient = new THREE.AmbientLight(
+    0x31506a,
+    0.45
 );
 
+scene.add(ambient);
 
-const keyLight =
-    new THREE.DirectionalLight(
-        0xffffff,
-        3.2
-    );
 
-keyLight.position.set(
-    3,
-    5,
-    4
+const blueLight = new THREE.PointLight(
+    0x168cff,
+    7,
+    35
 );
-
-keyLight.castShadow = true;
-
-scene.add(
-    keyLight
-);
-
-
-const blueLight =
-    new THREE.PointLight(
-        0x398cff,
-        30,
-        12
-    );
 
 blueLight.position.set(
-    -3,
-    2,
-    2
+    0,
+    0,
+    -10
 );
 
-scene.add(
-    blueLight
+scene.add(blueLight);
+
+
+const cyanLight = new THREE.PointLight(
+    0x00d9ff,
+    5,
+    30
 );
 
+cyanLight.position.set(
+    -8,
+    3,
+    -25
+);
 
-const orangeLight =
-    new THREE.PointLight(
-        0xff6d32,
-        18,
-        10
-    );
+scene.add(cyanLight);
+
+
+const orangeLight = new THREE.PointLight(
+    0xff7a18,
+    4,
+    28
+);
 
 orangeLight.position.set(
-    3,
-    1,
-    -1
+    8,
+    -4,
+    -40
 );
 
-scene.add(
-    orangeLight
-);
+scene.add(orangeLight);
 
 
 /* =========================================================
-   FLOOR
+   TUNNEL
 ========================================================= */
 
-const floorMaterial =
-    new THREE.MeshStandardMaterial({
-        color: 0x050505,
-        roughness: .8,
-        metalness: .15
-    });
+const tunnel = new THREE.Group();
 
+scene.add(tunnel);
+
+const tunnelLength = 180;
+const tunnelRadius = 8;
+
+
+/* Tunnel ring material */
+
+const ringMaterial = new THREE.LineBasicMaterial({
+    color: 0x16364d,
+    transparent: true,
+    opacity: 0.55
+});
+
+
+/* Create rings */
+
+for (
+    let i = 0;
+    i < quality.rings;
+    i++
+) {
+
+    const z =
+        -i *
+        (tunnelLength / quality.rings);
+
+    const ring = createTunnelRing(
+        tunnelRadius,
+        quality.ringSegments
+    );
+
+    ring.position.z = z;
+
+    /*
+        Slight organic variation so the tunnel
+        doesn't look like a perfect tube.
+    */
+
+    ring.rotation.z =
+        Math.sin(i * 0.27) * 0.035;
+
+    ring.scale.x =
+        1 +
+        Math.sin(i * 0.17) * 0.025;
+
+    ring.scale.y =
+        1 +
+        Math.cos(i * 0.21) * 0.025;
+
+    tunnel.add(ring);
+}
+
+
+/* =========================================================
+   TUNNEL FLOOR
+========================================================= */
+
+const floorMaterial = new THREE.MeshBasicMaterial({
+    color: 0x071018,
+    side: THREE.DoubleSide
+});
+
+const floorGeometry =
+    new THREE.PlaneGeometry(
+        18,
+        tunnelLength
+    );
 
 const floor =
     new THREE.Mesh(
-        new THREE.CircleGeometry(
-            12,
-            64
-        ),
+        floorGeometry,
         floorMaterial
     );
 
+floor.rotation.x = -Math.PI / 2;
 
-floor.rotation.x =
-    -Math.PI / 2;
+floor.position.z =
+    -tunnelLength / 2;
 
-floor.position.y =
-    -1.15;
-
-floor.receiveShadow = true;
-
-scene.add(
-    floor
-);
+tunnel.add(floor);
 
 
 /* =========================================================
-   FLOOR RING
+   TUNNEL CEILING / SIDE STRUCTURE
 ========================================================= */
 
-const ringMaterial =
-    new THREE.MeshBasicMaterial({
-        color: 0x3f8cff,
+const structuralMaterial =
+    new THREE.LineBasicMaterial({
+        color: 0x0c2638,
         transparent: true,
-        opacity: .18,
-        side: THREE.DoubleSide
+        opacity: 0.8
     });
 
 
-const floorRing =
-    new THREE.Mesh(
-        new THREE.RingGeometry(
-            2.1,
-            2.12,
-            96
+function createStructuralLine(
+    x,
+    y,
+    rotationZ = 0
+) {
+
+    const points = [
+        new THREE.Vector3(
+            x,
+            y,
+            0
         ),
-        ringMaterial
-    );
+
+        new THREE.Vector3(
+            x * 0.85,
+            y * 0.85,
+            -tunnelLength
+        )
+    ];
+
+    const geometry =
+        new THREE.BufferGeometry()
+            .setFromPoints(points);
+
+    const line =
+        new THREE.Line(
+            geometry,
+            structuralMaterial
+        );
+
+    line.rotation.z = rotationZ;
+
+    tunnel.add(line);
+}
 
 
-floorRing.rotation.x =
-    -Math.PI / 2;
-
-floorRing.position.y =
-    -1.13;
-
-scene.add(
-    floorRing
-);
+createStructuralLine(7, 5);
+createStructuralLine(-7, 5);
+createStructuralLine(7, -5);
+createStructuralLine(-7, -5);
 
 
 /* =========================================================
-   AMBIENT PARTICLES
+   TUNNEL RING FUNCTION
 ========================================================= */
 
-const particleCount =
-    window.innerWidth < 700
-        ? 450
-        : 900;
+function createTunnelRing(
+    radius,
+    segments
+) {
 
+    const points = [];
 
-const particlePositions =
-    new Float32Array(
-        particleCount * 3
+    for (
+        let i = 0;
+        i <= segments;
+        i++
+    ) {
+
+        const angle =
+            (i / segments) *
+            Math.PI *
+            2;
+
+        const x =
+            Math.cos(angle) *
+            radius;
+
+        const y =
+            Math.sin(angle) *
+            radius;
+
+        points.push(
+            new THREE.Vector3(
+                x,
+                y,
+                0
+            )
+        );
+    }
+
+    const geometry =
+        new THREE.BufferGeometry()
+            .setFromPoints(points);
+
+    return new THREE.Line(
+        geometry,
+        ringMaterial
     );
+}
+
+
+/* =========================================================
+   LIGHT STRIPS
+========================================================= */
+
+const lightGroup =
+    new THREE.Group();
+
+scene.add(lightGroup);
+
+
+const lightMaterials = [
+    new THREE.MeshBasicMaterial({
+        color: 0x168cff
+    }),
+
+    new THREE.MeshBasicMaterial({
+        color: 0x00d9ff
+    }),
+
+    new THREE.MeshBasicMaterial({
+        color: 0xff7a18
+    }),
+
+    new THREE.MeshBasicMaterial({
+        color: 0x9b5cff
+    })
+];
 
 
 for (
     let i = 0;
-    i < particleCount;
+    i < (isMobile ? 30 : 60);
     i++
 ) {
 
-    const radius =
-        3 +
-        Math.random() * 7;
+    const length =
+        0.5 +
+        Math.random() * 2.2;
+
+    const geometry =
+        new THREE.BoxGeometry(
+            0.025,
+            0.025,
+            length
+        );
+
+    const material =
+        lightMaterials[
+            i %
+            lightMaterials.length
+        ];
+
+    const mesh =
+        new THREE.Mesh(
+            geometry,
+            material
+        );
 
     const angle =
         Math.random() *
         Math.PI *
         2;
 
-    const height =
-        -1 +
-        Math.random() * 6;
+    const radius =
+        5.8 +
+        Math.random() *
+        1.5;
 
-    particlePositions[
-        i * 3
-    ] =
+    mesh.position.x =
         Math.cos(angle) *
         radius;
 
-    particlePositions[
-        i * 3 + 1
-    ] =
-        height;
-
-    particlePositions[
-        i * 3 + 2
-    ] =
+    mesh.position.y =
         Math.sin(angle) *
         radius;
 
+    mesh.position.z =
+        -Math.random() *
+        tunnelLength;
+
+    mesh.rotation.z =
+        angle;
+
+    lightGroup.add(mesh);
 }
 
+
+/* =========================================================
+   PARTICLES / DATA
+========================================================= */
 
 const particleGeometry =
     new THREE.BufferGeometry();
 
+const particlePositions =
+    new Float32Array(
+        quality.stars * 3
+    );
+
+for (
+    let i = 0;
+    i < quality.stars;
+    i++
+) {
+
+    const i3 = i * 3;
+
+    const angle =
+        Math.random() *
+        Math.PI *
+        2;
+
+    const radius =
+        2 +
+        Math.random() * 9;
+
+    particlePositions[i3] =
+        Math.cos(angle) *
+        radius;
+
+    particlePositions[i3 + 1] =
+        Math.sin(angle) *
+        radius;
+
+    particlePositions[i3 + 2] =
+        -Math.random() *
+        tunnelLength;
+}
 
 particleGeometry.setAttribute(
     "position",
@@ -319,14 +465,11 @@ particleGeometry.setAttribute(
 
 const particleMaterial =
     new THREE.PointsMaterial({
-        color: 0x79aaff,
-        size:
-            window.innerWidth < 700
-                ? .018
-                : .025,
+        color: 0x75bfff,
+        size: isMobile ? 0.035 : 0.05,
         transparent: true,
-        opacity: .5,
-        depthWrite: false
+        opacity: 0.6,
+        sizeAttenuation: true
     });
 
 
@@ -336,513 +479,388 @@ const particles =
         particleMaterial
     );
 
-
-scene.add(
-    particles
-);
+scene.add(particles);
 
 
 /* =========================================================
-   GENIE
+   AI PANELS
 ========================================================= */
 
-let genie = null;
+const panels =
+    new THREE.Group();
 
-let mixer = null;
+scene.add(panels);
 
-let animations = [];
 
-let currentAction = null;
-
-let currentTask = 0;
-
-let modelReady = false;
-
-
-/* =========================================================
-   CHARACTER ANIMATION STORAGE
-========================================================= */
-
-const actions = {};
-
-
-/* =========================================================
-   LOAD GLB
-========================================================= */
-
-const gltfLoader =
-    new GLTFLoader();
-
-
-gltfLoader.load(
-
-    "models/genie.glb",
-
-    gltf => {
-
-        genie =
-            gltf.scene;
-
-        genie.position.set(
-            0,
-            -1.05,
-            0
-        );
-
-        genie.scale.setScalar(
-            1.65
-        );
-
-
-        genie.traverse(
-            object => {
-
-                if (
-                    object.isMesh
-                ) {
-
-                    object.castShadow =
-                        true;
-
-                    object.receiveShadow =
-                        true;
-
-                    if (
-                        object.material
-                    ) {
-
-                        object.material
-                            .roughness = .42;
-
-                        object.material
-                            .metalness = .3;
-
-                    }
-
-                }
-
-            }
-        );
-
-
-        scene.add(
-            genie
-        );
-
-
-        /* -----------------------------------------
-           ANIMATION MIXER
-        ----------------------------------------- */
-
-        if (
-            gltf.animations &&
-            gltf.animations.length
-        ) {
-
-            mixer =
-                new THREE.AnimationMixer(
-                    genie
-                );
-
-            animations =
-                gltf.animations;
-
-
-            animations.forEach(
-                clip => {
-
-                    const action =
-                        mixer.clipAction(
-                            clip
-                        );
-
-                    actions[
-                        clip.name.toLowerCase()
-                    ] =
-                        action;
-
-                }
-            );
-
-        }
-
-
-        modelReady = true;
-
-
-        if (loaderElement) {
-
-            loaderElement.classList.add(
-                "hidden"
-            );
-
-        }
-
-
-        /*
-         * Start with the first
-         * available idle animation.
-         */
-
-        playAnimationByName(
-            [
-                "idle",
-                "breathing",
-                "stand",
-                "standing"
-            ]
-        );
-
-
-        updateTask(
-            0
-        );
-
-    },
-
-    undefined,
-
-    error => {
-
-        console.error(
-            "Could not load models/genie.glb",
-            error
-        );
-
-
-        if (loaderElement) {
-
-            loaderElement.innerHTML =
-                `
-                <span class="loader-dot"></span>
-                <span>3D MODEL NOT FOUND</span>
-                `;
-
-        }
-
-    }
-
-);
-
-
-/* =========================================================
-   ANIMATION FINDER
-========================================================= */
-
-function findAnimation(
-    possibleNames
-) {
-
-    const names =
-        Object.keys(actions);
-
-
-    for (
-        const requested
-        of possibleNames
-    ) {
-
-        const exact =
-            requested.toLowerCase();
-
-        const match =
-            names.find(
-                name =>
-                    name === exact
-            );
-
-        if (match) {
-            return actions[match];
-        }
-
-    }
-
-
-    /*
-     * Fuzzy search.
-     */
-
-    for (
-        const requested
-        of possibleNames
-    ) {
-
-        const match =
-            names.find(
-                name =>
-                    name.includes(
-                        requested.toLowerCase()
-                    )
-            );
-
-        if (match) {
-            return actions[match];
-        }
-
-    }
-
-
-    return null;
-}
-
-
-/* =========================================================
-   PLAY ANIMATION
-========================================================= */
-
-function playAnimationByName(
-    possibleNames,
-    fadeDuration = .45
-) {
-
-    if (!mixer) {
-        return;
-    }
-
-
-    const nextAction =
-        findAnimation(
-            possibleNames
-        );
-
-
-    if (!nextAction) {
-
-        /*
-         * The model may not contain
-         * this specific animation.
-         *
-         * Don't break the scene.
-         */
-
-        return;
-
-    }
-
-
-    if (
-        currentAction ===
-        nextAction
-    ) {
-
-        return;
-
-    }
-
-
-    nextAction
-        .reset()
-        .fadeIn(
-            fadeDuration
-        )
-        .play();
-
-
-    if (currentAction) {
-
-        currentAction
-            .fadeOut(
-                fadeDuration
-            );
-
-    }
-
-
-    currentAction =
-        nextAction;
-
-}
-
-
-/* =========================================================
-   TASK DEFINITIONS
-========================================================= */
-
-const tasks = [
+const panelData = [
 
     {
-        title:
-            "OBSERVING",
-
-        description:
-            "Monitoring your business environment.",
-
-        animations: [
-            "idle",
-            "breathing",
-            "stand"
-        ]
+        title: "INCOMING CALL",
+        text: "+1 (512) 555-0198",
+        accent: 0x168cff
     },
 
-
     {
-        title:
-            "RECEIVING CALL",
-
-        description:
-            "Understanding an incoming customer request.",
-
-        animations: [
-            "phone",
-            "call",
-            "talk",
-            "gesture"
-        ]
+        title: "AI RECEPTIONIST",
+        text: "CALL QUALIFIED",
+        accent: 0x00d9ff
     },
 
-
     {
-        title:
-            "THINKING",
-
-        description:
-            "Understanding the customer and deciding what happens next.",
-
-        animations: [
-            "think",
-            "thinking",
-            "idle"
-        ]
+        title: "APPOINTMENT",
+        text: "BOOKED • 2:00 PM",
+        accent: 0x9b5cff
     },
 
-
     {
-        title:
-            "BOOKING APPOINTMENT",
-
-        description:
-            "Finding the right time and confirming the appointment.",
-
-        animations: [
-            "typing",
-            "computer",
-            "reach",
-            "gesture"
-        ]
+        title: "CRM UPDATE",
+        text: "NEW LEAD • $12,500",
+        accent: 0xff7a18
     },
 
-
     {
-        title:
-            "UPDATING CRM",
-
-        description:
-            "Recording the customer and updating business data.",
-
-        animations: [
-            "typing",
-            "computer",
-            "gesture"
-        ]
+        title: "AUTOMATION",
+        text: "WORKFLOW ACTIVE",
+        accent: 0x00d9ff
     },
 
-
     {
-        title:
-            "RUNNING AUTOMATION",
-
-        description:
-            "Connecting systems and completing the workflow.",
-
-        animations: [
-            "gesture",
-            "reach",
-            "work",
-            "computer"
-        ]
+        title: "FOLLOW-UP",
+        text: "EMAIL SENT",
+        accent: 0x168cff
     },
 
+    {
+        title: "ANALYTICS",
+        text: "REVENUE +18.4%",
+        accent: 0x9b5cff
+    },
 
     {
-        title:
-            "COMPLETE",
+        title: "BUSINESS OS",
+        text: "SYSTEM CONNECTED",
+        accent: 0xff7a18
+    },
 
-        description:
-            "Task completed. Returning to standby.",
+    {
+        title: "LEAD SCORE",
+        text: "QUALIFICATION 92%",
+        accent: 0x00d9ff
+    },
 
-        animations: [
-            "idle",
-            "breathing",
-            "stand"
-        ]
+    {
+        title: "TASK COMPLETE",
+        text: "ACTION EXECUTED",
+        accent: 0x168cff
+    },
+
+    {
+        title: "DATA SYNC",
+        text: "CRM UPDATED",
+        accent: 0x9b5cff
+    },
+
+    {
+        title: "WORKFLOW",
+        text: "RUNNING AUTOMATICALLY",
+        accent: 0xff7a18
     }
 
 ];
 
 
-/* =========================================================
-   UPDATE TASK
-========================================================= */
-
-function updateTask(
+function createPanel(
+    data,
     index
 ) {
 
-    index =
-        Math.max(
-            0,
-            Math.min(
-                tasks.length - 1,
-                index
-            )
+    const group =
+        new THREE.Group();
+
+    const width = 3.8;
+    const height = 2.1;
+
+    /*
+        Border
+    */
+
+    const borderPoints = [
+        new THREE.Vector3(
+            -width / 2,
+            -height / 2,
+            0
+        ),
+
+        new THREE.Vector3(
+            width / 2,
+            -height / 2,
+            0
+        ),
+
+        new THREE.Vector3(
+            width / 2,
+            height / 2,
+            0
+        ),
+
+        new THREE.Vector3(
+            -width / 2,
+            height / 2,
+            0
+        ),
+
+        new THREE.Vector3(
+            -width / 2,
+            -height / 2,
+            0
+        )
+    ];
+
+    const borderGeometry =
+        new THREE.BufferGeometry()
+            .setFromPoints(
+                borderPoints
+            );
+
+    const borderMaterial =
+        new THREE.LineBasicMaterial({
+            color: data.accent,
+            transparent: true,
+            opacity: 0.8
+        });
+
+    const border =
+        new THREE.Line(
+            borderGeometry,
+            borderMaterial
         );
 
-
-    currentTask =
-        index;
+    group.add(border);
 
 
-    const task =
-        tasks[index];
+    /*
+        Center data lines
+    */
+
+    const lineMaterial =
+        new THREE.LineBasicMaterial({
+            color: data.accent,
+            transparent: true,
+            opacity: 0.35
+        });
 
 
-    if (taskTitle) {
+    for (
+        let i = 0;
+        i < 3;
+        i++
+    ) {
 
-        taskTitle.textContent =
-            task.title;
+        const lineWidth =
+            1 +
+            Math.random() *
+            1.6;
 
-    }
+        const geometry =
+            new THREE.BufferGeometry()
+                .setFromPoints([
 
+                    new THREE.Vector3(
+                        -1.25,
+                        0.15 -
+                        i * 0.3,
+                        0.01
+                    ),
 
-    if (taskDescription) {
+                    new THREE.Vector3(
+                        -1.25 +
+                        lineWidth,
+                        0.15 -
+                        i * 0.3,
+                        0.01
+                    )
 
-        taskDescription.textContent =
-            task.description;
+                ]);
 
-    }
-
-
-    if (taskStatus) {
-
-        const number =
-            String(
-                index + 1
-            ).padStart(
-                2,
-                "0"
+        const line =
+            new THREE.Line(
+                geometry,
+                lineMaterial
             );
 
-
-        const numberElement =
-            taskStatus.querySelector(
-                ".task-status-number"
-            );
-
-
-        if (numberElement) {
-
-            numberElement.textContent =
-                number;
-
-        }
-
+        group.add(line);
     }
 
 
-    playAnimationByName(
-        task.animations
+    /*
+        Small status indicator
+    */
+
+    const dotGeometry =
+        new THREE.CircleGeometry(
+            0.07,
+            12
+        );
+
+    const dotMaterial =
+        new THREE.MeshBasicMaterial({
+            color: data.accent
+        });
+
+    const dot =
+        new THREE.Mesh(
+            dotGeometry,
+            dotMaterial
+        );
+
+    dot.position.set(
+        -1.55,
+        0.72,
+        0.02
     );
 
+    group.add(dot);
+
+
+    /*
+        Position around tunnel
+    */
+
+    const angle =
+        (index / panelData.length) *
+        Math.PI *
+        2;
+
+    const radius = 5.1;
+
+    group.position.set(
+        Math.cos(angle) *
+        radius,
+
+        Math.sin(angle) *
+        radius,
+
+        -12 -
+        index * 13
+    );
+
+
+    /*
+        Face the camera
+    */
+
+    group.lookAt(
+        new THREE.Vector3(
+            0,
+            0,
+            group.position.z
+        )
+    );
+
+
+    group.userData = {
+        baseX: group.position.x,
+        baseY: group.position.y,
+        baseZ: group.position.z,
+        phase: Math.random() * Math.PI * 2,
+        speed:
+            0.4 +
+            Math.random() * 0.4
+    };
+
+
+    panels.add(group);
+}
+
+
+panelData.forEach(
+    (data, index) => {
+        createPanel(
+            data,
+            index
+        );
+    }
+);
+
+
+/* =========================================================
+   CENTRAL ENERGY CORE
+========================================================= */
+
+const coreGroup =
+    new THREE.Group();
+
+coreGroup.position.z =
+    -55;
+
+scene.add(coreGroup);
+
+
+const coreGeometry =
+    new THREE.IcosahedronGeometry(
+        1.2,
+        2
+    );
+
+
+const coreMaterial =
+    new THREE.MeshBasicMaterial({
+        color: 0x168cff,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.85
+    });
+
+
+const core =
+    new THREE.Mesh(
+        coreGeometry,
+        coreMaterial
+    );
+
+coreGroup.add(core);
+
+
+/* Outer rings */
+
+for (
+    let i = 0;
+    i < 3;
+    i++
+) {
+
+    const geometry =
+        new THREE.TorusGeometry(
+            1.8 + i * 0.55,
+            0.015,
+            8,
+            48
+        );
+
+    const material =
+        new THREE.MeshBasicMaterial({
+            color:
+                i === 1
+                    ? 0xff7a18
+                    : 0x168cff,
+            transparent: true,
+            opacity: 0.7
+        });
+
+    const ring =
+        new THREE.Mesh(
+            geometry,
+            material
+        );
+
+    ring.rotation.x =
+        Math.PI / 2;
+
+    ring.userData.speed =
+        0.3 +
+        i * 0.15;
+
+    coreGroup.add(ring);
 }
 
 
@@ -850,21 +868,45 @@ function updateTask(
    SCROLL STATE
 ========================================================= */
 
-let targetScroll =
-    window.scrollY;
+let targetScroll = 0;
+let currentScroll = 0;
 
-let smoothScroll =
-    window.scrollY;
+let lastScroll = 0;
+let scrollVelocity = 0;
 
+
+/*
+    We don't use scrollY directly for camera
+    movement. Instead we smooth it.
+*/
+
+function updateScroll() {
+
+    const maxScroll =
+        document.documentElement
+            .scrollHeight -
+        window.innerHeight;
+
+    if (maxScroll <= 0) {
+        targetScroll = 0;
+        return;
+    }
+
+    targetScroll =
+        window.scrollY /
+        maxScroll;
+
+    scrollVelocity =
+        targetScroll -
+        lastScroll;
+
+    lastScroll =
+        targetScroll;
+}
 
 window.addEventListener(
     "scroll",
-    () => {
-
-        targetScroll =
-            window.scrollY;
-
-    },
+    updateScroll,
     {
         passive: true
     }
@@ -872,32 +914,345 @@ window.addEventListener(
 
 
 /* =========================================================
-   POINTER
+   CAMERA JOURNEY
+========================================================= */
+
+function updateCamera(time) {
+
+    /*
+        Smooth scrolling
+    */
+
+    currentScroll +=
+        (
+            targetScroll -
+            currentScroll
+        ) *
+        0.075;
+
+
+    /*
+        Main tunnel travel
+
+        Start around Z = 7
+        Finish around Z = -105
+    */
+
+    const tunnelTravel =
+        THREE.MathUtils.lerp(
+            7,
+            -105,
+            currentScroll
+        );
+
+
+    camera.position.z =
+        tunnelTravel;
+
+
+    /*
+        Slight organic camera movement
+    */
+
+    const sway =
+        Math.sin(
+            time * 0.00035
+        ) * 0.12;
+
+    const swayY =
+        Math.cos(
+            time * 0.00028
+        ) * 0.08;
+
+
+    camera.position.x +=
+        (
+            sway -
+            camera.position.x
+        ) * 0.025;
+
+
+    camera.position.y +=
+        (
+            swayY -
+            camera.position.y
+        ) * 0.025;
+
+
+    /*
+        Scroll gives the camera a tiny tilt.
+    */
+
+    camera.rotation.z =
+        THREE.MathUtils.lerp(
+            camera.rotation.z,
+            scrollVelocity * -1.8,
+            0.06
+        );
+
+
+    camera.rotation.x =
+        THREE.MathUtils.lerp(
+            camera.rotation.x,
+            scrollVelocity * 0.5,
+            0.06
+        );
+}
+
+
+/* =========================================================
+   SECTION DEPTH
+========================================================= */
+
+function updateSections() {
+
+    const sections =
+        document.querySelectorAll(
+            ".tunnel-section"
+        );
+
+    sections.forEach(
+        (section, index) => {
+
+            const rect =
+                section.getBoundingClientRect();
+
+            /*
+                Don't interfere with actual page layout.
+
+                Instead use visibility to slightly
+                change opacity based on distance.
+            */
+
+            const center =
+                rect.top +
+                rect.height / 2;
+
+            const distance =
+                Math.abs(
+                    center -
+                    window.innerHeight / 2
+                );
+
+            const opacity =
+                THREE.MathUtils.clamp(
+                    1 -
+                    distance /
+                    window.innerHeight *
+                    0.7,
+
+                    0.35,
+                    1
+                );
+
+            const copy =
+                section.querySelector(
+                    ".section-copy"
+                );
+
+            if (copy) {
+
+                copy.style.opacity =
+                    opacity.toFixed(2);
+
+                copy.style.transform =
+                    `translateY(${
+                        Math.min(
+                            distance * 0.03,
+                            35
+                        )
+                    }px)`;
+
+            }
+
+        }
+    );
+}
+
+
+/* =========================================================
+   ANIMATE PANELS
+========================================================= */
+
+function animatePanels(time) {
+
+    panels.children.forEach(
+        (panel) => {
+
+            const data =
+                panel.userData;
+
+            const float =
+                Math.sin(
+                    time * 0.001 *
+                    data.speed +
+                    data.phase
+                );
+
+
+            panel.position.x =
+                data.baseX +
+                float * 0.12;
+
+
+            panel.position.y =
+                data.baseY +
+                Math.cos(
+                    time * 0.0008 *
+                    data.speed +
+                    data.phase
+                ) * 0.12;
+
+
+            /*
+                Gentle rotation makes them
+                feel suspended in space.
+            */
+
+            panel.rotation.z =
+                float * 0.015;
+
+        }
+    );
+}
+
+
+/* =========================================================
+   ANIMATE LIGHTS
+========================================================= */
+
+function animateLights(time) {
+
+    lightGroup.children.forEach(
+        (light, index) => {
+
+            const pulse =
+                0.8 +
+                Math.sin(
+                    time * 0.002 +
+                    index
+                ) * 0.2;
+
+            light.scale.x =
+                pulse;
+
+        }
+    );
+
+
+    /*
+        Move point lights slowly.
+    */
+
+    blueLight.position.x =
+        Math.sin(
+            time * 0.0005
+        ) * 4;
+
+    blueLight.position.y =
+        Math.cos(
+            time * 0.0004
+        ) * 3;
+
+
+    cyanLight.position.x =
+        Math.cos(
+            time * 0.00035
+        ) * 7;
+
+
+    orangeLight.position.y =
+        Math.sin(
+            time * 0.00045
+        ) * 5;
+}
+
+
+/* =========================================================
+   ANIMATE CORE
+========================================================= */
+
+function animateCore(time) {
+
+    core.rotation.x =
+        time * 0.00035;
+
+    core.rotation.y =
+        time * 0.0005;
+
+
+    coreGroup.children
+        .forEach(
+            (child, index) => {
+
+                if (
+                    child.geometry &&
+                    child.geometry.type ===
+                    "TorusGeometry"
+                ) {
+
+                    child.rotation.z =
+                        time *
+                        0.00025 *
+                        (index + 1);
+
+                    child.rotation.y =
+                        time *
+                        0.00015 *
+                        (index + 1);
+
+                }
+
+            }
+        );
+
+
+    /*
+        Core pulses when user is scrolling.
+    */
+
+    const pulse =
+        1 +
+        Math.min(
+            Math.abs(
+                scrollVelocity
+            ) * 15,
+            0.35
+        );
+
+    core.scale.setScalar(
+        THREE.MathUtils.lerp(
+            core.scale.x,
+            pulse,
+            0.08
+        )
+    );
+}
+
+
+/* =========================================================
+   MOBILE PARALLAX
 ========================================================= */
 
 let pointerX = 0;
 let pointerY = 0;
 
-let targetPointerX = 0;
-let targetPointerY = 0;
-
-
 window.addEventListener(
     "pointermove",
-    event => {
+    (event) => {
 
-        targetPointerX =
+        pointerX =
             (
                 event.clientX /
                 window.innerWidth -
-                .5
+                0.5
             );
 
-        targetPointerY =
+        pointerY =
             (
                 event.clientY /
                 window.innerHeight -
-                .5
+                0.5
             );
 
     },
@@ -907,265 +1262,115 @@ window.addEventListener(
 );
 
 
-/* =========================================================
-   CAMERA + CHARACTER MOTION
-========================================================= */
+function updateParallax() {
 
-function updateScene(
-    time
-) {
+    /*
+        Very subtle so it doesn't fight
+        the scroll-controlled camera.
+    */
 
-    smoothScroll +=
-        (
-            targetScroll -
-            smoothScroll
-        ) * .075;
+    const targetX =
+        pointerX * 0.25;
 
-
-    pointerX +=
-        (
-            targetPointerX -
-            pointerX
-        ) * .045;
-
-
-    pointerY +=
-        (
-            targetPointerY -
-            pointerY
-        ) * .045;
-
-
-    const hero =
-        document.querySelector(
-            ".hero"
-        );
-
-
-    if (!hero) {
-        return;
-    }
-
-
-    const heroHeight =
-        hero.offsetHeight;
-
-
-    const heroProgress =
-        THREE.MathUtils.clamp(
-            smoothScroll /
-                heroHeight,
-            0,
-            1
-        );
-
-
-    /* -----------------------------------------
-       CAMERA
-    ----------------------------------------- */
-
-    const cameraTargetX =
-        pointerX * .55;
-
-    const cameraTargetY =
-        1.25 -
-        pointerY * .18 -
-        heroProgress * .2;
-
-    const cameraTargetZ =
-        7 -
-        heroProgress * 2.0;
-
+    const targetY =
+        pointerY * 0.18;
 
     camera.position.x +=
         (
-            cameraTargetX -
+            targetX -
             camera.position.x
-        ) * .035;
-
+        ) * 0.01;
 
     camera.position.y +=
         (
-            cameraTargetY -
+            targetY -
             camera.position.y
-        ) * .035;
+        ) * 0.01;
+}
 
 
-    camera.position.z +=
-        (
-            cameraTargetZ -
-            camera.position.z
-        ) * .035;
+/* =========================================================
+   MENU
+========================================================= */
 
+const menuButton =
+    document.getElementById(
+        "menuButton"
+    );
 
-    camera.lookAt(
-        0,
-        .6,
-        0
+const mobileMenu =
+    document.getElementById(
+        "mobileMenu"
     );
 
 
-    /* -----------------------------------------
-       CHARACTER
-    ----------------------------------------- */
+if (
+    menuButton &&
+    mobileMenu
+) {
 
-    if (genie) {
+    menuButton.addEventListener(
+        "click",
+        () => {
 
-        const breathing =
-            Math.sin(
-                time * .0015
-            ) * .018;
+            const open =
+                mobileMenu.classList
+                    .toggle("open");
+
+            menuButton.classList
+                .toggle("active", open);
+
+            menuButton.setAttribute(
+                "aria-expanded",
+                String(open)
+            );
+
+            document.body.classList
+                .toggle(
+                    "menu-open",
+                    open
+                );
+
+        }
+    );
 
 
-        genie.position.x =
-            pointerX * .28;
+    mobileMenu
+        .querySelectorAll("a")
+        .forEach(
+            (link) => {
 
+                link.addEventListener(
+                    "click",
+                    () => {
 
-        genie.position.y =
-            -1.05 +
-            breathing;
+                        mobileMenu
+                            .classList
+                            .remove("open");
 
+                        menuButton
+                            .classList
+                            .remove(
+                                "active"
+                            );
 
-        genie.rotation.y =
-            pointerX * -.12;
+                        menuButton
+                            .setAttribute(
+                                "aria-expanded",
+                                "false"
+                            );
 
+                        document.body
+                            .classList
+                            .remove(
+                                "menu-open"
+                            );
 
-        genie.rotation.x =
-            pointerY * .035;
+                    }
+                );
 
-
-        /*
-         * As the user scrolls,
-         * the camera approaches the AI.
-         */
-
-        const scale =
-            1.65 +
-            heroProgress * .25;
-
-        genie.scale.setScalar(
-            scale
+            }
         );
-
-    }
-
-
-    /* -----------------------------------------
-       PARTICLES
-    ----------------------------------------- */
-
-    particles.rotation.y =
-        time * .000025;
-
-    particles.rotation.x =
-        Math.sin(
-            time * .00008
-        ) * .03;
-
-
-    /* -----------------------------------------
-       FLOOR RING
-    ----------------------------------------- */
-
-    floorRing.rotation.z =
-        time * .00025;
-
-
-    floorRing.material.opacity =
-        .12 +
-        Math.sin(
-            time * .002
-        ) * .04;
-
-
-    /* -----------------------------------------
-       LIGHTS
-    ----------------------------------------- */
-
-    blueLight.position.x =
-        -3 +
-        pointerX * 2;
-
-    blueLight.position.y =
-        2 -
-        pointerY * 1.5;
-
-
-    orangeLight.position.x =
-        3 -
-        pointerX * 2;
-
-    orangeLight.position.y =
-        1 +
-        pointerY;
-
-
-    /* -----------------------------------------
-       SCROLL TASKS
-    ----------------------------------------- */
-
-    /*
-     * Hero progress is divided into
-     * intentional behavioral states.
-     */
-
-    let nextTask;
-
-
-    if (
-        heroProgress < .12
-    ) {
-
-        nextTask = 0;
-
-    } else if (
-        heroProgress < .28
-    ) {
-
-        nextTask = 1;
-
-    } else if (
-        heroProgress < .43
-    ) {
-
-        nextTask = 2;
-
-    } else if (
-        heroProgress < .60
-    ) {
-
-        nextTask = 3;
-
-    } else if (
-        heroProgress < .77
-    ) {
-
-        nextTask = 4;
-
-    } else if (
-        heroProgress < .92
-    ) {
-
-        nextTask = 5;
-
-    } else {
-
-        nextTask = 6;
-
-    }
-
-
-    if (
-        nextTask !==
-        currentTask
-    ) {
-
-        updateTask(
-            nextTask
-        );
-
-    }
-
 }
 
 
@@ -1187,10 +1392,9 @@ window.addEventListener(
         renderer.setPixelRatio(
             Math.min(
                 window.devicePixelRatio,
-                2
+                1.5
             )
         );
-
 
         renderer.setSize(
             window.innerWidth,
@@ -1202,43 +1406,71 @@ window.addEventListener(
 
 
 /* =========================================================
-   CLOCK
+   LOADING
 ========================================================= */
 
-const clock =
-    new THREE.Clock();
+setTimeout(
+    () => {
+
+        if (loading) {
+            loading.classList.add(
+                "hidden"
+            );
+        }
+
+    },
+    800
+);
 
 
 /* =========================================================
    RENDER LOOP
 ========================================================= */
 
-function render() {
+const clock =
+    new THREE.Clock();
+
+
+function animate() {
 
     requestAnimationFrame(
-        render
+        animate
     );
 
-
-    const delta =
-        clock.getDelta();
-
-    const elapsed =
-        clock.elapsedTime;
+    const time =
+        performance.now();
 
 
-    if (mixer) {
+    updateCamera(time);
 
-        mixer.update(
-            delta
-        );
+    updateParallax();
 
-    }
+    animatePanels(time);
+
+    animateLights(time);
+
+    animateCore(time);
+
+    updateSections();
 
 
-    updateScene(
-        elapsed * 1000
-    );
+    /*
+        Very subtle tunnel rotation.
+        Camera remains the primary motion.
+    */
+
+    tunnel.rotation.z =
+        Math.sin(
+            time * 0.00008
+        ) * 0.006;
+
+
+    /*
+        Particles drift very slowly.
+    */
+
+    particles.rotation.z =
+        time * 0.000015;
 
 
     renderer.render(
@@ -1249,13 +1481,15 @@ function render() {
 }
 
 
-render();
+animate();
 
 
 /* =========================================================
-   INITIAL TASK
+   INITIAL STATE
 ========================================================= */
 
-updateTask(
-    0
+updateScroll();
+
+console.log(
+    "Virtual Genie AI — 3D tunnel initialized."
 );
