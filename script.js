@@ -1,14 +1,20 @@
 import * as THREE from "three";
 
+
 /* =========================================================
-   VIRTUAL GENIE AI — IMMERSIVE 3D HOMEPAGE
+   INITIALIZE
 ========================================================= */
 
-const world = document.getElementById("world");
+const world =
+    document.getElementById("world");
+
 
 if (!world) {
-    console.error("Virtual Genie: #world missing.");
-    throw new Error("#world is required");
+
+    throw new Error(
+        "Virtual Genie: #world not found."
+    );
+
 }
 
 
@@ -16,10 +22,13 @@ if (!world) {
    SCENE
 ========================================================= */
 
-const scene = new THREE.Scene();
+const scene =
+    new THREE.Scene();
 
 scene.background =
-    new THREE.Color(0x020304);
+    new THREE.Color(
+        0x020304
+    );
 
 scene.fog =
     new THREE.FogExp2(
@@ -33,9 +42,10 @@ const camera =
         58,
         window.innerWidth /
         window.innerHeight,
-        0.1,
+        .1,
         300
     );
+
 
 camera.position.set(
     0,
@@ -44,16 +54,21 @@ camera.position.set(
 );
 
 
+/* =========================================================
+   RENDERER
+========================================================= */
+
 const renderer =
     new THREE.WebGLRenderer({
+
         antialias:
             window.devicePixelRatio < 2,
 
-        alpha: false,
-
         powerPreference:
             "high-performance"
+
     });
+
 
 renderer.setPixelRatio(
     Math.min(
@@ -62,13 +77,16 @@ renderer.setPixelRatio(
     )
 );
 
+
 renderer.setSize(
     window.innerWidth,
     window.innerHeight
 );
 
+
 renderer.outputColorSpace =
     THREE.SRGBColorSpace;
+
 
 world.appendChild(
     renderer.domElement
@@ -76,93 +94,107 @@ world.appendChild(
 
 
 /* =========================================================
-   MOBILE QUALITY
+   QUALITY
 ========================================================= */
 
-const isMobile =
-    window.innerWidth < 800;
+const mobile =
+    window.innerWidth <= 800;
 
-const ringCount =
-    isMobile ? 85 : 150;
+const RINGS =
+    mobile ? 80 : 145;
 
-const particleCount =
-    isMobile ? 350 : 900;
+const PARTICLES =
+    mobile ? 300 : 800;
 
 
 /* =========================================================
-   LIGHTING
+   LIGHTS
 ========================================================= */
 
 scene.add(
     new THREE.AmbientLight(
-        0x26384a,
-        0.55
+        0x25394b,
+        .55
     )
 );
 
 
-const blue =
+const blueLight =
     new THREE.PointLight(
         0x168cff,
         8,
         45
     );
 
-const cyan =
+const cyanLight =
     new THREE.PointLight(
         0x00d9ff,
         7,
         40
     );
 
-const orange =
+const orangeLight =
     new THREE.PointLight(
         0xff6418,
         6,
         35
     );
 
+
 scene.add(
-    blue,
-    cyan,
-    orange
+    blueLight,
+    cyanLight,
+    orangeLight
 );
 
 
 /* =========================================================
-   WORLD
+   WORLD GROUP
 ========================================================= */
 
-const worldGroup =
+const tunnel =
     new THREE.Group();
 
 scene.add(
-    worldGroup
+    tunnel
 );
 
 
 /* =========================================================
-   TUNNEL RINGS
+   TUNNEL
 ========================================================= */
 
-const tunnelLength = 220;
-const tunnelRadius = 8.5;
+const tunnelLength =
+    230;
+
+const tunnelRadius =
+    8.5;
 
 
 const ringMaterial =
     new THREE.LineBasicMaterial({
-        color: 0x17405a,
-        transparent: true,
-        opacity: .7
+
+        color:
+            0x17405a,
+
+        transparent:
+            true,
+
+        opacity:
+            .72
+
     });
 
 
-function makeRing(
-    radius,
-    segments
-) {
+function createRing() {
 
     const points = [];
+
+    const segments =
+        mobile
+            ? 14
+            : 22;
+
 
     for (
         let i = 0;
@@ -176,65 +208,85 @@ function makeRing(
             Math.PI *
             2;
 
+
         points.push(
+
             new THREE.Vector3(
-                Math.cos(angle) * radius,
-                Math.sin(angle) * radius,
+
+                Math.cos(angle) *
+                tunnelRadius,
+
+                Math.sin(angle) *
+                tunnelRadius,
+
                 0
+
             )
+
         );
 
     }
 
+
     return new THREE.Line(
+
         new THREE.BufferGeometry()
-            .setFromPoints(points),
+            .setFromPoints(
+                points
+            ),
 
         ringMaterial
+
     );
+
 }
 
 
 for (
     let i = 0;
-    i < ringCount;
+    i < RINGS;
     i++
 ) {
 
     const ring =
-        makeRing(
-            tunnelRadius,
-            isMobile ? 14 : 22
-        );
+        createRing();
 
-    const depth =
-        i *
-        tunnelLength /
-        ringCount;
 
     ring.position.z =
-        -depth;
+        -(
+            i *
+            tunnelLength /
+            RINGS
+        );
+
 
     ring.rotation.z =
-        Math.sin(i * .19) *
+        Math.sin(
+            i * .2
+        ) *
         .035;
+
 
     ring.scale.x =
         1 +
-        Math.sin(i * .13) *
+        Math.sin(
+            i * .13
+        ) *
         .025;
+
 
     ring.scale.y =
         1 +
-        Math.cos(i * .17) *
+        Math.cos(
+            i * .17
+        ) *
         .025;
 
-    ring.userData.depth =
-        depth;
 
-    worldGroup.add(
+    tunnel.add(
         ring
     );
+
 }
 
 
@@ -244,34 +296,39 @@ for (
 
 const spineMaterial =
     new THREE.LineBasicMaterial({
-        color: 0x0b3046,
-        transparent: true,
-        opacity: .7
+
+        color:
+            0x0b3046,
+
+        transparent:
+            true,
+
+        opacity:
+            .8
+
     });
 
 
-const spinePoints = [
+[
+    [7.2,5.2],
+    [-7.2,5.2],
+    [7.2,-5.2],
+    [-7.2,-5.2]
 
-    [ 7.2,  5.2 ],
-    [-7.2,  5.2 ],
-    [ 7.2, -5.2 ],
-    [-7.2, -5.2 ]
+].forEach(
+    ([x,y]) => {
 
-];
+        tunnel.add(
 
-
-spinePoints.forEach(
-    ([x, y]) => {
-
-        const line =
             new THREE.Line(
+
                 new THREE.BufferGeometry()
                     .setFromPoints([
 
                         new THREE.Vector3(
                             x,
                             y,
-                            5
+                            8
                         ),
 
                         new THREE.Vector3(
@@ -283,10 +340,9 @@ spinePoints.forEach(
                     ]),
 
                 spineMaterial
-            );
 
-        worldGroup.add(
-            line
+            )
+
         );
 
     }
@@ -294,28 +350,30 @@ spinePoints.forEach(
 
 
 /* =========================================================
-   MOVING LIGHT STREAKS
+   LIGHT STREAKS
 ========================================================= */
 
-const streaks =
+const streakGroup =
     new THREE.Group();
 
 scene.add(
-    streaks
+    streakGroup
 );
 
 
 const streakColors = [
+
     0x168cff,
     0x00d9ff,
     0xff6418,
     0x9b5cff,
     0xc9ff35
+
 ];
 
 
 const streakCount =
-    isMobile ? 45 : 100;
+    mobile ? 40 : 100;
 
 
 for (
@@ -324,31 +382,33 @@ for (
     i++
 ) {
 
-    const material =
-        new THREE.MeshBasicMaterial({
-            color:
-                streakColors[
-                    i %
-                    streakColors.length
-                ],
-
-            transparent:true,
-
-            opacity:
-                .25 +
-                Math.random() * .5
-        });
-
-
     const mesh =
         new THREE.Mesh(
+
             new THREE.BoxGeometry(
                 .025,
                 .025,
                 .5 +
                 Math.random() * 3
             ),
-            material
+
+            new THREE.MeshBasicMaterial({
+
+                color:
+                    streakColors[
+                        i %
+                        streakColors.length
+                    ],
+
+                transparent:
+                    true,
+
+                opacity:
+                    .2 +
+                    Math.random() * .55
+
+            })
+
         );
 
 
@@ -357,9 +417,11 @@ for (
         Math.PI *
         2;
 
+
     const radius =
         4.5 +
-        Math.random() * 4;
+        Math.random() *
+        4;
 
 
     mesh.position.set(
@@ -386,7 +448,7 @@ for (
         .08;
 
 
-    streaks.add(
+    streakGroup.add(
         mesh
     );
 
@@ -397,47 +459,54 @@ for (
    PARTICLES
 ========================================================= */
 
-const positions =
+const particlePositions =
     new Float32Array(
-        particleCount * 3
+        PARTICLES * 3
     );
+
 
 const particleSpeeds =
     new Float32Array(
-        particleCount
+        PARTICLES
     );
 
 
 for (
     let i = 0;
-    i < particleCount;
+    i < PARTICLES;
     i++
 ) {
 
     const n =
         i * 3;
 
+
     const angle =
         Math.random() *
         Math.PI *
         2;
+
 
     const radius =
         1.5 +
         Math.random() *
         9;
 
-    positions[n] =
+
+    particlePositions[n] =
         Math.cos(angle) *
         radius;
 
-    positions[n + 1] =
+
+    particlePositions[n + 1] =
         Math.sin(angle) *
         radius;
 
-    positions[n + 2] =
+
+    particlePositions[n + 2] =
         -Math.random() *
         tunnelLength;
+
 
     particleSpeeds[i] =
         .015 +
@@ -450,40 +519,47 @@ for (
 const particleGeometry =
     new THREE.BufferGeometry();
 
+
 particleGeometry.setAttribute(
+
     "position",
 
     new THREE.BufferAttribute(
-        positions,
+        particlePositions,
         3
     )
+
 );
-
-
-const particleMaterial =
-    new THREE.PointsMaterial({
-
-        color:0x65bfff,
-
-        size:
-            isMobile
-                ? .035
-                : .045,
-
-        transparent:true,
-
-        opacity:.62,
-
-        depthWrite:false
-
-    });
 
 
 const particles =
     new THREE.Points(
+
         particleGeometry,
-        particleMaterial
+
+        new THREE.PointsMaterial({
+
+            color:
+                0x65bfff,
+
+            size:
+                mobile
+                    ? .035
+                    : .045,
+
+            transparent:
+                true,
+
+            opacity:
+                .62,
+
+            depthWrite:
+                false
+
+        })
+
     );
+
 
 scene.add(
     particles
@@ -502,30 +578,27 @@ scene.add(
 );
 
 
-const productLayers = [
+const worlds = [
 
     {
-        z:-45,
-        title:"AI RECEPTIONIST",
+        z:-48,
         color:0x168cff
     },
 
     {
-        z:-105,
-        title:"AI AUTOMATIONS",
+        z:-112,
         color:0x9b5cff
     },
 
     {
-        z:-165,
-        title:"BUSINESS OS",
+        z:-176,
         color:0xc9ff35
     }
 
 ];
 
 
-function createProductWorld(
+function buildWorld(
     data
 ) {
 
@@ -534,7 +607,7 @@ function createProductWorld(
 
 
     /*
-       Central intelligence core
+       Central AI core
     */
 
     const core =
@@ -546,10 +619,19 @@ function createProductWorld(
             ),
 
             new THREE.MeshBasicMaterial({
-                color:data.color,
-                wireframe:true,
-                transparent:true,
-                opacity:.9
+
+                color:
+                    data.color,
+
+                wireframe:
+                    true,
+
+                transparent:
+                    true,
+
+                opacity:
+                    .9
+
             })
 
         );
@@ -570,51 +652,60 @@ function createProductWorld(
         i++
     ) {
 
-        const ring =
+        const orbit =
             new THREE.Mesh(
 
                 new THREE.TorusGeometry(
                     1.8 +
                     i * .65,
-
                     .012,
                     8,
                     80
                 ),
 
                 new THREE.MeshBasicMaterial({
-                    color:data.color,
-                    transparent:true,
-                    opacity:.4
+
+                    color:
+                        data.color,
+
+                    transparent:
+                        true,
+
+                    opacity:
+                        .4
+
                 })
 
             );
 
 
-        ring.rotation.x =
+        orbit.rotation.x =
             Math.PI /
             2 +
             i * .35;
 
-        ring.rotation.y =
+
+        orbit.rotation.y =
             i * .7;
 
-        ring.userData.speed =
+
+        orbit.userData.speed =
             .001 +
             i * .0008;
 
+
         group.add(
-            ring
+            orbit
         );
 
     }
 
 
     /*
-       Business nodes
+       Intelligence nodes
     */
 
-    const nodeGeometry =
+    const geometry =
         new THREE.SphereGeometry(
             .12,
             10,
@@ -634,6 +725,7 @@ function createProductWorld(
             Math.PI *
             2;
 
+
         const radius =
             3.2 +
             Math.sin(i) *
@@ -643,10 +735,13 @@ function createProductWorld(
         const node =
             new THREE.Mesh(
 
-                nodeGeometry,
+                geometry,
 
                 new THREE.MeshBasicMaterial({
-                    color:data.color
+
+                    color:
+                        data.color
+
                 })
 
             );
@@ -677,14 +772,10 @@ function createProductWorld(
         data.z;
 
 
-    group.userData =
-        {
-            baseZ:data.z,
-            phase:
-                Math.random() *
-                Math.PI *
-                2
-        };
+    group.userData.phase =
+        Math.random() *
+        Math.PI *
+        2;
 
 
     productWorld.add(
@@ -694,25 +785,29 @@ function createProductWorld(
 }
 
 
-productLayers.forEach(
-    createProductWorld
+worlds.forEach(
+    buildWorld
 );
 
 
 /* =========================================================
-   SCROLL ENGINE
+   SCROLL
 ========================================================= */
 
-let targetProgress = 0;
-let smoothProgress = 0;
+let targetScroll =
+    0;
+
+let smoothScroll =
+    0;
 
 let previousScroll =
     window.scrollY;
 
-let scrollVelocity = 0;
+let scrollVelocity =
+    0;
 
 
-function updateScroll() {
+function readScroll() {
 
     const max =
         document.documentElement
@@ -720,7 +815,7 @@ function updateScroll() {
         window.innerHeight;
 
 
-    targetProgress =
+    targetScroll =
         max <= 0
             ? 0
             : window.scrollY / max;
@@ -730,6 +825,7 @@ function updateScroll() {
         window.scrollY -
         previousScroll;
 
+
     previousScroll =
         window.scrollY;
 
@@ -738,36 +834,7 @@ function updateScroll() {
 
 window.addEventListener(
     "scroll",
-    updateScroll,
-    {
-        passive:true
-    }
-);
-
-
-/* =========================================================
-   POINTER
-========================================================= */
-
-let pointerX = 0;
-let pointerY = 0;
-
-
-window.addEventListener(
-    "pointermove",
-    event => {
-
-        pointerX =
-            event.clientX /
-            window.innerWidth -
-            .5;
-
-        pointerY =
-            event.clientY /
-            window.innerHeight -
-            .5;
-
-    },
+    readScroll,
     {
         passive:true
     }
@@ -782,22 +849,17 @@ function updateCamera(
     time
 ) {
 
-    smoothProgress +=
+    smoothScroll +=
         (
-            targetProgress -
-            smoothProgress
+            targetScroll -
+            smoothScroll
         ) *
         .055;
 
 
-    /*
-       This is the actual
-       tunnel travel.
-    */
-
-    const destinationZ =
+    const targetZ =
         10 -
-        smoothProgress *
+        smoothScroll *
         205;
 
 
@@ -815,19 +877,9 @@ function updateCamera(
         .11;
 
 
-    const pointerInfluenceX =
-        pointerX *
-        (isMobile ? .05 : .45);
-
-
-    const pointerInfluenceY =
-        pointerY *
-        (isMobile ? .03 : .25);
-
-
     camera.position.z +=
         (
-            destinationZ -
+            targetZ -
             camera.position.z
         ) *
         .06;
@@ -835,8 +887,7 @@ function updateCamera(
 
     camera.position.x +=
         (
-            swayX +
-            pointerInfluenceX -
+            swayX -
             camera.position.x
         ) *
         .025;
@@ -845,16 +896,10 @@ function updateCamera(
     camera.position.y +=
         (
             swayY -
-            pointerInfluenceY -
             camera.position.y
         ) *
         .025;
 
-
-    /*
-       The faster the user scrolls,
-       the more the tunnel reacts.
-    */
 
     const targetRotation =
         THREE.MathUtils.clamp(
@@ -872,14 +917,70 @@ function updateCamera(
         ) *
         .08;
 
+}
 
-    camera.rotation.x +=
+
+/* =========================================================
+   POINTER
+========================================================= */
+
+let pointerX =
+    0;
+
+let pointerY =
+    0;
+
+
+window.addEventListener(
+    "pointermove",
+    event => {
+
+        pointerX =
+            event.clientX /
+            window.innerWidth -
+            .5;
+
+
+        pointerY =
+            event.clientY /
+            window.innerHeight -
+            .5;
+
+    },
+    {
+        passive:true
+    }
+);
+
+
+function updatePointer() {
+
+    if (mobile) {
+        return;
+    }
+
+
+    const x =
+        pointerX * .35;
+
+    const y =
+        pointerY * .2;
+
+
+    camera.position.x +=
         (
-            pointerY *
-            .018 -
-            camera.rotation.x
+            x -
+            camera.position.x
         ) *
-        .025;
+        .008;
+
+
+    camera.position.y +=
+        (
+            y -
+            camera.position.y
+        ) *
+        .008;
 
 }
 
@@ -888,22 +989,21 @@ function updateCamera(
    ANIMATE TUNNEL
 ========================================================= */
 
-function animateTunnel(
-    time
-) {
+function animateTunnel() {
 
-    worldGroup.rotation.z =
+    tunnel.rotation.z =
         Math.sin(
-            time * .00008
+            performance.now() *
+            .00008
         ) *
         .008;
 
 
     /*
-       Light streak movement.
+       Light streaks.
     */
 
-    streaks.children.forEach(
+    streakGroup.children.forEach(
         streak => {
 
             streak.position.z +=
@@ -925,10 +1025,10 @@ function animateTunnel(
 
 
     /*
-       Particle movement.
+       Particles.
     */
 
-    const position =
+    const positions =
         particleGeometry
             .attributes
             .position;
@@ -936,45 +1036,44 @@ function animateTunnel(
 
     for (
         let i = 0;
-        i < particleCount;
+        i < PARTICLES;
         i++
     ) {
 
-        const z =
-            position.getZ(i);
+        let z =
+            positions.getZ(i);
 
 
-        position.setZ(
-            i,
-
-            z +
-            particleSpeeds[i]
-        );
+        z +=
+            particleSpeeds[i];
 
 
         if (
-            position.getZ(i) >
-            10
+            z > 10
         ) {
 
-            position.setZ(
-                i,
-                -tunnelLength
-            );
+            z =
+                -tunnelLength;
 
         }
+
+
+        positions.setZ(
+            i,
+            z
+        );
 
     }
 
 
-    position.needsUpdate =
+    positions.needsUpdate =
         true;
 
 }
 
 
 /* =========================================================
-   ANIMATE PRODUCT WORLDS
+   PRODUCT WORLD ANIMATION
 ========================================================= */
 
 function animateProducts(
@@ -989,12 +1088,14 @@ function animateProducts(
 
 
             group.rotation.y =
-                time * .00025;
+                time *
+                .00025;
 
 
             group.rotation.x =
                 Math.sin(
-                    time * .0004 +
+                    time *
+                    .0004 +
                     phase
                 ) *
                 .08;
@@ -1002,14 +1103,15 @@ function animateProducts(
 
             group.position.y =
                 Math.sin(
-                    time * .0007 +
+                    time *
+                    .0007 +
                     phase
                 ) *
                 .15;
 
 
             group.children.forEach(
-                (child,index) => {
+                child => {
 
                     if (
                         child.userData
@@ -1031,48 +1133,252 @@ function animateProducts(
 
 
 /* =========================================================
-   LIGHT MOTION
+   LIGHT ANIMATION
 ========================================================= */
 
 function animateLights(
     time
 ) {
 
-    blue.position.x =
+    blueLight.position.x =
         Math.sin(
-            time * .00045
-        ) * 6;
+            time *
+            .00045
+        ) *
+        6;
 
-    blue.position.y =
+
+    blueLight.position.y =
         Math.cos(
-            time * .00035
-        ) * 4;
+            time *
+            .00035
+        ) *
+        4;
 
 
-    cyan.position.x =
+    cyanLight.position.x =
         Math.cos(
-            time * .00032
-        ) * 8;
+            time *
+            .00032
+        ) *
+        8;
 
-    cyan.position.z =
+
+    cyanLight.position.z =
         -30 +
         Math.sin(
-            time * .0004
-        ) * 20;
+            time *
+            .0004
+        ) *
+        20;
 
 
-    orange.position.y =
+    orangeLight.position.y =
         Math.sin(
-            time * .0005
-        ) * 6;
+            time *
+            .0005
+        ) *
+        6;
 
-    orange.position.z =
+
+    orangeLight.position.z =
         -80 +
         Math.cos(
-            time * .0003
-        ) * 30;
+            time *
+            .0003
+        ) *
+        30;
 
 }
+
+
+/* =========================================================
+   SECTION WORLDS
+========================================================= */
+
+const sectionElements =
+    document.querySelectorAll(
+        ".tunnel-section[data-world]"
+    );
+
+
+let activeWorld =
+    "";
+
+
+function updateSectionWorld() {
+
+    const center =
+        window.innerHeight *
+        .5;
+
+
+    let closest =
+        null;
+
+
+    let distance =
+        Infinity;
+
+
+    sectionElements.forEach(
+        section => {
+
+            const rect =
+                section
+                    .getBoundingClientRect();
+
+
+            const sectionCenter =
+                rect.top +
+                rect.height / 2;
+
+
+            const d =
+                Math.abs(
+                    sectionCenter -
+                    center
+                );
+
+
+            if (
+                d < distance
+            ) {
+
+                distance =
+                    d;
+
+                closest =
+                    section;
+
+            }
+
+        }
+    );
+
+
+    if (!closest) {
+        return;
+    }
+
+
+    const worldName =
+        closest.dataset.world;
+
+
+    if (
+        worldName ===
+        activeWorld
+    ) {
+
+        return;
+
+    }
+
+
+    activeWorld =
+        worldName;
+
+
+    document.body.dataset.world =
+        worldName;
+
+
+    const colors = {
+
+        receptionist:
+            0x168cff,
+
+        automation:
+            0x9b5cff,
+
+        os:
+            0xc9ff35
+
+    };
+
+
+    const color =
+        colors[
+            worldName
+        ];
+
+
+    if (color) {
+
+        const target =
+            new THREE.Color(
+                color
+            );
+
+
+        ringMaterial.color.lerp(
+            target,
+            .35
+        );
+
+        blueLight.color.lerp(
+            target,
+            .35
+        );
+
+    }
+
+}
+
+
+window.addEventListener(
+    "scroll",
+    updateSectionWorld,
+    {
+        passive:true
+    }
+);
+
+
+/* =========================================================
+   SECTION REVEALS
+========================================================= */
+
+const sectionObserver =
+    new IntersectionObserver(
+
+        entries => {
+
+            entries.forEach(
+                entry => {
+
+                    if (
+                        entry.isIntersecting
+                    ) {
+
+                        entry.target
+                            .classList
+                            .add(
+                                "active"
+                            );
+
+                    }
+
+                }
+            );
+
+        },
+
+        {
+            threshold:
+                .35
+        }
+
+    );
+
+
+sectionElements.forEach(
+    section =>
+        sectionObserver.observe(
+            section
+        )
+);
 
 
 /* =========================================================
@@ -1100,13 +1406,15 @@ if (
         () => {
 
             const open =
-                mobileMenu.classList
+                mobileMenu
+                    .classList
                     .toggle(
                         "open"
                     );
 
 
-            menuButton.classList
+            menuButton
+                .classList
                 .toggle(
                     "active",
                     open
@@ -1123,7 +1431,9 @@ if (
 
 
     mobileMenu
-        .querySelectorAll("a")
+        .querySelectorAll(
+            "a"
+        )
         .forEach(
             link => {
 
@@ -1136,6 +1446,7 @@ if (
                             .remove(
                                 "open"
                             );
+
 
                         menuButton
                             .classList
@@ -1153,7 +1464,7 @@ if (
 
 
 /* =========================================================
-   PRODUCT ROUTING
+   PRODUCT TRANSITION
 ========================================================= */
 
 const routes = {
@@ -1218,225 +1529,15 @@ document.body.appendChild(
 );
 
 
-/* =========================================================
-   TRANSITION STYLE
-========================================================= */
-
-const transitionCSS =
-    document.createElement(
-        "style"
-    );
-
-
-transitionCSS.textContent = `
-
-#vg-transition{
-
-    position:fixed;
-
-    inset:0;
-
-    z-index:99999;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    background:#020304;
-
-    opacity:0;
-
-    visibility:hidden;
-
-    pointer-events:none;
-
-    transition:
-        opacity .3s ease;
-
-}
-
-#vg-transition.active{
-
-    opacity:1;
-
-    visibility:visible;
-
-    pointer-events:auto;
-
-}
-
-.vg-transition-inner{
-
-    width:min(430px,82vw);
-
-    text-align:center;
-
-}
-
-.vg-transition-core{
-
-    position:relative;
-
-    width:100px;
-    height:100px;
-
-    margin:
-        0 auto
-        35px;
-
-    border:
-        1px solid
-        rgba(22,140,255,.6);
-
-    border-radius:50%;
-
-    animation:
-        vgCoreSpin
-        2s
-        linear
-        infinite;
-
-}
-
-.vg-transition-core span{
-
-    position:absolute;
-
-    left:50%;
-    top:50%;
-
-    width:8px;
-    height:8px;
-
-    margin:-4px;
-
-    border-radius:50%;
-
-    background:#168cff;
-
-    box-shadow:
-        0 0 18px
-        rgba(22,140,255,.9);
-
-}
-
-.vg-transition-core span:nth-child(1){
-    transform:
-        translateY(-46px);
-}
-
-.vg-transition-core span:nth-child(2){
-    transform:
-        translateX(46px);
-}
-
-.vg-transition-core span:nth-child(3){
-    transform:
-        translateY(46px);
-}
-
-@keyframes vgCoreSpin{
-
-    to{
-        transform:rotate(360deg);
-    }
-
-}
-
-.vg-transition-label{
-
-    color:#666;
-
-    font-size:9px;
-
-    letter-spacing:.3em;
-
-}
-
-.vg-transition-title{
-
-    margin-top:16px;
-
-    font-size:30px;
-
-    letter-spacing:-.04em;
-
-}
-
-.vg-transition-status{
-
-    margin-top:12px;
-
-    color:#777;
-
-    font-size:11px;
-
-}
-
-.vg-progress{
-
-    width:100%;
-
-    height:1px;
-
-    margin-top:30px;
-
-    background:
-        rgba(255,255,255,.1);
-
-}
-
-.vg-progress span{
-
-    display:block;
-
-    width:0;
-
-    height:100%;
-
-    background:#c9ff35;
-
-}
-
-#vg-transition.active
-.vg-progress span{
-
-    animation:
-        vgProgress
-        1.5s
-        ease
-        forwards;
-
-}
-
-@keyframes vgProgress{
-
-    to{
-        width:100%;
-    }
-
-}
-
-`;
-
-document.head.appendChild(
-    transitionCSS
-);
-
-
-/* =========================================================
-   PRODUCT NAVIGATION
-========================================================= */
-
 function openProduct(
     product,
     event
 ) {
 
     const destination =
-        routes[product];
+        routes[
+            product
+        ];
 
 
     if (!destination) {
@@ -1523,10 +1624,6 @@ function openProduct(
 }
 
 
-/*
-   One routing system only.
-*/
-
 document
     .querySelectorAll(
         "a[data-product]"
@@ -1562,6 +1659,7 @@ window.addEventListener(
             window.innerWidth /
             window.innerHeight;
 
+
         camera.updateProjectionMatrix();
 
 
@@ -1592,24 +1690,24 @@ const loading =
     );
 
 
-if (loading) {
+setTimeout(
+    () => {
 
-    setTimeout(
-        () => {
+        if (loading) {
 
             loading.classList.add(
                 "hidden"
             );
 
-        },
-        650
-    );
+        }
 
-}
+    },
+    700
+);
 
 
 /* =========================================================
-   RENDER
+   LOOP
 ========================================================= */
 
 function animate() {
@@ -1627,9 +1725,9 @@ function animate() {
         time
     );
 
-    animateTunnel(
-        time
-    );
+    updatePointer();
+
+    animateTunnel();
 
     animateProducts(
         time
@@ -1648,11 +1746,8 @@ function animate() {
 }
 
 
-updateScroll();
+readScroll();
+
+updateSectionWorld();
 
 animate();
-
-
-console.log(
-    "Virtual Genie AI — immersive tunnel online."
-);
