@@ -1,20 +1,19 @@
 import * as THREE from "three";
 
 /* =========================================================
-   VIRTUAL GENIE AI
-   MAIN 3D TUNNEL + PRODUCT ROUTING
+   VIRTUAL GENIE AI — IMMERSIVE 3D HOMEPAGE
 ========================================================= */
 
 const world = document.getElementById("world");
-const loading = document.getElementById("loading");
 
 if (!world) {
-    console.error("Virtual Genie: #world not found.");
+    console.error("Virtual Genie: #world missing.");
+    throw new Error("#world is required");
 }
 
 
 /* =========================================================
-   THREE.JS
+   SCENE
 ========================================================= */
 
 const scene = new THREE.Scene();
@@ -25,23 +24,23 @@ scene.background =
 scene.fog =
     new THREE.FogExp2(
         0x020304,
-        0.018
+        0.012
     );
 
 
 const camera =
     new THREE.PerspectiveCamera(
-        62,
+        58,
         window.innerWidth /
         window.innerHeight,
         0.1,
-        250
+        300
     );
 
 camera.position.set(
     0,
     0,
-    7
+    10
 );
 
 
@@ -49,6 +48,8 @@ const renderer =
     new THREE.WebGLRenderer({
         antialias:
             window.devicePixelRatio < 2,
+
+        alpha: false,
 
         powerPreference:
             "high-performance"
@@ -75,17 +76,17 @@ world.appendChild(
 
 
 /* =========================================================
-   QUALITY
+   MOBILE QUALITY
 ========================================================= */
 
-const mobile =
-    window.innerWidth <= 800;
+const isMobile =
+    window.innerWidth < 800;
 
-const RINGS =
-    mobile ? 75 : 130;
+const ringCount =
+    isMobile ? 85 : 150;
 
-const PARTICLES =
-    mobile ? 220 : 500;
+const particleCount =
+    isMobile ? 350 : 900;
 
 
 /* =========================================================
@@ -94,72 +95,69 @@ const PARTICLES =
 
 scene.add(
     new THREE.AmbientLight(
-        0x31506a,
-        0.45
+        0x26384a,
+        0.55
     )
 );
 
 
-const blueLight =
+const blue =
     new THREE.PointLight(
         0x168cff,
+        8,
+        45
+    );
+
+const cyan =
+    new THREE.PointLight(
+        0x00d9ff,
         7,
+        40
+    );
+
+const orange =
+    new THREE.PointLight(
+        0xff6418,
+        6,
         35
     );
 
 scene.add(
-    blueLight
-);
-
-
-const cyanLight =
-    new THREE.PointLight(
-        0x00d9ff,
-        5,
-        30
-    );
-
-scene.add(
-    cyanLight
-);
-
-
-const orangeLight =
-    new THREE.PointLight(
-        0xff7a18,
-        4,
-        28
-    );
-
-scene.add(
-    orangeLight
+    blue,
+    cyan,
+    orange
 );
 
 
 /* =========================================================
-   TUNNEL
+   WORLD
 ========================================================= */
 
-const tunnel =
+const worldGroup =
     new THREE.Group();
 
 scene.add(
-    tunnel
+    worldGroup
 );
 
-const tunnelLength = 180;
-const tunnelRadius = 8;
+
+/* =========================================================
+   TUNNEL RINGS
+========================================================= */
+
+const tunnelLength = 220;
+const tunnelRadius = 8.5;
 
 
 const ringMaterial =
     new THREE.LineBasicMaterial({
-        color: 0x16364d,
+        color: 0x17405a,
         transparent: true,
-        opacity: 0.55
+        opacity: .7
     });
 
 
-function createRing(
+function makeRing(
     radius,
     segments
 ) {
@@ -180,26 +178,18 @@ function createRing(
 
         points.push(
             new THREE.Vector3(
-                Math.cos(angle) *
-                radius,
-
-                Math.sin(angle) *
-                radius,
-
+                Math.cos(angle) * radius,
+                Math.sin(angle) * radius,
                 0
             )
         );
 
     }
 
-    const geometry =
-        new THREE.BufferGeometry()
-            .setFromPoints(
-                points
-            );
-
     return new THREE.Line(
-        geometry,
+        new THREE.BufferGeometry()
+            .setFromPoints(points),
+
         ringMaterial
     );
 }
@@ -207,153 +197,148 @@ function createRing(
 
 for (
     let i = 0;
-    i < RINGS;
+    i < ringCount;
     i++
 ) {
 
     const ring =
-        createRing(
+        makeRing(
             tunnelRadius,
-            mobile ? 10 : 16
+            isMobile ? 14 : 22
         );
 
-    ring.position.z =
-        -i *
+    const depth =
+        i *
         tunnelLength /
-        RINGS;
+        ringCount;
+
+    ring.position.z =
+        -depth;
 
     ring.rotation.z =
-        Math.sin(i * .27) *
+        Math.sin(i * .19) *
         .035;
 
     ring.scale.x =
         1 +
-        Math.sin(i * .17) *
+        Math.sin(i * .13) *
         .025;
 
     ring.scale.y =
         1 +
-        Math.cos(i * .21) *
+        Math.cos(i * .17) *
         .025;
 
-    tunnel.add(
+    ring.userData.depth =
+        depth;
+
+    worldGroup.add(
         ring
     );
 }
 
 
 /* =========================================================
-   STRUCTURAL LINES
+   TUNNEL SPINES
 ========================================================= */
 
-const structureMaterial =
+const spineMaterial =
     new THREE.LineBasicMaterial({
-        color: 0x0c2638,
+        color: 0x0b3046,
         transparent: true,
-        opacity: .8
+        opacity: .7
     });
 
 
-function structure(
-    x,
-    y
-) {
+const spinePoints = [
 
-    const geometry =
-        new THREE.BufferGeometry()
-            .setFromPoints([
+    [ 7.2,  5.2 ],
+    [-7.2,  5.2 ],
+    [ 7.2, -5.2 ],
+    [-7.2, -5.2 ]
 
-                new THREE.Vector3(
-                    x,
-                    y,
-                    0
-                ),
-
-                new THREE.Vector3(
-                    x * .85,
-                    y * .85,
-                    -tunnelLength
-                )
-
-            ]);
-
-    tunnel.add(
-        new THREE.Line(
-            geometry,
-            structureMaterial
-        )
-    );
-}
+];
 
 
-structure(7, 5);
-structure(-7, 5);
-structure(7, -5);
-structure(-7, -5);
+spinePoints.forEach(
+    ([x, y]) => {
 
+        const line =
+            new THREE.Line(
+                new THREE.BufferGeometry()
+                    .setFromPoints([
 
-/* =========================================================
-   FLOOR
-========================================================= */
+                        new THREE.Vector3(
+                            x,
+                            y,
+                            5
+                        ),
 
-const floor =
-    new THREE.Mesh(
-        new THREE.PlaneGeometry(
-            18,
-            tunnelLength
-        ),
+                        new THREE.Vector3(
+                            x * .82,
+                            y * .82,
+                            -tunnelLength
+                        )
 
-        new THREE.MeshBasicMaterial({
-            color: 0x071018,
-            side: THREE.DoubleSide
-        })
-    );
+                    ]),
 
-floor.rotation.x =
-    -Math.PI / 2;
+                spineMaterial
+            );
 
-floor.position.z =
-    -tunnelLength / 2;
+        worldGroup.add(
+            line
+        );
 
-tunnel.add(
-    floor
+    }
 );
 
 
 /* =========================================================
-   LIGHT STRIPS
+   MOVING LIGHT STREAKS
 ========================================================= */
 
-const lights =
+const streaks =
     new THREE.Group();
 
 scene.add(
-    lights
+    streaks
 );
 
 
-const lightColors = [
+const streakColors = [
     0x168cff,
     0x00d9ff,
-    0xff7a18,
-    0x9b5cff
+    0xff6418,
+    0x9b5cff,
+    0xc9ff35
 ];
+
+
+const streakCount =
+    isMobile ? 45 : 100;
 
 
 for (
     let i = 0;
-    i < (mobile ? 25 : 55);
+    i < streakCount;
     i++
 ) {
 
     const material =
         new THREE.MeshBasicMaterial({
             color:
-                lightColors[
+                streakColors[
                     i %
-                    lightColors.length
-                ]
+                    streakColors.length
+                ],
+
+            transparent:true,
+
+            opacity:
+                .25 +
+                Math.random() * .5
         });
+
 
     const mesh =
         new THREE.Mesh(
@@ -361,10 +346,11 @@ for (
                 .025,
                 .025,
                 .5 +
-                Math.random() * 2
+                Math.random() * 3
             ),
             material
         );
+
 
     const angle =
         Math.random() *
@@ -372,11 +358,12 @@ for (
         2;
 
     const radius =
-        5.8 +
-        Math.random() *
-        1.5;
+        4.5 +
+        Math.random() * 4;
+
 
     mesh.position.set(
+
         Math.cos(angle) *
         radius,
 
@@ -385,14 +372,24 @@ for (
 
         -Math.random() *
         tunnelLength
+
     );
+
 
     mesh.rotation.z =
         angle;
 
-    lights.add(
+
+    mesh.userData.speed =
+        .025 +
+        Math.random() *
+        .08;
+
+
+    streaks.add(
         mesh
     );
+
 }
 
 
@@ -400,19 +397,25 @@ for (
    PARTICLES
 ========================================================= */
 
-const particlePositions =
+const positions =
     new Float32Array(
-        PARTICLES * 3
+        particleCount * 3
+    );
+
+const particleSpeeds =
+    new Float32Array(
+        particleCount
     );
 
 
 for (
     let i = 0;
-    i < PARTICLES;
+    i < particleCount;
     i++
 ) {
 
-    const n = i * 3;
+    const n =
+        i * 3;
 
     const angle =
         Math.random() *
@@ -420,21 +423,27 @@ for (
         2;
 
     const radius =
-        2 +
+        1.5 +
         Math.random() *
         9;
 
-    particlePositions[n] =
+    positions[n] =
         Math.cos(angle) *
         radius;
 
-    particlePositions[n + 1] =
+    positions[n + 1] =
         Math.sin(angle) *
         radius;
 
-    particlePositions[n + 2] =
+    positions[n + 2] =
         -Math.random() *
         tunnelLength;
+
+    particleSpeeds[i] =
+        .015 +
+        Math.random() *
+        .08;
+
 }
 
 
@@ -443,26 +452,37 @@ const particleGeometry =
 
 particleGeometry.setAttribute(
     "position",
+
     new THREE.BufferAttribute(
-        particlePositions,
+        positions,
         3
     )
 );
 
 
+const particleMaterial =
+    new THREE.PointsMaterial({
+
+        color:0x65bfff,
+
+        size:
+            isMobile
+                ? .035
+                : .045,
+
+        transparent:true,
+
+        opacity:.62,
+
+        depthWrite:false
+
+    });
+
+
 const particles =
     new THREE.Points(
         particleGeometry,
-
-        new THREE.PointsMaterial({
-            color: 0x75bfff,
-            size:
-                mobile
-                    ? .035
-                    : .05,
-            transparent: true,
-            opacity: .6
-        })
+        particleMaterial
     );
 
 scene.add(
@@ -471,141 +491,77 @@ scene.add(
 
 
 /* =========================================================
-   PRODUCT PANELS
+   PRODUCT WORLDS
 ========================================================= */
 
-const panelGroup =
+const productWorld =
     new THREE.Group();
 
 scene.add(
-    panelGroup
+    productWorld
 );
 
 
-const productData = [
+const productLayers = [
 
     {
-        title: "AI RECEPTIONIST",
-        status: "CALL RECEIVED",
-        color: 0x168cff
+        z:-45,
+        title:"AI RECEPTIONIST",
+        color:0x168cff
     },
 
     {
-        title: "AI RECEPTIONIST",
-        status: "LEAD QUALIFIED",
-        color: 0x00d9ff
+        z:-105,
+        title:"AI AUTOMATIONS",
+        color:0x9b5cff
     },
 
     {
-        title: "AI AUTOMATIONS",
-        status: "WORKFLOW RUNNING",
-        color: 0x9b5cff
-    },
-
-    {
-        title: "CRM",
-        status: "RECORD UPDATED",
-        color: 0xff7a18
-    },
-
-    {
-        title: "AI AUTOMATIONS",
-        status: "FOLLOW-UP SENT",
-        color: 0x00d9ff
-    },
-
-    {
-        title: "BUSINESS OS",
-        status: "SYSTEM CONNECTED",
-        color: 0x168cff
-    },
-
-    {
-        title: "BUSINESS OS",
-        status: "OPERATIONS ACTIVE",
-        color: 0x9b5cff
-    },
-
-    {
-        title: "AI",
-        status: "DECISION MADE",
-        color: 0xff7a18
+        z:-165,
+        title:"BUSINESS OS",
+        color:0xc9ff35
     }
 
 ];
 
 
-function createPanel(
-    data,
-    index
+function createProductWorld(
+    data
 ) {
 
     const group =
         new THREE.Group();
 
 
-    const width = 3.6;
-    const height = 1.9;
+    /*
+       Central intelligence core
+    */
 
+    const core =
+        new THREE.Mesh(
 
-    const points = [
+            new THREE.IcosahedronGeometry(
+                1.15,
+                1
+            ),
 
-        new THREE.Vector3(
-            -width / 2,
-            -height / 2,
-            0
-        ),
-
-        new THREE.Vector3(
-            width / 2,
-            -height / 2,
-            0
-        ),
-
-        new THREE.Vector3(
-            width / 2,
-            height / 2,
-            0
-        ),
-
-        new THREE.Vector3(
-            -width / 2,
-            height / 2,
-            0
-        ),
-
-        new THREE.Vector3(
-            -width / 2,
-            -height / 2,
-            0
-        )
-
-    ];
-
-
-    const border =
-        new THREE.Line(
-            new THREE.BufferGeometry()
-                .setFromPoints(
-                    points
-                ),
-
-            new THREE.LineBasicMaterial({
-                color:
-                    data.color,
+            new THREE.MeshBasicMaterial({
+                color:data.color,
+                wireframe:true,
                 transparent:true,
-                opacity:.75
+                opacity:.9
             })
+
         );
 
 
     group.add(
-        border
+        core
     );
 
 
     /*
-       Internal data bars.
+       Orbiting rings
     */
 
     for (
@@ -614,117 +570,149 @@ function createPanel(
         i++
     ) {
 
-        const length =
-            .7 +
-            Math.random() *
-            1.5;
+        const ring =
+            new THREE.Mesh(
 
-        const line =
-            new THREE.Line(
-                new THREE.BufferGeometry()
-                    .setFromPoints([
+                new THREE.TorusGeometry(
+                    1.8 +
+                    i * .65,
 
-                        new THREE.Vector3(
-                            -1.15,
-                            .18 -
-                            i * .28,
-                            .01
-                        ),
+                    .012,
+                    8,
+                    80
+                ),
 
-                        new THREE.Vector3(
-                            -1.15 +
-                            length,
-                            .18 -
-                            i * .28,
-                            .01
-                        )
-
-                    ]),
-
-                new THREE.LineBasicMaterial({
-                    color:
-                        data.color,
+                new THREE.MeshBasicMaterial({
+                    color:data.color,
                     transparent:true,
-                    opacity:.35
+                    opacity:.4
                 })
+
             );
 
+
+        ring.rotation.x =
+            Math.PI /
+            2 +
+            i * .35;
+
+        ring.rotation.y =
+            i * .7;
+
+        ring.userData.speed =
+            .001 +
+            i * .0008;
+
         group.add(
-            line
+            ring
         );
 
     }
 
 
-    const angle =
-        index /
-        productData.length *
-        Math.PI *
-        2;
+    /*
+       Business nodes
+    */
 
-    const radius =
-        5.1;
-
-
-    group.position.set(
-
-        Math.cos(angle) *
-        radius,
-
-        Math.sin(angle) *
-        radius,
-
-        -13 -
-        index * 15
-
-    );
+    const nodeGeometry =
+        new THREE.SphereGeometry(
+            .12,
+            10,
+            10
+        );
 
 
-    group.lookAt(
-        new THREE.Vector3(
-            0,
-            0,
-            group.position.z
-        )
-    );
+    for (
+        let i = 0;
+        i < 10;
+        i++
+    ) {
 
-
-    group.userData = {
-        baseX:
-            group.position.x,
-
-        baseY:
-            group.position.y,
-
-        phase:
-            Math.random() *
+        const angle =
+            i /
+            10 *
             Math.PI *
-            2
-    };
+            2;
+
+        const radius =
+            3.2 +
+            Math.sin(i) *
+            .4;
 
 
-    panelGroup.add(
+        const node =
+            new THREE.Mesh(
+
+                nodeGeometry,
+
+                new THREE.MeshBasicMaterial({
+                    color:data.color
+                })
+
+            );
+
+
+        node.position.set(
+
+            Math.cos(angle) *
+            radius,
+
+            Math.sin(angle) *
+            radius,
+
+            Math.sin(i * 2) *
+            .7
+
+        );
+
+
+        group.add(
+            node
+        );
+
+    }
+
+
+    group.position.z =
+        data.z;
+
+
+    group.userData =
+        {
+            baseZ:data.z,
+            phase:
+                Math.random() *
+                Math.PI *
+                2
+        };
+
+
+    productWorld.add(
         group
     );
+
 }
 
 
-productData.forEach(
-    createPanel
+productLayers.forEach(
+    createProductWorld
 );
 
 
 /* =========================================================
-   SCROLL
+   SCROLL ENGINE
 ========================================================= */
 
-let targetScroll = 0;
-let smoothScroll = 0;
-let previousScroll = 0;
-let velocity = 0;
+let targetProgress = 0;
+let smoothProgress = 0;
+
+let previousScroll =
+    window.scrollY;
+
+let scrollVelocity = 0;
 
 
-function readScroll() {
+function updateScroll() {
 
     const max =
         document.documentElement
@@ -732,25 +720,25 @@ function readScroll() {
         window.innerHeight;
 
 
-    targetScroll =
-        max > 0
-            ? window.scrollY / max
-            : 0;
+    targetProgress =
+        max <= 0
+            ? 0
+            : window.scrollY / max;
 
 
-    velocity =
-        targetScroll -
+    scrollVelocity =
+        window.scrollY -
         previousScroll;
 
-
     previousScroll =
-        targetScroll;
+        window.scrollY;
+
 }
 
 
 window.addEventListener(
     "scroll",
-    readScroll,
+    updateScroll,
     {
         passive:true
     }
@@ -758,166 +746,7 @@ window.addEventListener(
 
 
 /* =========================================================
-   CAMERA
-========================================================= */
-
-function updateCamera(
-    time
-) {
-
-    smoothScroll +=
-        (
-            targetScroll -
-            smoothScroll
-        ) *
-        .075;
-
-
-    const z =
-        THREE.MathUtils.lerp(
-            7,
-            -112,
-            smoothScroll
-        );
-
-
-    camera.position.z =
-        z;
-
-
-    /*
-       Natural camera movement.
-    */
-
-    const x =
-        Math.sin(
-            time * .00035
-        ) * .11;
-
-
-    const y =
-        Math.cos(
-            time * .00028
-        ) * .07;
-
-
-    camera.position.x +=
-        (
-            x -
-            camera.position.x
-        ) *
-        .025;
-
-
-    camera.position.y +=
-        (
-            y -
-            camera.position.y
-        ) *
-        .025;
-
-
-    camera.rotation.z +=
-        (
-            velocity * -1.5 -
-            camera.rotation.z
-        ) *
-        .06;
-
-
-    camera.rotation.x +=
-        (
-            velocity * .4 -
-            camera.rotation.x
-        ) *
-        .06;
-}
-
-
-/* =========================================================
-   ANIMATE PANELS
-========================================================= */
-
-function animatePanels(
-    time
-) {
-
-    panelGroup.children.forEach(
-        panel => {
-
-            const d =
-                panel.userData;
-
-            panel.position.x =
-                d.baseX +
-                Math.sin(
-                    time * .001 +
-                    d.phase
-                ) *
-                .12;
-
-            panel.position.y =
-                d.baseY +
-                Math.cos(
-                    time * .0008 +
-                    d.phase
-                ) *
-                .12;
-
-        }
-    );
-}
-
-
-/* =========================================================
-   LIGHT ANIMATION
-========================================================= */
-
-function animateLights(
-    time
-) {
-
-    lights.children.forEach(
-        (light,index) => {
-
-            light.scale.x =
-                .8 +
-                Math.sin(
-                    time * .002 +
-                    index
-                ) *
-                .2;
-
-        }
-    );
-
-
-    blueLight.position.x =
-        Math.sin(
-            time * .0005
-        ) * 4;
-
-    blueLight.position.y =
-        Math.cos(
-            time * .0004
-        ) * 3;
-
-
-    cyanLight.position.x =
-        Math.cos(
-            time * .00035
-        ) * 7;
-
-
-    orangeLight.position.y =
-        Math.sin(
-            time * .00045
-        ) * 5;
-}
-
-
-/* =========================================================
-   POINTER PARALLAX
+   POINTER
 ========================================================= */
 
 let pointerX = 0;
@@ -945,36 +774,304 @@ window.addEventListener(
 );
 
 
-function updateParallax() {
+/* =========================================================
+   CAMERA
+========================================================= */
 
-    if (
-        window.innerWidth <= 800
-    ) {
-        return;
-    }
+function updateCamera(
+    time
+) {
+
+    smoothProgress +=
+        (
+            targetProgress -
+            smoothProgress
+        ) *
+        .055;
 
 
-    const targetX =
-        pointerX * .18;
+    /*
+       This is the actual
+       tunnel travel.
+    */
 
-    const targetY =
-        pointerY * .12;
+    const destinationZ =
+        10 -
+        smoothProgress *
+        205;
+
+
+    const swayX =
+        Math.sin(
+            time * .00025
+        ) *
+        .16;
+
+
+    const swayY =
+        Math.cos(
+            time * .0002
+        ) *
+        .11;
+
+
+    const pointerInfluenceX =
+        pointerX *
+        (isMobile ? .05 : .45);
+
+
+    const pointerInfluenceY =
+        pointerY *
+        (isMobile ? .03 : .25);
+
+
+    camera.position.z +=
+        (
+            destinationZ -
+            camera.position.z
+        ) *
+        .06;
 
 
     camera.position.x +=
         (
-            targetX -
+            swayX +
+            pointerInfluenceX -
             camera.position.x
         ) *
-        .008;
+        .025;
 
 
     camera.position.y +=
         (
-            targetY -
+            swayY -
+            pointerInfluenceY -
             camera.position.y
         ) *
+        .025;
+
+
+    /*
+       The faster the user scrolls,
+       the more the tunnel reacts.
+    */
+
+    const targetRotation =
+        THREE.MathUtils.clamp(
+            -scrollVelocity *
+            .0008,
+            -.045,
+            .045
+        );
+
+
+    camera.rotation.z +=
+        (
+            targetRotation -
+            camera.rotation.z
+        ) *
+        .08;
+
+
+    camera.rotation.x +=
+        (
+            pointerY *
+            .018 -
+            camera.rotation.x
+        ) *
+        .025;
+
+}
+
+
+/* =========================================================
+   ANIMATE TUNNEL
+========================================================= */
+
+function animateTunnel(
+    time
+) {
+
+    worldGroup.rotation.z =
+        Math.sin(
+            time * .00008
+        ) *
         .008;
+
+
+    /*
+       Light streak movement.
+    */
+
+    streaks.children.forEach(
+        streak => {
+
+            streak.position.z +=
+                streak.userData.speed;
+
+
+            if (
+                streak.position.z >
+                10
+            ) {
+
+                streak.position.z =
+                    -tunnelLength;
+
+            }
+
+        }
+    );
+
+
+    /*
+       Particle movement.
+    */
+
+    const position =
+        particleGeometry
+            .attributes
+            .position;
+
+
+    for (
+        let i = 0;
+        i < particleCount;
+        i++
+    ) {
+
+        const z =
+            position.getZ(i);
+
+
+        position.setZ(
+            i,
+
+            z +
+            particleSpeeds[i]
+        );
+
+
+        if (
+            position.getZ(i) >
+            10
+        ) {
+
+            position.setZ(
+                i,
+                -tunnelLength
+            );
+
+        }
+
+    }
+
+
+    position.needsUpdate =
+        true;
+
+}
+
+
+/* =========================================================
+   ANIMATE PRODUCT WORLDS
+========================================================= */
+
+function animateProducts(
+    time
+) {
+
+    productWorld.children.forEach(
+        group => {
+
+            const phase =
+                group.userData.phase;
+
+
+            group.rotation.y =
+                time * .00025;
+
+
+            group.rotation.x =
+                Math.sin(
+                    time * .0004 +
+                    phase
+                ) *
+                .08;
+
+
+            group.position.y =
+                Math.sin(
+                    time * .0007 +
+                    phase
+                ) *
+                .15;
+
+
+            group.children.forEach(
+                (child,index) => {
+
+                    if (
+                        child.userData
+                        .speed
+                    ) {
+
+                        child.rotation.z +=
+                            child.userData.speed;
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   LIGHT MOTION
+========================================================= */
+
+function animateLights(
+    time
+) {
+
+    blue.position.x =
+        Math.sin(
+            time * .00045
+        ) * 6;
+
+    blue.position.y =
+        Math.cos(
+            time * .00035
+        ) * 4;
+
+
+    cyan.position.x =
+        Math.cos(
+            time * .00032
+        ) * 8;
+
+    cyan.position.z =
+        -30 +
+        Math.sin(
+            time * .0004
+        ) * 20;
+
+
+    orange.position.y =
+        Math.sin(
+            time * .0005
+        ) * 6;
+
+    orange.position.z =
+        -80 +
+        Math.cos(
+            time * .0003
+        ) * 30;
+
 }
 
 
@@ -1008,11 +1105,13 @@ if (
                         "open"
                     );
 
+
             menuButton.classList
                 .toggle(
                     "active",
                     open
                 );
+
 
             menuButton.setAttribute(
                 "aria-expanded",
@@ -1054,7 +1153,7 @@ if (
 
 
 /* =========================================================
-   PRODUCT TRANSITION
+   PRODUCT ROUTING
 ========================================================= */
 
 const routes = {
@@ -1076,6 +1175,7 @@ const transition =
         "div"
     );
 
+
 transition.id =
     "vg-transition";
 
@@ -1084,11 +1184,11 @@ transition.innerHTML = `
 
     <div class="vg-transition-inner">
 
-        <div class="vg-transition-orb">
+        <div class="vg-transition-core">
 
-            <div></div>
-            <div></div>
-            <div></div>
+            <span></span>
+            <span></span>
+            <span></span>
 
         </div>
 
@@ -1101,7 +1201,7 @@ transition.innerHTML = `
         </div>
 
         <div class="vg-transition-status">
-            Initializing intelligent workflow...
+            Initializing intelligence...
         </div>
 
         <div class="vg-progress">
@@ -1119,16 +1219,16 @@ document.body.appendChild(
 
 
 /* =========================================================
-   TRANSITION CSS
+   TRANSITION STYLE
 ========================================================= */
 
-const transitionStyle =
+const transitionCSS =
     document.createElement(
         "style"
     );
 
 
-transitionStyle.textContent = `
+transitionCSS.textContent = `
 
 #vg-transition{
 
@@ -1153,8 +1253,7 @@ transitionStyle.textContent = `
     pointer-events:none;
 
     transition:
-        opacity .3s ease,
-        visibility .3s ease;
+        opacity .3s ease;
 
 }
 
@@ -1164,76 +1263,81 @@ transitionStyle.textContent = `
 
     visibility:visible;
 
-    pointer-events:all;
+    pointer-events:auto;
 
 }
 
 .vg-transition-inner{
 
-    width:min(420px,82vw);
+    width:min(430px,82vw);
 
     text-align:center;
 
 }
 
-.vg-transition-orb{
+.vg-transition-core{
 
     position:relative;
 
-    width:95px;
-    height:95px;
+    width:100px;
+    height:100px;
 
-    margin:0 auto 35px;
+    margin:
+        0 auto
+        35px;
 
     border:
         1px solid
-        rgba(22,140,255,.7);
+        rgba(22,140,255,.6);
 
     border-radius:50%;
 
     animation:
-        vgRotate 2s linear infinite;
+        vgCoreSpin
+        2s
+        linear
+        infinite;
 
 }
 
-.vg-transition-orb div{
+.vg-transition-core span{
 
     position:absolute;
 
     left:50%;
     top:50%;
 
-    width:7px;
-    height:7px;
+    width:8px;
+    height:8px;
 
-    margin:-3.5px;
+    margin:-4px;
 
     border-radius:50%;
 
     background:#168cff;
 
     box-shadow:
-        0 0 15px
-        rgba(22,140,255,.8);
+        0 0 18px
+        rgba(22,140,255,.9);
 
 }
 
-.vg-transition-orb div:nth-child(1){
+.vg-transition-core span:nth-child(1){
     transform:
-        translateY(-45px);
+        translateY(-46px);
 }
 
-.vg-transition-orb div:nth-child(2){
+.vg-transition-core span:nth-child(2){
     transform:
-        translateX(45px);
+        translateX(46px);
 }
 
-.vg-transition-orb div:nth-child(3){
+.vg-transition-core span:nth-child(3){
     transform:
-        translateY(45px);
+        translateY(46px);
 }
 
-@keyframes vgRotate{
+@keyframes vgCoreSpin{
 
     to{
         transform:rotate(360deg);
@@ -1253,7 +1357,7 @@ transitionStyle.textContent = `
 
 .vg-transition-title{
 
-    margin-top:18px;
+    margin-top:16px;
 
     font-size:30px;
 
@@ -1272,6 +1376,8 @@ transitionStyle.textContent = `
 }
 
 .vg-progress{
+
+    width:100%;
 
     height:1px;
 
@@ -1300,7 +1406,7 @@ transitionStyle.textContent = `
     animation:
         vgProgress
         1.5s
-        cubic-bezier(.65,0,.35,1)
+        ease
         forwards;
 
 }
@@ -1315,17 +1421,16 @@ transitionStyle.textContent = `
 
 `;
 
-
 document.head.appendChild(
-    transitionStyle
+    transitionCSS
 );
 
 
 /* =========================================================
-   PRODUCT CLICK HANDLER
+   PRODUCT NAVIGATION
 ========================================================= */
 
-function navigateProduct(
+function openProduct(
     product,
     event
 ) {
@@ -1346,6 +1451,7 @@ function navigateProduct(
         transition.querySelector(
             ".vg-transition-title"
         );
+
 
     const status =
         transition.querySelector(
@@ -1373,10 +1479,10 @@ function navigateProduct(
     ) {
 
         title.textContent =
-            "Activating Automations.";
+            "Activating AI Automations.";
 
         status.textContent =
-            "Connecting workflows and business systems...";
+            "Connecting intelligent workflows...";
 
     }
 
@@ -1417,9 +1523,9 @@ function navigateProduct(
 }
 
 
-/* =========================================================
-   ONLY ONE ROUTER
-========================================================= */
+/*
+   One routing system only.
+*/
 
 document
     .querySelectorAll(
@@ -1432,78 +1538,7 @@ document
                 "click",
                 event => {
 
-                    navigateProduct(
-                        link.dataset.product,
-                        event
-                    );
-
-                }
-            );
-
-        }
-    );
-
-
-/* =========================================================
-   FALLBACK FOR EXISTING HASH LINKS
-========================================================= */
-
-document
-    .querySelectorAll(
-        'a[href="#receptionist"],' +
-        'a[href="#automation"],' +
-        'a[href="#os"]'
-    )
-    .forEach(
-        link => {
-
-            /*
-                Avoid duplicate listeners by converting
-                the old hash into the data-product system.
-            */
-
-            const href =
-                link.getAttribute(
-                    "href"
-                );
-
-
-            if (
-                href ===
-                "#receptionist"
-            ) {
-
-                link.dataset.product =
-                    "receptionist";
-
-            }
-
-            if (
-                href ===
-                "#automation"
-            ) {
-
-                link.dataset.product =
-                    "automation";
-
-            }
-
-            if (
-                href ===
-                "#os"
-            ) {
-
-                link.dataset.product =
-                    "os";
-
-            }
-
-
-            link.addEventListener(
-                "click",
-                event => {
-
-                    navigateProduct(
+                    openProduct(
                         link.dataset.product,
                         event
                     );
@@ -1551,24 +1586,30 @@ window.addEventListener(
    LOADING
 ========================================================= */
 
-setTimeout(
-    () => {
+const loading =
+    document.getElementById(
+        "loading"
+    );
 
-        if (loading) {
+
+if (loading) {
+
+    setTimeout(
+        () => {
 
             loading.classList.add(
                 "hidden"
             );
 
-        }
+        },
+        650
+    );
 
-    },
-    700
-);
+}
 
 
 /* =========================================================
-   RENDER LOOP
+   RENDER
 ========================================================= */
 
 function animate() {
@@ -1586,25 +1627,17 @@ function animate() {
         time
     );
 
-    updateParallax();
+    animateTunnel(
+        time
+    );
 
-    animatePanels(
+    animateProducts(
         time
     );
 
     animateLights(
         time
     );
-
-
-    tunnel.rotation.z =
-        Math.sin(
-            time * .00008
-        ) * .006;
-
-
-    particles.rotation.z =
-        time * .000015;
 
 
     renderer.render(
@@ -1615,11 +1648,11 @@ function animate() {
 }
 
 
-readScroll();
+updateScroll();
 
 animate();
 
 
 console.log(
-    "Virtual Genie AI — 3D tunnel online."
+    "Virtual Genie AI — immersive tunnel online."
 );
