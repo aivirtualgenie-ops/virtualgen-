@@ -5,7 +5,7 @@
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+        content="width=device-width, initial-scale=1.0"
     >
 
     <meta
@@ -15,45 +15,102 @@
 
     <meta
         name="description"
-        content="Virtual Genie builds AI systems, automation and business operating infrastructure."
+        content="Virtual Genie — AI systems, automation and business infrastructure."
     >
 
     <title>Virtual Genie — Intelligence for Business</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap"
+        rel="stylesheet"
+    >
 
     <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
 
-    <!-- =====================================
-         3D EXPERIENCE
-    ====================================== -->
+    <!-- =====================================================
+         WEBGL EXPERIENCE
+    ====================================================== -->
 
-    <canvas id="experience"></canvas>
+    <div
+        id="experience-wrap"
+        aria-hidden="true"
+    >
+        <canvas id="experience"></canvas>
+
+        <div class="experience-vignette"></div>
+        <div class="experience-grid"></div>
+    </div>
 
 
-    <!-- =====================================
-         UI LAYER
-    ====================================== -->
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
 
-    <header class="topbar">
+    <header class="site-header">
 
-        <a href="index.html" class="logo">
+        <a
+            href="index.html"
+            class="brand"
+            aria-label="Virtual Genie home"
+        >
 
-            <span class="logo-mark">✦</span>
+            <span class="brand-mark">
+                <span>✦</span>
+            </span>
 
-            <span class="logo-name">
+            <span class="brand-name">
                 VIRTUAL GENIE
             </span>
 
         </a>
 
 
+        <nav
+            class="desktop-nav"
+            aria-label="Primary navigation"
+        >
+
+            <a href="ai-receptionist.html">
+                AI Receptionist
+            </a>
+
+            <a href="ai-lead-generator.html">
+                Lead Generator
+            </a>
+
+            <a href="ai-infrastructure.html">
+                Infrastructure
+            </a>
+
+            <a href="business-os.html">
+                Business OS
+            </a>
+
+        </nav>
+
+
+        <a
+            href="contact.html"
+            class="header-cta"
+        >
+            Get started
+            <span>↗</span>
+        </a>
+
+
         <button
-            class="menu-toggle"
             id="menuToggle"
+            class="menu-toggle"
+            type="button"
             aria-label="Open navigation"
             aria-expanded="false"
+            aria-controls="mobileMenu"
         >
 
             <span></span>
@@ -64,102 +121,142 @@
     </header>
 
 
-    <!-- =====================================
-         MENU
-    ====================================== -->
+    <!-- =====================================================
+         MOBILE MENU
+    ====================================================== -->
 
-    <nav class="menu" id="menu">
+    <aside
+        id="mobileMenu"
+        class="mobile-menu"
+        aria-hidden="true"
+    >
 
-        <div class="menu-top">
-            NAVIGATION
+        <div class="mobile-menu-inner">
+
+            <div class="mobile-menu-label">
+                NAVIGATION
+            </div>
+
+            <nav>
+
+                <a href="index.html">
+                    <span>01</span>
+                    Virtual Genie
+                </a>
+
+                <a href="ai-receptionist.html">
+                    <span>02</span>
+                    AI Receptionist
+                </a>
+
+                <a href="ai-lead-generator.html">
+                    <span>03</span>
+                    AI Lead Generator
+                </a>
+
+                <a href="ai-infrastructure.html">
+                    <span>04</span>
+                    AI Infrastructure
+                </a>
+
+                <a href="business-os.html">
+                    <span>05</span>
+                    Business Operating System
+                </a>
+
+                <a href="platform.html">
+                    <span>06</span>
+                    Platform
+                </a>
+
+                <a href="contact.html">
+                    <span>07</span>
+                    Start a conversation
+                </a>
+
+            </nav>
+
+            <div class="mobile-menu-footer">
+                AI systems for modern businesses.
+            </div>
+
         </div>
 
-
-        <div class="menu-links">
-
-            <a href="index.html">
-                Home
-            </a>
-
-            <a href="ai-receptionist.html">
-                AI Receptionist
-            </a>
-
-            <a href="ai-lead-generator.html">
-                AI Lead Generator
-            </a>
-
-            <a href="ai-infrastructure.html">
-                AI Infrastructure
-            </a>
-
-            <a href="business-os.html">
-                Business Operating System
-            </a>
-
-            <a href="platform.html">
-                Platform
-            </a>
-
-            <a href="contact.html">
-                Contact
-            </a>
-
-        </div>
+    </aside>
 
 
-        <div class="menu-bottom">
-            AI INFRASTRUCTURE · AUTOMATION · BUSINESS SYSTEMS
-        </div>
+    <!-- =====================================================
+         MAIN EXPERIENCE
+    ====================================================== -->
 
-    </nav>
+    <main id="main">
 
 
-    <!-- =====================================
-         HERO CONTENT
-    ====================================== -->
+        <!-- =================================================
+             HERO
+        ================================================== -->
 
-    <main>
+        <section
+            class="hero"
+            id="hero"
+        >
 
-        <section class="hero">
+            <div class="hero-top">
 
-            <div class="hero-index">
-                01 / VIRTUAL GENIE
+                <div class="hero-index">
+                    01&nbsp;&nbsp;/&nbsp;&nbsp;VIRTUAL GENIE
+                </div>
+
+                <div class="hero-status">
+
+                    <span class="status-dot"></span>
+
+                    <span>
+                        SYSTEM ONLINE
+                    </span>
+
+                </div>
+
             </div>
 
 
             <div class="hero-content">
 
-                <p class="eyebrow">
+                <div class="hero-eyebrow">
                     INTELLIGENCE SYSTEMS
-                </p>
+                </div>
 
 
                 <h1>
-                    Intelligence
-                    <span>for business.</span>
+
+                    <span class="hero-title-main">
+                        Intelligence
+                    </span>
+
+                    <span class="hero-title-italic">
+                        for business.
+                    </span>
+
                 </h1>
 
 
                 <p class="hero-description">
-
-                    AI systems that answer,
-                    discover, automate and operate
-                    across your business.
-
+                    AI systems that answer, discover,
+                    automate and operate across your
+                    business.
                 </p>
 
 
                 <a
                     href="#systems"
-                    class="hero-action"
+                    class="hero-enter"
                 >
 
                     <span>
                         ENTER THE SYSTEM
                     </span>
 
-                    <span>
+                    <span class="hero-arrow">
                         ↓
                     </span>
 
@@ -168,34 +265,25 @@
             </div>
 
 
-            <div class="hero-status">
-
-                <span class="status-dot"></span>
-
-                SYSTEM ONLINE
-
-            </div>
-
-
-            <div class="scroll-hint">
+            <div class="hero-bottom">
 
                 <span>
                     SCROLL
                 </span>
 
-                <i></i>
+                <span class="scroll-line"></span>
 
             </div>
 
         </section>
 
 
-        <!-- =================================
+        <!-- =================================================
              SYSTEM INTRO
-        ================================== -->
+        ================================================== -->
 
         <section
-            class="content-section"
+            class="system-intro"
             id="systems"
         >
 
@@ -204,25 +292,27 @@
             </div>
 
 
-            <div class="content-inner">
+            <div class="system-intro-content">
 
-                <p class="eyebrow">
+                <div class="section-label">
                     THE SYSTEM
-                </p>
+                </div>
 
 
                 <h2>
+
                     Your business,
-                    <span>with an intelligence layer.</span>
+                    <em>with an intelligence</em>
+                    layer.
+
                 </h2>
 
 
-                <p class="section-text">
-
-                    Virtual Genie connects people,
-                    data, software and AI into systems
-                    that move work forward automatically.
-
+                <p>
+                    Virtual Genie connects AI,
+                    automation and business
+                    infrastructure into one operating
+                    system.
                 </p>
 
             </div>
@@ -230,52 +320,294 @@
         </section>
 
 
-        <!-- =================================
-             PRODUCTS
-        ================================== -->
+        <!-- =================================================
+             PRODUCT SYSTEM
+        ================================================== -->
 
-        <section class="product-intro">
+        <section class="product-system">
 
-            <div class="section-number">
-                03
+            <!-- AI RECEPTIONIST -->
+
+            <article
+                class="system-product"
+                data-system="receptionist"
+            >
+
+                <div class="product-number">
+                    03
+                </div>
+
+                <div class="product-meta">
+                    AI RECEPTIONIST
+                </div>
+
+                <div class="product-content">
+
+                    <h3>
+                        Never miss
+                        <em>another opportunity.</em>
+                    </h3>
+
+                    <p>
+                        A voice AI receptionist that
+                        answers calls, qualifies
+                        customers, books appointments
+                        and follows up automatically.
+                    </p>
+
+                    <a
+                        href="ai-receptionist.html"
+                        class="system-link"
+                    >
+                        Explore receptionist
+                        <span>→</span>
+                    </a>
+
+                </div>
+
+            </article>
+
+
+            <!-- AI LEAD GENERATOR -->
+
+            <article
+                class="system-product"
+                data-system="leads"
+            >
+
+                <div class="product-number">
+                    04
+                </div>
+
+                <div class="product-meta">
+                    AI LEAD GENERATOR
+                </div>
+
+                <div class="product-content">
+
+                    <h3>
+                        Turn public data
+                        <em>into pipeline.</em>
+                    </h3>
+
+                    <p>
+                        Discover relevant opportunities
+                        from permitted public sources,
+                        enrich the information and
+                        move qualified prospects into
+                        your sales workflow.
+                    </p>
+
+                    <a
+                        href="ai-lead-generator.html"
+                        class="system-link"
+                    >
+                        Explore lead generation
+                        <span>→</span>
+                    </a>
+
+                </div>
+
+            </article>
+
+
+            <!-- AI INFRASTRUCTURE -->
+
+            <article
+                class="system-product"
+                data-system="infrastructure"
+            >
+
+                <div class="product-number">
+                    05
+                </div>
+
+                <div class="product-meta">
+                    AI INFRASTRUCTURE
+                </div>
+
+                <div class="product-content">
+
+                    <h3>
+                        Build the systems
+                        <em>behind the business.</em>
+                    </h3>
+
+                    <p>
+                        Connect your data, AI agents,
+                        software and workflows into
+                        reliable infrastructure built
+                        around how your company works.
+                    </p>
+
+                    <a
+                        href="ai-infrastructure.html"
+                        class="system-link"
+                    >
+                        Explore infrastructure
+                        <span>→</span>
+                    </a>
+
+                </div>
+
+            </article>
+
+
+            <!-- BUSINESS OS -->
+
+            <article
+                class="system-product"
+                data-system="business-os"
+            >
+
+                <div class="product-number">
+                    06
+                </div>
+
+                <div class="product-meta">
+                    BUSINESS OPERATING SYSTEM
+                </div>
+
+                <div class="product-content">
+
+                    <h3>
+                        Run your business
+                        <em>from one system.</em>
+                    </h3>
+
+                    <p>
+                        A unified operating layer for
+                        sales, operations, customers,
+                        workflows and business
+                        intelligence.
+                    </p>
+
+                    <a
+                        href="business-os.html"
+                        class="system-link"
+                    >
+                        Explore the Business OS
+                        <span>→</span>
+                    </a>
+
+                </div>
+
+            </article>
+
+        </section>
+
+
+        <!-- =================================================
+             PROCESS
+        ================================================== -->
+
+        <section class="process">
+
+            <div class="process-heading">
+
+                <div class="section-label">
+                    HOW IT WORKS
+                </div>
+
+                <h2>
+                    Intelligence that
+                    <em>moves with your business.</em>
+                </h2>
+
             </div>
 
 
-            <div class="content-inner">
+            <div class="process-list">
 
-                <p class="eyebrow">
-                    WHAT WE BUILD
-                </p>
+                <div class="process-item">
 
+                    <span class="process-number">
+                        01
+                    </span>
 
-                <div class="product-list">
+                    <div>
 
-                    <a href="ai-receptionist.html">
-                        <span>01</span>
-                        <strong>AI Receptionist</strong>
-                        <b>↗</b>
-                    </a>
+                        <h3>
+                            Discover
+                        </h3>
 
+                        <p>
+                            Identify opportunities,
+                            conversations and processes
+                            where intelligent systems can
+                            create leverage.
+                        </p>
 
-                    <a href="ai-lead-generator.html">
-                        <span>02</span>
-                        <strong>AI Lead Generator</strong>
-                        <b>↗</b>
-                    </a>
+                    </div>
 
-
-                    <a href="ai-infrastructure.html">
-                        <span>03</span>
-                        <strong>AI Infrastructure</strong>
-                        <b>↗</b>
-                    </a>
+                </div>
 
 
-                    <a href="business-os.html">
-                        <span>04</span>
-                        <strong>Business Operating System</strong>
-                        <b>↗</b>
-                    </a>
+                <div class="process-item">
+
+                    <span class="process-number">
+                        02
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Connect
+                        </h3>
+
+                        <p>
+                            Connect your existing tools,
+                            information and workflows
+                            into one operating layer.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="process-item">
+
+                    <span class="process-number">
+                        03
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Automate
+                        </h3>
+
+                        <p>
+                            Let AI agents handle repetitive
+                            work and move information
+                            between systems automatically.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="process-item">
+
+                    <span class="process-number">
+                        04
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Operate
+                        </h3>
+
+                        <p>
+                            Give your team a single,
+                            intelligent layer through
+                            which the business operates.
+                        </p>
+
+                    </div>
 
                 </div>
 
@@ -284,36 +616,40 @@
         </section>
 
 
-        <!-- =================================
+        <!-- =================================================
              FINAL CTA
-        ================================== -->
+        ================================================== -->
 
-        <section class="final-section">
+        <section class="final-cta">
 
-            <div class="final-core">
-                ✦
+            <div class="section-label">
+                START BUILDING
             </div>
 
 
-            <p class="eyebrow">
-                VIRTUAL GENIE
-            </p>
-
-
             <h2>
-                Build a business
-                <span>that runs intelligently.</span>
+                Give your business
+                <em>a digital workforce.</em>
             </h2>
+
+
+            <p>
+                Tell us what you want to automate.
+                We'll map the opportunity and design
+                the right system for your business.
+            </p>
 
 
             <a
                 href="contact.html"
-                class="final-action"
+                class="final-button"
             >
 
-                START A CONVERSATION
+                Start a conversation
 
-                <span>↗</span>
+                <span>
+                    →
+                </span>
 
             </a>
 
@@ -322,16 +658,64 @@
     </main>
 
 
-    <!-- =====================================
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+
+    <footer class="site-footer">
+
+        <div class="footer-brand">
+
+            <span class="brand-mark">
+                <span>✦</span>
+            </span>
+
+            <span class="brand-name">
+                VIRTUAL GENIE
+            </span>
+
+        </div>
+
+
+        <p>
+            AI infrastructure, automation
+            &amp; business systems.
+        </p>
+
+
+        <div class="footer-bottom">
+
+            <span>
+                © 2026 Virtual Genie
+            </span>
+
+            <span>
+                Intelligence for business.
+            </span>
+
+        </div>
+
+    </footer>
+
+
+    <!-- =====================================================
          THREE.JS
-    ====================================== -->
+    ====================================================== -->
 
     <script
-        src="https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.min.js"
+        src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
+        defer
     ></script>
 
 
-    <script src="script.js"></script>
+    <!-- =====================================================
+         SITE SCRIPT
+    ====================================================== -->
+
+    <script
+        src="script.js"
+        defer
+    ></script>
 
 </body>
-    </html>
+</html>
