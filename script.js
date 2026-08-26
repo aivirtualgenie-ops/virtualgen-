@@ -1,543 +1,513 @@
 /* =========================================================
-   VIRTUAL GENIE AI
-   3D INTELLIGENCE SYSTEM
-   Three.js / GitHub Pages
-========================================================= */
+   VIRTUAL GENIE — AI SYSTEM ENGINE
+   Dynamic AI workforce / neural operating layer
+   Mobile-first • GitHub Pages compatible
+   ========================================================= */
 
 (() => {
     "use strict";
 
-    /* -----------------------------------------------------
-       ELEMENTS
-    ----------------------------------------------------- */
+    /* ---------------------------------------------------------
+       CONFIG
+    --------------------------------------------------------- */
 
-    const canvas = document.getElementById("scene");
-    const menuButton = document.querySelector(".menu-button");
-    const mobileMenu = document.querySelector(".mobile-menu");
+    const CONFIG = {
+        nodeCount: 58,
+        connectionDistance: 2.25,
+        particleCount: 85,
+
+        // Camera depth controlled by scrolling
+        cameraStartZ: 8,
+        cameraDepth: 3.2,
+
+        // Animation speed
+        rotationSpeed: 0.00018,
+        particleSpeed: 0.0007,
+
+        // Colours
+        background: 0x050505,
+        white: 0xf4f2ec,
+        muted: 0x777777,
+
+        // System colours
+        ai: 0xb9ff3d,
+        data: 0x58b7ff,
+        human: 0xffb84d,
+        automation: 0xa889ff
+    };
+
+    /* ---------------------------------------------------------
+       REDUCED MOTION
+    --------------------------------------------------------- */
+
+    const reducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+
+    /* ---------------------------------------------------------
+       PAGE STATE
+    --------------------------------------------------------- */
+
+    let currentSection = 0;
+    let targetScroll = window.scrollY;
+    let smoothScroll = window.scrollY;
+
+    const sections = Array.from(
+        document.querySelectorAll("section")
+    );
+
+
+    /* ---------------------------------------------------------
+       CREATE CANVAS
+    --------------------------------------------------------- */
+
+    let canvas = document.getElementById("vg-ai-system");
 
     if (!canvas) {
-        console.warn("Virtual Genie: #scene not found.");
-        return;
+        canvas = document.createElement("canvas");
+        canvas.id = "vg-ai-system";
+
+        canvas.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+        document.body.prepend(canvas);
     }
 
 
-    /* -----------------------------------------------------
-       LOAD THREE.JS
-    ----------------------------------------------------- */
+    /* ---------------------------------------------------------
+       CANVAS CSS
+    --------------------------------------------------------- */
 
-    function loadThree() {
+    const canvasStyle = document.createElement("style");
 
-        return new Promise((resolve, reject) => {
+    canvasStyle.textContent = `
+        #vg-ai-system {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.92;
+            display: block;
+        }
 
-            if (window.THREE) {
-                resolve(window.THREE);
-                return;
+        body > *:not(#vg-ai-system) {
+            position: relative;
+            z-index: 1;
+        }
+
+        section,
+        header,
+        footer,
+        nav {
+            position: relative;
+            z-index: 2;
+        }
+
+        .vg-system-status {
+            position: fixed;
+            left: 32px;
+            bottom: 28px;
+            z-index: 20;
+
+            display: flex;
+            align-items: center;
+            gap: 9px;
+
+            color: rgba(244,242,236,.55);
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+            letter-spacing: .28em;
+            text-transform: uppercase;
+
+            pointer-events: none;
+            transition: opacity .4s ease;
+        }
+
+        .vg-system-status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #b9ff3d;
+            box-shadow: 0 0 14px rgba(185,255,61,.45);
+        }
+
+        .vg-task-label {
+            position: fixed;
+            right: 32px;
+            bottom: 28px;
+            z-index: 20;
+
+            color: rgba(244,242,236,.38);
+            font-family: Arial, sans-serif;
+            font-size: 9px;
+            letter-spacing: .22em;
+            text-transform: uppercase;
+
+            pointer-events: none;
+            transition: opacity .35s ease;
+        }
+
+        @media(max-width:700px) {
+            .vg-system-status {
+                left: 22px;
+                bottom: 20px;
+                font-size: 8px;
             }
 
-            const script =
-                document.createElement("script");
+            .vg-task-label {
+                right: 22px;
+                bottom: 20px;
+                font-size: 8px;
+            }
 
-            script.src =
-                "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js";
+            #vg-ai-system {
+                opacity: .75;
+            }
+        }
+    `;
 
-            script.onload = () => {
-
-                if (window.THREE) {
-                    resolve(window.THREE);
-                } else {
-                    reject(
-                        new Error(
-                            "Three.js failed to initialize."
-                        )
-                    );
-                }
-
-            };
-
-            script.onerror = () => {
-
-                reject(
-                    new Error(
-                        "Unable to load Three.js."
-                    )
-                );
-
-            };
-
-            document.head.appendChild(script);
-
-        });
-    }
+    document.head.appendChild(canvasStyle);
 
 
-    /* -----------------------------------------------------
-       START
-    ----------------------------------------------------- */
+    /* ---------------------------------------------------------
+       THREE.JS
+    --------------------------------------------------------- */
 
-    loadThree()
-        .then(init3D)
-        .catch(error => {
+    const THREE_URL =
+        "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js";
 
+
+    async function startSystem() {
+
+        let THREE;
+
+        try {
+            THREE = await import(THREE_URL);
+        } catch (error) {
             console.warn(
-                "Virtual Genie 3D unavailable:",
+                "Virtual Genie: Three.js could not load.",
                 error
             );
 
+            canvas.style.display = "none";
+            return;
+        }
+
+
+        /* -----------------------------------------------------
+           RENDERER
+        ----------------------------------------------------- */
+
+        const renderer = new THREE.WebGLRenderer({
+            canvas,
+            antialias: true,
+            alpha: true,
+            powerPreference: "high-performance"
         });
 
-
-    /* =====================================================
-       3D ENGINE
-    ===================================================== */
-
-    function init3D(THREE) {
-
-        const mobile =
-            window.innerWidth <= 700;
-
-        const lowPower =
-            mobile ||
-            navigator.hardwareConcurrency <= 4;
-
-
-        /* -------------------------------------------------
-           RENDERER
-        ------------------------------------------------- */
-
-        const renderer =
-            new THREE.WebGLRenderer({
-                canvas: canvas,
-                antialias: !lowPower,
-                alpha: true,
-                powerPreference:
-                    "high-performance"
-            });
-
-
         renderer.setPixelRatio(
-            Math.min(
-                window.devicePixelRatio || 1,
-                mobile ? 1.5 : 2
-            )
+            Math.min(window.devicePixelRatio || 1, 1.7)
         );
-
 
         renderer.setSize(
             window.innerWidth,
-            window.innerHeight,
-            false
+            window.innerHeight
+        );
+
+        renderer.setClearColor(
+            CONFIG.background,
+            1
         );
 
 
-        renderer.outputColorSpace =
-            THREE.SRGBColorSpace;
-
-
-        /* -------------------------------------------------
+        /* -----------------------------------------------------
            SCENE
-        ------------------------------------------------- */
+        ----------------------------------------------------- */
 
-        const scene =
-            new THREE.Scene();
+        const scene = new THREE.Scene();
+
+        scene.fog = new THREE.FogExp2(
+            CONFIG.background,
+            0.055
+        );
 
 
-        /* -------------------------------------------------
+        /* -----------------------------------------------------
            CAMERA
-        ------------------------------------------------- */
+        ----------------------------------------------------- */
 
-        const camera =
-            new THREE.PerspectiveCamera(
-                34,
-                window.innerWidth /
-                    window.innerHeight,
-                0.1,
-                100
-            );
-
+        const camera = new THREE.PerspectiveCamera(
+            52,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            100
+        );
 
         camera.position.set(
             0,
             0,
-            mobile ? 8.8 : 7.5
+            CONFIG.cameraStartZ
         );
 
 
-        /* -------------------------------------------------
-           MAIN SYSTEM
-        ------------------------------------------------- */
+        /* -----------------------------------------------------
+           MAIN SYSTEM GROUP
+        ----------------------------------------------------- */
 
-        const system =
-            new THREE.Group();
-
+        const system = new THREE.Group();
 
         scene.add(system);
 
 
-        /*
-            The entire system sits slightly to the
-            right on desktop.
+        /* -----------------------------------------------------
+           NODE DATA
+        ----------------------------------------------------- */
 
-            On mobile it moves closer to centre.
-        */
+        const nodes = [];
 
-        system.position.x =
-            mobile ? 0 : 1.45;
-
-        system.position.y =
-            mobile ? -0.15 : 0.05;
-
-
-        /* =================================================
-           MATERIALS
-        ================================================= */
-
-        const whiteMaterial =
-            new THREE.MeshBasicMaterial({
-                color: 0xf3f2ed,
-                transparent: true,
-                opacity: 0.75
-            });
+        const nodeColours = [
+            CONFIG.ai,
+            CONFIG.data,
+            CONFIG.human,
+            CONFIG.automation
+        ];
 
 
-        const dimMaterial =
-            new THREE.MeshBasicMaterial({
-                color: 0xf3f2ed,
-                transparent: true,
-                opacity: 0.18,
-                wireframe: true
-            });
-
-
-        const faintMaterial =
-            new THREE.MeshBasicMaterial({
-                color: 0xf3f2ed,
-                transparent: true,
-                opacity: 0.08,
-                wireframe: true
-            });
-
-
-        const greenMaterial =
-            new THREE.MeshBasicMaterial({
-                color: 0xb9ff35
-            });
-
-
-        /* =================================================
-           CENTRAL CORE
-        ================================================= */
-
-        const coreGeometry =
-            new THREE.IcosahedronGeometry(
-                mobile ? 0.62 : 0.78,
-                mobile ? 1 : 2
-            );
-
-
-        const core =
-            new THREE.Mesh(
-                coreGeometry,
-                dimMaterial
-            );
-
-
-        system.add(core);
-
-
-        /* -------------------------------------------------
-           INNER CORE
-        ------------------------------------------------- */
-
-        const innerGeometry =
-            new THREE.IcosahedronGeometry(
-                mobile ? 0.35 : 0.42,
-                1
-            );
-
-
-        const inner =
-            new THREE.Mesh(
-                innerGeometry,
-                faintMaterial
-            );
-
-
-        system.add(inner);
-
-
-        /* =================================================
-           WIREFRAME SHELL
-        ================================================= */
-
-        const shellGeometry =
-            new THREE.IcosahedronGeometry(
-                mobile ? 1.0 : 1.25,
-                mobile ? 1 : 2
-            );
-
-
-        const shell =
-            new THREE.Mesh(
-                shellGeometry,
-                faintMaterial
-            );
-
-
-        system.add(shell);
-
-
-        /* =================================================
-           ORBIT RINGS
-        ================================================= */
-
-        function createRing(
-            radius,
-            opacity,
-            rotationX,
-            rotationY,
-            rotationZ
-        ) {
-
-            const geometry =
-                new THREE.TorusGeometry(
-                    radius,
-                    0.006,
-                    8,
-                    mobile ? 64 : 128
-                );
-
-
-            const material =
-                new THREE.MeshBasicMaterial({
-                    color: 0xf3f2ed,
-                    transparent: true,
-                    opacity: opacity
-                });
-
-
-            const ring =
-                new THREE.Mesh(
-                    geometry,
-                    material
-                );
-
-
-            ring.rotation.x =
-                rotationX;
-
-            ring.rotation.y =
-                rotationY;
-
-            ring.rotation.z =
-                rotationZ;
-
-
-            system.add(ring);
-
-            return ring;
-        }
-
-
-        const ring1 =
-            createRing(
-                1.45,
-                0.24,
-                Math.PI / 2,
-                0.25,
-                0
-            );
-
-
-        const ring2 =
-            createRing(
-                1.72,
-                0.12,
-                1.05,
-                -0.4,
-                0.3
-            );
-
-
-        const ring3 =
-            createRing(
-                2.05,
-                0.07,
-                0.35,
-                0.8,
-                0.9
-            );
-
-
-        /* =================================================
-           ORBITAL NODES
-        ================================================= */
+        /* -----------------------------------------------------
+           NODE MATERIALS
+        ----------------------------------------------------- */
 
         const nodeGeometry =
             new THREE.SphereGeometry(
-                mobile ? 0.035 : 0.045,
+                0.035,
                 8,
                 8
             );
 
 
-        const nodes = [];
-
+        /* -----------------------------------------------------
+           CREATE NODES
+        ----------------------------------------------------- */
 
         for (
             let i = 0;
-            i < 6;
+            i < CONFIG.nodeCount;
             i++
         ) {
 
-            const node =
-                new THREE.Mesh(
-                    nodeGeometry,
-                    whiteMaterial
-                );
-
-
+            // Elliptical / organic system distribution
             const angle =
-                (
-                    i / 6
-                ) *
-                Math.PI *
-                2;
-
-
-            node.userData.angle =
-                angle;
-
-
-            node.userData.radius =
-                1.55 +
-                (i % 2) *
-                0.35;
-
-
-            node.userData.speed =
-                0.00035 +
-                i * 0.00004;
-
-
-            system.add(node);
-
-            nodes.push(node);
-        }
-
-
-        /* =================================================
-           PARTICLE FIELD
-        ================================================= */
-
-        const particleCount =
-            mobile
-                ? 180
-                : lowPower
-                    ? 280
-                    : 520;
-
-
-        const particlePositions =
-            new Float32Array(
-                particleCount * 3
-            );
-
-
-        const particleSizes =
-            new Float32Array(
-                particleCount
-            );
-
-
-        for (
-            let i = 0;
-            i < particleCount;
-            i++
-        ) {
+                Math.random() * Math.PI * 2;
 
             const radius =
-                2.1 +
-                Math.random() *
-                3.5;
-
-
-            const theta =
-                Math.random() *
-                Math.PI *
-                2;
-
-
-            const phi =
-                Math.acos(
-                    2 *
-                    Math.random() -
-                    1
-                );
-
+                Math.pow(Math.random(), 0.55) * 4.5;
 
             const x =
+                Math.cos(angle) *
                 radius *
-                Math.sin(phi) *
-                Math.cos(theta);
-
+                (0.65 + Math.random() * 0.45);
 
             const y =
+                Math.sin(angle) *
                 radius *
-                Math.sin(phi) *
-                Math.sin(theta);
-
+                0.55;
 
             const z =
-                radius *
-                Math.cos(phi);
+                (Math.random() - 0.5) * 4.8;
 
+            const colour =
+                nodeColours[
+                    Math.floor(
+                        Math.random() *
+                        nodeColours.length
+                    )
+                ];
 
-            particlePositions[
-                i * 3
-            ] = x;
+            const material =
+                new THREE.MeshBasicMaterial({
+                    color: colour,
+                    transparent: true,
+                    opacity: 0.7
+                });
 
+            const mesh =
+                new THREE.Mesh(
+                    nodeGeometry,
+                    material
+                );
 
-            particlePositions[
-                i * 3 + 1
-            ] = y;
+            mesh.position.set(
+                x,
+                y,
+                z
+            );
 
+            mesh.userData = {
+                baseX: x,
+                baseY: y,
+                baseZ: z,
+                phase: Math.random() * Math.PI * 2,
+                speed:
+                    0.0004 +
+                    Math.random() * 0.0008,
+                colour
+            };
 
-            particlePositions[
-                i * 3 + 2
-            ] = z;
-
-
-            particleSizes[i] =
-                0.5 +
-                Math.random() * 1.5;
+            system.add(mesh);
+            nodes.push(mesh);
         }
 
+
+        /* -----------------------------------------------------
+           CONNECTIONS
+        ----------------------------------------------------- */
+
+        const connectionGeometry =
+            new THREE.BufferGeometry();
+
+        const connectionPositions = [];
+
+        const connectionColours = [];
+
+        for (
+            let i = 0;
+            i < nodes.length;
+            i++
+        ) {
+
+            for (
+                let j = i + 1;
+                j < nodes.length;
+                j++
+            ) {
+
+                const a = nodes[i];
+                const b = nodes[j];
+
+                const distance =
+                    a.position.distanceTo(
+                        b.position
+                    );
+
+                if (
+                    distance <
+                    CONFIG.connectionDistance
+                ) {
+
+                    connectionPositions.push(
+                        a.position.x,
+                        a.position.y,
+                        a.position.z,
+
+                        b.position.x,
+                        b.position.y,
+                        b.position.z
+                    );
+
+                    connectionColours.push(
+                        0.18,
+                        0.22,
+                        0.2,
+
+                        0.18,
+                        0.22,
+                        0.2
+                    );
+                }
+            }
+        }
+
+        connectionGeometry.setAttribute(
+            "position",
+            new THREE.Float32BufferAttribute(
+                connectionPositions,
+                3
+            )
+        );
+
+        connectionGeometry.setAttribute(
+            "color",
+            new THREE.Float32BufferAttribute(
+                connectionColours,
+                3
+            )
+        );
+
+        const connectionMaterial =
+            new THREE.LineBasicMaterial({
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.28
+            });
+
+        const connections =
+            new THREE.LineSegments(
+                connectionGeometry,
+                connectionMaterial
+            );
+
+        system.add(connections);
+
+
+        /* -----------------------------------------------------
+           DATA PARTICLES
+        ----------------------------------------------------- */
 
         const particleGeometry =
             new THREE.BufferGeometry();
 
+        const particlePositions = [];
+
+        const particleVelocities = [];
+
+        for (
+            let i = 0;
+            i < CONFIG.particleCount;
+            i++
+        ) {
+
+            const node =
+                nodes[
+                    Math.floor(
+                        Math.random() *
+                        nodes.length
+                    )
+                ];
+
+            particlePositions.push(
+                node.position.x,
+                node.position.y,
+                node.position.z
+            );
+
+            particleVelocities.push(
+                (Math.random() - 0.5) * 0.001,
+                (Math.random() - 0.5) * 0.001,
+                (Math.random() - 0.5) * 0.001
+            );
+        }
 
         particleGeometry.setAttribute(
             "position",
-            new THREE.BufferAttribute(
+            new THREE.Float32BufferAttribute(
                 particlePositions,
                 3
             )
         );
 
-
         const particleMaterial =
             new THREE.PointsMaterial({
-                color: 0xf3f2ed,
-                size:
-                    mobile
-                        ? 0.018
-                        : 0.022,
+                color: CONFIG.data,
+                size: 0.035,
                 transparent: true,
-                opacity: 0.32,
-                depthWrite: false
+                opacity: 0.8,
+                sizeAttenuation: true
             });
-
 
         const particles =
             new THREE.Points(
@@ -545,38 +515,76 @@
                 particleMaterial
             );
 
+        system.add(particles);
 
-        scene.add(particles);
+
+        /* -----------------------------------------------------
+           CENTRAL INTELLIGENCE NODE
+        ----------------------------------------------------- */
+
+        const coreGeometry =
+            new THREE.IcosahedronGeometry(
+                0.23,
+                1
+            );
+
+        const coreMaterial =
+            new THREE.MeshBasicMaterial({
+                color: CONFIG.ai,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.82
+            });
+
+        const core =
+            new THREE.Mesh(
+                coreGeometry,
+                coreMaterial
+            );
+
+        system.add(core);
 
 
-        /* =================================================
-           CENTRAL SIGNAL
-        ================================================= */
+        /* -----------------------------------------------------
+           INNER CORE
+        ----------------------------------------------------- */
 
-        const signalGeometry =
+        const innerGeometry =
             new THREE.SphereGeometry(
-                0.065,
+                0.075,
                 12,
                 12
             );
 
+        const innerMaterial =
+            new THREE.MeshBasicMaterial({
+                color: CONFIG.white
+            });
 
-        const signal =
+        const innerCore =
             new THREE.Mesh(
-                signalGeometry,
-                greenMaterial
+                innerGeometry,
+                innerMaterial
             );
 
+        system.add(innerCore);
 
-        system.add(signal);
 
+        /* -----------------------------------------------------
+           ORBITAL DATA PATHS
+           Not a solar-system look — subtle system geometry.
+        ----------------------------------------------------- */
 
-        /* =================================================
-           SIGNAL RINGS
-        ================================================= */
+        const orbitGroup =
+            new THREE.Group();
 
-        const signalRings = [];
+        system.add(orbitGroup);
 
+        const orbitColours = [
+            CONFIG.ai,
+            CONFIG.data,
+            CONFIG.automation
+        ];
 
         for (
             let i = 0;
@@ -584,240 +592,174 @@
             i++
         ) {
 
-            const geometry =
-                new THREE.RingGeometry(
-                    0.14 + i * 0.09,
-                    0.145 + i * 0.09,
-                    48
+            const curve =
+                new THREE.EllipseCurve(
+                    0,
+                    0,
+                    1.4 + i * 0.75,
+                    0.65 + i * 0.4,
+                    0,
+                    Math.PI * 2,
+                    false,
+                    0
                 );
 
-
-            const material =
-                new THREE.MeshBasicMaterial({
-                    color: 0xb9ff35,
-                    transparent: true,
-                    opacity: 0.18,
-                    side:
-                        THREE.DoubleSide
-                });
-
-
-            const ring =
-                new THREE.Mesh(
-                    geometry,
-                    material
-                );
-
-
-            ring.rotation.x =
-                Math.PI / 2;
-
-
-            system.add(ring);
-
-            signalRings.push(
-                ring
-            );
-        }
-
-
-        /* =================================================
-           CONNECTION LINES
-        ================================================= */
-
-        const lineMaterial =
-            new THREE.LineBasicMaterial({
-                color: 0xf3f2ed,
-                transparent: true,
-                opacity: 0.08
-            });
-
-
-        const connectionGroup =
-            new THREE.Group();
-
-
-        system.add(
-            connectionGroup
-        );
-
-
-        function createConnection(
-            a,
-            b
-        ) {
+            const points =
+                curve.getPoints(100);
 
             const geometry =
                 new THREE.BufferGeometry()
-                    .setFromPoints([
-                        a,
-                        b
-                    ]);
+                    .setFromPoints(points);
 
+            const material =
+                new THREE.LineBasicMaterial({
+                    color:
+                        orbitColours[i],
+                    transparent: true,
+                    opacity: 0.12
+                });
 
             const line =
                 new THREE.Line(
                     geometry,
-                    lineMaterial
+                    material
                 );
 
+            line.rotation.x =
+                Math.PI * (
+                    0.25 + i * 0.16
+                );
 
-            connectionGroup.add(
-                line
+            line.rotation.z =
+                i * 0.6;
+
+            orbitGroup.add(line);
+        }
+
+
+        /* -----------------------------------------------------
+           TASK LABELS
+        ----------------------------------------------------- */
+
+        const status =
+            document.createElement("div");
+
+        status.className =
+            "vg-system-status";
+
+        status.innerHTML = `
+            <span class="vg-system-status-dot"></span>
+            <span>AI SYSTEM ONLINE</span>
+        `;
+
+        document.body.appendChild(status);
+
+
+        const taskLabel =
+            document.createElement("div");
+
+        taskLabel.className =
+            "vg-task-label";
+
+        document.body.appendChild(
+            taskLabel
+        );
+
+
+        const tasks = [
+            "LEAD RECEIVED",
+            "AI QUALIFYING",
+            "CRM UPDATED",
+            "FOLLOW-UP SENT",
+            "APPOINTMENT BOOKED",
+            "CALL ANSWERED",
+            "DATA ENRICHED",
+            "WORKFLOW EXECUTED",
+            "REPORT GENERATED",
+            "DEAL CREATED"
+        ];
+
+
+        /* -----------------------------------------------------
+           TASK ANIMATION
+        ----------------------------------------------------- */
+
+        let taskIndex = 0;
+
+        function updateTask() {
+
+            taskLabel.textContent =
+                tasks[taskIndex];
+
+            taskIndex =
+                (taskIndex + 1) %
+                tasks.length;
+        }
+
+        updateTask();
+
+        setInterval(
+            updateTask,
+            reducedMotion ? 6000 : 2600
+        );
+
+
+        /* -----------------------------------------------------
+           SECTION DETECTION
+        ----------------------------------------------------- */
+
+        function detectSection() {
+
+            if (!sections.length) {
+                currentSection = 0;
+                return;
+            }
+
+            const middle =
+                window.scrollY +
+                window.innerHeight * 0.45;
+
+            let closest = 0;
+            let closestDistance = Infinity;
+
+            sections.forEach(
+                (section, index) => {
+
+                    const rect =
+                        section.getBoundingClientRect();
+
+                    const position =
+                        rect.top +
+                        window.scrollY;
+
+                    const distance =
+                        Math.abs(
+                            position - middle
+                        );
+
+                    if (
+                        distance <
+                        closestDistance
+                    ) {
+                        closestDistance =
+                            distance;
+
+                        closest = index;
+                    }
+                }
             );
 
+            currentSection = closest;
         }
-
-
-        createConnection(
-            new THREE.Vector3(
-                -1.9,
-                0.7,
-                0
-            ),
-            new THREE.Vector3(
-                -0.6,
-                0.2,
-                0
-            )
-        );
-
-
-        createConnection(
-            new THREE.Vector3(
-                1.9,
-                -0.7,
-                0
-            ),
-            new THREE.Vector3(
-                0.6,
-                -0.2,
-                0
-            )
-        );
-
-
-        createConnection(
-            new THREE.Vector3(
-                0,
-                1.9,
-                0
-            ),
-            new THREE.Vector3(
-                0,
-                0.6,
-                0
-            )
-        );
-
-
-        createConnection(
-            new THREE.Vector3(
-                0,
-                -1.9,
-                0
-            ),
-            new THREE.Vector3(
-                0,
-                -0.6,
-                0
-            )
-        );
-
-
-        /* =================================================
-           MOUSE / TOUCH
-        ================================================= */
-
-        let pointerX = 0;
-        let pointerY = 0;
-
-        let targetPointerX = 0;
-        let targetPointerY = 0;
-
-
-        function updatePointer(
-            clientX,
-            clientY
-        ) {
-
-            targetPointerX =
-                (
-                    clientX /
-                    window.innerWidth
-                ) *
-                2 -
-                1;
-
-
-            targetPointerY =
-                (
-                    clientY /
-                    window.innerHeight
-                ) *
-                2 -
-                1;
-        }
-
-
-        window.addEventListener(
-            "mousemove",
-            event => {
-
-                updatePointer(
-                    event.clientX,
-                    event.clientY
-                );
-
-            },
-            {
-                passive: true
-            }
-        );
-
-
-        window.addEventListener(
-            "touchmove",
-            event => {
-
-                if (
-                    event.touches.length
-                ) {
-
-                    const touch =
-                        event.touches[0];
-
-                    updatePointer(
-                        touch.clientX,
-                        touch.clientY
-                    );
-                }
-
-            },
-            {
-                passive: true
-            }
-        );
-
-
-        /* =================================================
-           SCROLL
-        ================================================= */
-
-        let scrollTarget =
-            window.scrollY || 0;
-
-        let scroll =
-            scrollTarget;
 
 
         window.addEventListener(
             "scroll",
             () => {
+                targetScroll =
+                    window.scrollY;
 
-                scrollTarget =
-                    window.scrollY || 0;
-
+                detectSection();
             },
             {
                 passive: true
@@ -825,436 +767,346 @@
         );
 
 
-        /* =================================================
+        /* -----------------------------------------------------
            RESIZE
-        ================================================= */
+        ----------------------------------------------------- */
 
         function resize() {
 
-            const w =
+            const width =
                 window.innerWidth;
 
-            const h =
+            const height =
                 window.innerHeight;
 
-
             camera.aspect =
-                w / h;
-
+                width / height;
 
             camera.updateProjectionMatrix();
 
-
             renderer.setSize(
-                w,
-                h,
-                false
+                width,
+                height
             );
-
 
             renderer.setPixelRatio(
                 Math.min(
                     window.devicePixelRatio || 1,
-                    w <= 700 ? 1.5 : 2
+                    width < 700 ? 1.25 : 1.7
                 )
             );
-
-
-            /*
-                Keep the system appropriately
-                positioned on mobile.
-            */
-
-            system.position.x =
-                w <= 700
-                    ? 0
-                    : 1.45;
-
-
-            system.position.y =
-                w <= 700
-                    ? -0.15
-                    : 0.05;
         }
-
 
         window.addEventListener(
             "resize",
-            resize,
-            {
-                passive: true
-            }
+            resize
         );
 
 
-        /* =================================================
+        /* -----------------------------------------------------
            ANIMATION
-        ================================================= */
+        ----------------------------------------------------- */
 
         const clock =
             new THREE.Clock();
 
-
-        let lastTime = 0;
-
+        let animationFrame;
 
         function animate() {
 
-            requestAnimationFrame(
-                animate
-            );
-
+            animationFrame =
+                requestAnimationFrame(
+                    animate
+                );
 
             const elapsed =
                 clock.getElapsedTime();
-
-
-            const delta =
-                elapsed -
-                lastTime;
-
-
-            lastTime =
-                elapsed;
-
-
-            /* ---------------------------------------------
-               SMOOTH POINTER
-            --------------------------------------------- */
-
-            pointerX +=
-                (
-                    targetPointerX -
-                    pointerX
-                ) *
-                0.035;
-
-
-            pointerY +=
-                (
-                    targetPointerY -
-                    pointerY
-                ) *
-                0.035;
 
 
             /* ---------------------------------------------
                SMOOTH SCROLL
             --------------------------------------------- */
 
-            scroll +=
-                (
-                    scrollTarget -
-                    scroll
-                ) *
-                0.06;
+            if (!reducedMotion) {
 
+                smoothScroll +=
+                    (
+                        targetScroll -
+                        smoothScroll
+                    ) * 0.075;
+
+            } else {
+
+                smoothScroll =
+                    targetScroll;
+            }
+
+
+            /* ---------------------------------------------
+               NORMALIZED SCROLL
+            --------------------------------------------- */
+
+            const pageHeight =
+                Math.max(
+                    1,
+                    document.documentElement
+                        .scrollHeight -
+                    window.innerHeight
+                );
 
             const scrollProgress =
                 Math.min(
-                    scroll /
+                    1,
                     Math.max(
-                        window.innerHeight,
-                        1
-                    ),
-                    6
+                        0,
+                        smoothScroll /
+                        pageHeight
+                    )
                 );
+
+
+            /* ---------------------------------------------
+               CAMERA DIVE
+            --------------------------------------------- */
+
+            const sectionProgress =
+                Math.min(
+                    1,
+                    currentSection /
+                    Math.max(
+                        sections.length - 1,
+                        1
+                    )
+                );
+
+            const targetCameraZ =
+                CONFIG.cameraStartZ -
+                (
+                    scrollProgress *
+                    CONFIG.cameraDepth
+                );
+
+            camera.position.z +=
+                (
+                    targetCameraZ -
+                    camera.position.z
+                ) * 0.045;
+
+
+            /* ---------------------------------------------
+               CAMERA X / Y
+               Gives the background a subtle living motion.
+            --------------------------------------------- */
+
+            const targetCameraX =
+                Math.sin(
+                    scrollProgress *
+                    Math.PI * 2
+                ) * 0.35;
+
+            const targetCameraY =
+                Math.cos(
+                    scrollProgress *
+                    Math.PI * 1.5
+                ) * 0.18;
+
+            camera.position.x +=
+                (
+                    targetCameraX -
+                    camera.position.x
+                ) * 0.025;
+
+            camera.position.y +=
+                (
+                    targetCameraY -
+                    camera.position.y
+                ) * 0.025;
 
 
             /* ---------------------------------------------
                SYSTEM ROTATION
             --------------------------------------------- */
 
-            system.rotation.y =
-                elapsed *
-                0.075;
+            if (!reducedMotion) {
 
-
-            system.rotation.x =
-                Math.sin(
+                system.rotation.y =
                     elapsed *
-                    0.18
-                ) *
-                0.08;
+                    CONFIG.rotationSpeed *
+                    1000;
 
+                system.rotation.x =
+                    Math.sin(
+                        elapsed * 0.08
+                    ) * 0.06;
 
-            /*
-                Pointer influence.
-            */
-
-            system.rotation.y +=
-                pointerX *
-                0.16;
-
-
-            system.rotation.x +=
-                pointerY *
-                0.10;
-
-
-            /*
-                Scroll changes the system's
-                orientation instead of simply
-                moving it vertically.
-            */
-
-            system.rotation.z =
-                scrollProgress *
-                0.035;
+                system.rotation.z =
+                    Math.sin(
+                        elapsed * 0.045
+                    ) * 0.025;
+            }
 
 
             /* ---------------------------------------------
-               CORE
+               NODES FLOAT
             --------------------------------------------- */
 
-            core.rotation.x =
-                elapsed *
-                0.13;
+            nodes.forEach(
+                (node) => {
 
+                    if (reducedMotion)
+                        return;
 
-            core.rotation.y =
-                elapsed *
-                0.19;
+                    const data =
+                        node.userData;
 
+                    node.position.x =
+                        data.baseX +
+                        Math.sin(
+                            elapsed *
+                            data.speed *
+                            1000 +
+                            data.phase
+                        ) * 0.035;
 
-            inner.rotation.x =
-                -elapsed *
-                0.20;
+                    node.position.y =
+                        data.baseY +
+                        Math.cos(
+                            elapsed *
+                            data.speed *
+                            900 +
+                            data.phase
+                        ) * 0.035;
 
-
-            inner.rotation.y =
-                elapsed *
-                0.28;
-
-
-            shell.rotation.x =
-                elapsed *
-                0.035;
-
-
-            shell.rotation.y =
-                -elapsed *
-                0.055;
+                    node.position.z =
+                        data.baseZ +
+                        Math.sin(
+                            elapsed *
+                            data.speed *
+                            700 +
+                            data.phase
+                        ) * 0.045;
+                }
+            );
 
 
             /* ---------------------------------------------
-               RINGS
+               CORE PULSE
             --------------------------------------------- */
 
-            ring1.rotation.z =
-                elapsed *
-                0.12;
+            if (!reducedMotion) {
 
+                const pulse =
+                    1 +
+                    Math.sin(
+                        elapsed * 2.2
+                    ) * 0.12;
 
-            ring1.rotation.x =
-                Math.PI / 2 +
-                Math.sin(
-                    elapsed *
-                    0.35
-                ) *
-                0.12;
+                core.scale.setScalar(
+                    pulse
+                );
 
-
-            ring2.rotation.y =
-                elapsed *
-                0.09;
-
-
-            ring2.rotation.z =
-                -elapsed *
-                0.07;
-
-
-            ring3.rotation.x =
-                elapsed *
-                0.055;
-
-
-            ring3.rotation.y =
-                -elapsed *
-                0.045;
+                innerCore.scale.setScalar(
+                    1 +
+                    Math.sin(
+                        elapsed * 3
+                    ) * 0.18
+                );
+            }
 
 
             /* ---------------------------------------------
-               ORBIT NODES
+               DATA PARTICLES
             --------------------------------------------- */
+
+            const particleArray =
+                particleGeometry
+                    .attributes
+                    .position
+                    .array;
+
+            if (!reducedMotion) {
+
+                for (
+                    let i = 0;
+                    i < particleArray.length;
+                    i += 3
+                ) {
+
+                    particleArray[i] +=
+                        particleVelocities[i];
+
+                    particleArray[i + 1] +=
+                        particleVelocities[i + 1];
+
+                    particleArray[i + 2] +=
+                        particleVelocities[i + 2];
+
+                    // recycle particles
+                    if (
+                        Math.abs(
+                            particleArray[i]
+                        ) > 5
+                    ) {
+                        particleArray[i] *= -0.9;
+                    }
+
+                    if (
+                        Math.abs(
+                            particleArray[i + 1]
+                        ) > 3
+                    ) {
+                        particleArray[i + 1] *= -0.9;
+                    }
+
+                    if (
+                        Math.abs(
+                            particleArray[i + 2]
+                        ) > 3
+                    ) {
+                        particleArray[i + 2] *= -0.9;
+                    }
+                }
+
+                particleGeometry
+                    .attributes
+                    .position
+                    .needsUpdate = true;
+            }
+
+
+            /* ---------------------------------------------
+               ORBIT MOVEMENT
+            --------------------------------------------- */
+
+            if (!reducedMotion) {
+
+                orbitGroup.rotation.y =
+                    elapsed * 0.035;
+
+                orbitGroup.rotation.z =
+                    elapsed * 0.018;
+            }
+
+
+            /* ---------------------------------------------
+               SECTION-BASED COLOUR EMPHASIS
+            --------------------------------------------- */
+
+            const activeColour =
+                currentSection % 4;
 
             nodes.forEach(
                 (node, index) => {
 
-                    const angle =
-                        node.userData.angle +
-                        elapsed *
-                        node.userData.speed *
-                        1000;
+                    const active =
+                        index % 4 ===
+                        activeColour;
 
-
-                    const radius =
-                        node.userData.radius;
-
-
-                    node.position.x =
-                        Math.cos(angle) *
-                        radius;
-
-
-                    node.position.y =
-                        Math.sin(angle) *
-                        radius *
-                        0.72;
-
-
-                    node.position.z =
-                        Math.sin(
-                            angle *
-                            1.7
-                        ) *
-                        0.45;
-
-
-                    node.scale.setScalar(
-                        0.75 +
-                        Math.sin(
-                            elapsed * 2 +
-                            index
-                        ) *
-                        0.15
-                    );
-
+                    node.material.opacity =
+                        active
+                            ? 0.95
+                            : 0.42;
                 }
-            );
-
-
-            /* ---------------------------------------------
-               SIGNAL
-            --------------------------------------------- */
-
-            const pulse =
-                1 +
-                Math.sin(
-                    elapsed * 2.4
-                ) *
-                0.18;
-
-
-            signal.scale.setScalar(
-                pulse
-            );
-
-
-            signalRings.forEach(
-                (ring, index) => {
-
-                    const phase =
-                        (
-                            elapsed *
-                            0.75 +
-                            index *
-                            0.8
-                        ) %
-                        2.4;
-
-
-                    const scale =
-                        0.6 +
-                        phase *
-                        0.45;
-
-
-                    ring.scale.setScalar(
-                        scale
-                    );
-
-
-                    ring.material.opacity =
-                        Math.max(
-                            0,
-                            0.20 -
-                            phase *
-                            0.075
-                        );
-
-                }
-            );
-
-
-            /* ---------------------------------------------
-               PARTICLE FIELD
-            --------------------------------------------- */
-
-            particles.rotation.y =
-                elapsed *
-                0.012;
-
-
-            particles.rotation.x =
-                Math.sin(
-                    elapsed *
-                    0.08
-                ) *
-                0.04;
-
-
-            particles.position.x =
-                pointerX *
-                0.12;
-
-
-            particles.position.y =
-                -pointerY *
-                0.08;
-
-
-            /* ---------------------------------------------
-               CAMERA
-            --------------------------------------------- */
-
-            const cameraTargetX =
-                pointerX *
-                (mobile ? 0.12 : 0.28);
-
-
-            const cameraTargetY =
-                -pointerY *
-                (mobile ? 0.08 : 0.18);
-
-
-            camera.position.x +=
-                (
-                    cameraTargetX -
-                    camera.position.x
-                ) *
-                0.025;
-
-
-            camera.position.y +=
-                (
-                    cameraTargetY -
-                    camera.position.y
-                ) *
-                0.025;
-
-
-            /*
-                Subtle camera movement as
-                the user scrolls.
-            */
-
-            camera.position.z =
-                (
-                    mobile ? 8.8 : 7.5
-                ) +
-                Math.min(
-                    scrollProgress *
-                    0.18,
-                    0.9
-                );
-
-
-            camera.lookAt(
-                0,
-                0,
-                0
             );
 
 
@@ -1266,298 +1118,149 @@
                 scene,
                 camera
             );
-
-
-            /*
-                Prevent unused-variable warnings
-                in some environments.
-            */
-
-            void delta;
         }
 
 
+        /* -----------------------------------------------------
+           START
+        ----------------------------------------------------- */
+
+        resize();
+        detectSection();
         animate();
 
 
-        /* =================================================
-           MENU
-        ================================================= */
+        /* -----------------------------------------------------
+           PAGE LOAD FADE
+        ----------------------------------------------------- */
 
-        function openMenu() {
+        canvas.style.opacity = "0";
 
-            if (!menuButton ||
-                !mobileMenu) {
-                return;
-            }
+        requestAnimationFrame(
+            () => {
 
+                canvas.style.transition =
+                    "opacity 1.2s ease";
 
-            menuButton.classList.add(
-                "active"
-            );
-
-
-            mobileMenu.classList.add(
-                "open"
-            );
-
-
-            document.body.classList.add(
-                "menu-open"
-            );
-
-
-            menuButton.setAttribute(
-                "aria-expanded",
-                "true"
-            );
-
-
-            mobileMenu.setAttribute(
-                "aria-hidden",
-                "false"
-            );
-        }
-
-
-        function closeMenu() {
-
-            if (!menuButton ||
-                !mobileMenu) {
-                return;
-            }
-
-
-            menuButton.classList.remove(
-                "active"
-            );
-
-
-            mobileMenu.classList.remove(
-                "open"
-            );
-
-
-            document.body.classList.remove(
-                "menu-open"
-            );
-
-
-            menuButton.setAttribute(
-                "aria-expanded",
-                "false"
-            );
-
-
-            mobileMenu.setAttribute(
-                "aria-hidden",
-                "true"
-            );
-        }
-
-
-        if (menuButton) {
-
-            menuButton.addEventListener(
-                "click",
-                () => {
-
-                    if (
-                        mobileMenu.classList.contains(
-                            "open"
-                        )
-                    ) {
-
-                        closeMenu();
-
-                    } else {
-
-                        openMenu();
-
-                    }
-
-                }
-            );
-
-        }
-
-
-        /* -------------------------------------------------
-           CLOSE MOBILE MENU ON LINK
-        ------------------------------------------------- */
-
-        document
-            .querySelectorAll(
-                ".mobile-links a"
-            )
-            .forEach(
-                link => {
-
-                    link.addEventListener(
-                        "click",
-                        closeMenu
-                    );
-
-                }
-            );
-
-
-        /* -------------------------------------------------
-           ESCAPE
-        ------------------------------------------------- */
-
-        document.addEventListener(
-            "keydown",
-            event => {
-
-                if (
-                    event.key === "Escape"
-                ) {
-
-                    closeMenu();
-
-                }
-
+                canvas.style.opacity =
+                    window.innerWidth < 700
+                        ? "0.72"
+                        : "0.9";
             }
         );
 
 
-        /* =================================================
-           REVEAL ANIMATIONS
-        ================================================= */
+        /* -----------------------------------------------------
+           CLEANUP
+        ----------------------------------------------------- */
 
-        const revealElements =
-            document.querySelectorAll(
-                ".section-copy, .product-copy, .process-flow, .final-section > *"
-            );
+        window.addEventListener(
+            "pagehide",
+            () => {
 
-
-        if (
-            "IntersectionObserver"
-            in window
-        ) {
-
-            const observer =
-                new IntersectionObserver(
-                    entries => {
-
-                        entries.forEach(
-                            entry => {
-
-                                if (
-                                    entry.isIntersecting
-                                ) {
-
-                                    entry.target.classList.add(
-                                        "is-visible"
-                                    );
-
-
-                                    observer.unobserve(
-                                        entry.target
-                                    );
-
-                                }
-
-                            }
-                        );
-
-                    },
-                    {
-                        threshold: 0.12
-                    }
+                cancelAnimationFrame(
+                    animationFrame
                 );
 
+                renderer.dispose();
 
-            revealElements.forEach(
-                element => {
+                nodeGeometry.dispose();
+                connectionGeometry.dispose();
+                particleGeometry.dispose();
 
-                    element.classList.add(
-                        "reveal"
+                coreGeometry.dispose();
+                innerGeometry.dispose();
+            }
+        );
+
+    }
+
+
+    /* ---------------------------------------------------------
+       INITIALIZE
+    --------------------------------------------------------- */
+
+    startSystem();
+
+
+    /* =========================================================
+       MOBILE NAVIGATION
+       ========================================================= */
+
+    const menuButton =
+        document.querySelector(
+            "[data-menu], .menu-toggle, .hamburger"
+        );
+
+    const navigation =
+        document.querySelector(
+            "nav, .mobile-menu, .menu"
+        );
+
+    if (
+        menuButton &&
+        navigation
+    ) {
+
+        menuButton.addEventListener(
+            "click",
+            () => {
+
+                const open =
+                    navigation.classList.toggle(
+                        "is-open"
                     );
 
-
-                    observer.observe(
-                        element
-                    );
-
-                }
-            );
-
-        }
-
-
-        /* =================================================
-           INTERNAL LINKS
-        ================================================= */
-
-        document
-            .querySelectorAll(
-                'a[href^="#"]'
-            )
-            .forEach(
-                link => {
-
-                    link.addEventListener(
-                        "click",
-                        event => {
-
-                            const id =
-                                link.getAttribute(
-                                    "href"
-                                );
-
-
-                            if (
-                                !id ||
-                                id === "#"
-                            ) {
-                                return;
-                            }
-
-
-                            const target =
-                                document.querySelector(
-                                    id
-                                );
-
-
-                            if (!target) {
-                                return;
-                            }
-
-
-                            event.preventDefault();
-
-
-                            const navHeight =
-                                76;
-
-
-                            const top =
-                                target
-                                    .getBoundingClientRect()
-                                    .top +
-                                window.scrollY -
-                                navHeight;
-
-
-                            window.scrollTo({
-                                top,
-                                behavior:
-                                    "smooth"
-                            });
-
-                        }
-                    );
-
-                }
-            );
-
-
-        console.log(
-            "Virtual Genie 3D system online."
+                menuButton.setAttribute(
+                    "aria-expanded",
+                    String(open)
+                );
+            }
         );
     }
+
+
+    /* =========================================================
+       SMOOTH INTERNAL LINKS
+       ========================================================= */
+
+    document.addEventListener(
+        "click",
+        (event) => {
+
+            const link =
+                event.target.closest(
+                    'a[href^="#"]'
+                );
+
+            if (!link)
+                return;
+
+            const id =
+                link.getAttribute("href");
+
+            if (
+                !id ||
+                id === "#"
+            )
+                return;
+
+            const target =
+                document.querySelector(id);
+
+            if (!target)
+                return;
+
+            event.preventDefault();
+
+            target.scrollIntoView({
+                behavior:
+                    reducedMotion
+                        ? "auto"
+                        : "smooth",
+                block: "start"
+            });
+        }
+    );
 
 })();
