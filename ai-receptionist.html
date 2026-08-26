@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>AI Receptionist — Virtual Genie AI</title>
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;1,500&display=swap"
+        rel="stylesheet"
+    >
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            background: #020304;
+            color: #f2f1ec;
+            font-family: "DM Sans", sans-serif;
+            overflow-x: hidden;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        /* =====================================================
+           NAV
+        ===================================================== */
+
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+
+            z-index: 100;
+
+            height: 82px;
+
+            display: flex;
+            align-items: center;
+
+            padding: 0 32px;
+
+            border-bottom: 1px solid
+                rgba(255,255,255,.08);
+
+            background:
+                rgba(2,3,4,.72);
+
+            backdrop-filter: blur(18px);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+
+            font-size: 15px;
+            font-weight: 600;
+
+            letter-spacing: .18em;
+        }
+
+        .brand-mark {
+            width: 44px;
+            height: 44px;
+
+            display: grid;
+            place-items: center;
+
+            border-radius: 12px;
+
+            background: #f2f1ec;
+            color: #050607;
+
+            font-size: 22px;
+        }
+
+        .nav-links {
+            margin-left: auto;
+
+            display: flex;
+            gap: 32px;
+
+            font-size: 11px;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+
+        .nav-links a {
+            color: #aaa;
+            transition: color .25s ease;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+        }
+
+        .nav-cta {
+            margin-left: 35px;
+
+            padding: 13px 20px;
+
+            border: 1px solid
+                rgba(201,255,53,.45);
+
+            font-size: 10px;
+            letter-spacing: .17em;
+            text-transform: uppercase;
+        }
+
+        /* =====================================================
+           HERO
+        ===================================================== */
+
+        .hero {
+            min-height: 100svh;
+
+            position: relative;
+
+            display: flex;
+            align-items: center;
+
+            padding:
+                150px
+                8vw
+                90px;
+
+            overflow: hidden;
+        }
+
+        .hero-grid {
+            position: absolute;
+            inset: 0;
+
+            opacity: .22;
+
+            background-image:
+                linear-gradient(
+                    rgba(255,255,255,.04) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(255,255,255,.04) 1px,
+                    transparent 1px
+                );
+
+            background-size:
+                70px 70px;
+
+            transform:
+                perspective(700px)
+                rotateX(65deg)
+                scale(1.7);
+
+            transform-origin:
+                center bottom;
+
+            animation:
+                gridMove 8s linear infinite;
+        }
+
+        @keyframes gridMove {
+
+            from {
+                background-position:
+                    0 0,
+                    0 0;
+            }
+
+            to {
+                background-position:
+                    0 70px,
+                    70px 0;
+            }
+
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 3;
+
+            width: min(760px, 100%);
+        }
+
+        .eyebrow {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            margin-bottom: 35px;
+
+            color: #777;
+
+            font-size: 10px;
+            letter-spacing: .3em;
+            text-transform: uppercase;
+        }
+
+        .online {
+            width: 7px;
+            height: 7px;
+
+            border-radius: 50%;
+
+            background: #c9ff35;
+
+            box-shadow:
+                0 0 15px
+                rgba(201,255,53,.7);
+
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+
+            50% {
+                opacity: .35;
+                transform: scale(.65);
+            }
+
+        }
+
+        h1 {
+            margin: 0;
+
+            font-size:
+                clamp(
+                    58px,
+                    9vw,
+                    132px
+                );
+
+            line-height: .88;
+
+            letter-spacing: -.065em;
+
+            font-weight: 500;
+        }
+
+        h1 em {
+            display: block;
+
+            color: #8d8d8a;
+
+            font-family:
+                "Playfair Display",
+                serif;
+
+            font-weight: 500;
+        }
+
+        .hero-description {
+            max-width: 570px;
+
+            margin-top: 45px;
+
+            color: #999;
+
+            font-size:
+                clamp(
+                    17px,
+                    2vw,
+                    22px
+                );
+
+            line-height: 1.55;
+        }
+
+        .hero-actions {
+            margin-top: 45px;
+
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+        }
+
+        .primary-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 35px;
+
+            padding: 16px 0;
+
+            border-bottom: 1px solid
+                #c9ff35;
+
+            color: #f4f3ee;
+
+            font-size: 11px;
+            letter-spacing: .22em;
+            text-transform: uppercase;
+        }
+
+        /* =====================================================
+           PHONE VISUAL
+        ===================================================== */
+
+        .phone-system {
+            position: absolute;
+
+            right: 7vw;
+            top: 50%;
+
+            width: 330px;
+            height: 330px;
+
+            transform:
+                translateY(-50%);
+
+            z-index: 2;
+        }
+
+        .phone-core {
+            position: absolute;
+
+            left: 50%;
+            top: 50%;
+
+            width: 110px;
+            height: 110px;
+
+            transform:
+                translate(-50%, -50%);
+
+            border: 1px solid
+                rgba(201,255,53,.7);
+
+            border-radius: 50%;
+
+            display: grid;
+            place-items: center;
+
+            font-size: 42px;
+
+            animation:
+                phoneFloat 3s ease-in-out infinite;
+
+            box-shadow:
+                0 0 45px
+                rgba(201,255,53,.08);
+        }
+
+        @keyframes phoneFloat {
+
+            50% {
+                transform:
+                    translate(-50%, -55%)
+                    scale(1.04);
+            }
+
+        }
+
+        .phone-ring {
+            position: absolute;
+
+            inset: 0;
+
+            border: 1px solid
+                rgba(201,255,53,.18);
+
+            border-radius: 50%;
+
+            animation:
+                ringExpand 2.4s
+                ease-out infinite;
+        }
+
+        .phone-ring:nth-child(2) {
+            animation-delay: .8s;
+        }
+
+        .phone-ring:nth-child(3) {
+            animation-delay: 1.6s;
+        }
+
+        @keyframes ringExpand {
+
+            0% {
+                transform: scale(.35);
+                opacity: .8;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 0;
+            }
+
+        }
+
+        .orbit {
+            position: absolute;
+
+            inset: 20px;
+
+            border:
+                1px dashed
+                rgba(22,140,255,.3);
+
+            border-radius: 50%;
+
+            animation:
+                orbit 12s linear infinite;
+        }
+
+        @keyframes orbit {
+
+            to {
+                transform: rotate(360deg);
+            }
+
+        }
+
+        .data-dot {
+            position: absolute;
+
+            width: 7px;
+            height: 7px;
+
+            border-radius: 50%;
+
+            background: #168cff;
+
+            box-shadow:
+                0 0 15px
+                rgba(22,140,255,.8);
+        }
+
+        .dot-1 {
+            top: 20px;
+            left: 50%;
+        }
+
+        .dot-2 {
+            right: 20px;
+            top: 50%;
+            background: #ff7a18;
+        }
+
+        .dot-3 {
+            bottom: 20px;
+            left: 50%;
+        }
+
+        /* =====================================================
+           STATS
+        ===================================================== */
+
+        .stats {
+            position: absolute;
+
+            bottom: 45px;
+            left: 8vw;
+
+            display: flex;
+            gap: 55px;
+
+            z-index: 4;
+        }
+
+        .stat strong {
+            display: block;
+
+            font-size: 26px;
+            font-weight: 500;
+        }
+
+        .stat span {
+            display: block;
+
+            margin-top: 5px;
+
+            color: #666;
+
+            font-size: 9px;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+        }
+
+        /* =====================================================
+           WHAT IT DOES
+        ===================================================== */
+
+        .section {
+            position: relative;
+
+            padding:
+                150px
+                8vw;
+        }
+
+        .section-label {
+            color: #666;
+
+            font-size: 10px;
+            letter-spacing: .3em;
+            text-transform: uppercase;
+
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            max-width: 800px;
+
+            margin: 0;
+
+            font-size:
+                clamp(
+                    42px,
+                    7vw,
+                    92px
+                );
+
+            line-height: .95;
+
+            letter-spacing: -.055em;
+
+            font-weight: 500;
+        }
+
+        .section-title em {
+            color: #888;
+
+            font-family:
+                "Playfair Display",
+                serif;
+        }
+
+        .section-description {
+            max-width: 620px;
+
+            margin-top: 30px;
+
+            color: #888;
+
+            font-size: 19px;
+            line-height: 1.6;
+        }
+
+        /* =====================================================
+           FEATURES
+        ===================================================== */
+
+        .features {
+            margin-top: 100px;
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            border-top:
+                1px solid
+                rgba(255,255,255,.1);
+        }
+
+        .feature {
+            min-height: 300px;
+
+            padding:
+                35px
+                35px
+                35px
+                0;
+
+            border-right:
+                1px solid
+                rgba(255,255,255,.1);
+        }
+
+        .feature:not(:first-child) {
+            padding-left: 35px;
+        }
+
+        .feature:last-child {
+            border-right: 0;
+        }
+
+        .feature-number {
+            color: #666;
+
+            font-size: 10px;
+            letter-spacing: .2em;
+        }
+
+        .feature h3 {
+            margin-top: 80px;
+            margin-bottom: 15px;
+
+            font-size: 26px;
+            font-weight: 500;
+
+            letter-spacing: -.03em;
+        }
+
+        .feature p {
+            margin: 0;
+
+            color: #777;
+
+            line-height: 1.6;
+        }
+
+        /* =====================================================
+           CALL FLOW
+        ===================================================== */
+
+        .call-section {
+            min-height: 100svh;
+
+            display: flex;
+            align-items: center;
+
+            background:
+                radial-gradient(
+                    circle at 50% 50%,
+                    rgba(22,140,255,.07),
+                    transparent 45%
+                );
+        }
+
+        .call-interface {
+            width: min(900px, 100%);
+
+            margin: 80px auto 0;
+
+            border:
+                1px solid
+                rgba(255,255,255,.12);
+        }
+
+        .call-top {
+            padding: 18px 22px;
+
+            border-bottom:
+                1px solid
+                rgba(255,255,255,.1);
+
+            display: flex;
+            justify-content: space-between;
+
+            color: #666;
+
+            font-size: 9px;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+        }
+
+        .call-body {
+            padding: 55px;
+        }
+
+        .call-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            color: #c9ff35;
+
+            font-size: 10px;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+        }
+
+        .wave {
+            height: 80px;
+
+            margin: 40px 0;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            gap: 5px;
+        }
+
+        .wave span {
+            width: 3px;
+
+            height:
+                calc(
+                    15px +
+                    var(--h) * 1px
+                );
+
+            background: #168cff;
+
+            animation:
+                wave .8s
+                ease-in-out infinite
+                alternate;
+        }
+
+        @keyframes wave {
+
+            to {
+                transform: scaleY(.35);
+                opacity: .45;
+            }
+
+        }
+
+        .conversation {
+            display: grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap: 25px;
+        }
+
+        .conversation-box {
+            padding: 25px;
+
+            background:
+                rgba(255,255,255,.025);
+
+            border:
+                1px solid
+                rgba(255,255,255,.07);
+        }
+
+        .conversation-box small {
+            color: #666;
+
+            font-size: 9px;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+        }
+
+        .conversation-box p {
+            margin:
+                15px
+                0
+                0;
+
+            color: #aaa;
+
+            line-height: 1.6;
+        }
+
+        /* =====================================================
+           CTA
+        ===================================================== */
+
+        .cta {
+            min-height: 80svh;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            text-align: center;
+        }
+
+        .cta-inner {
+            max-width: 850px;
+        }
+
+        .cta h2 {
+            margin: 0;
+
+            font-size:
+                clamp(
+                    50px,
+                    9vw,
+                    110px
+                );
+
+            line-height: .9;
+
+            letter-spacing: -.06em;
+
+            font-weight: 500;
+        }
+
+        .cta h2 em {
+            color: #8d8d8a;
+
+            font-family:
+                "Playfair Display",
+                serif;
+        }
+
+        .cta p {
+            margin: 35px auto;
+
+            max-width: 520px;
+
+            color: #777;
+
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media (max-width: 900px) {
+
+            .nav {
+                height: 72px;
+                padding: 0 20px;
+            }
+
+            .nav-links,
+            .nav-cta {
+                display: none;
+            }
+
+            .hero {
+                padding:
+                    130px
+                    25px
+                    100px;
+
+                min-height: 900px;
+            }
+
+            .hero-content {
+                align-self: flex-start;
+            }
+
+            .hero h1 {
+                font-size:
+                    clamp(
+                        55px,
+                        15vw,
+                        90px
+                    );
+            }
+
+            .hero-description {
+                font-size: 17px;
+            }
+
+            .phone-system {
+                position: absolute;
+
+                width: 250px;
+                height: 250px;
+
+                top: auto;
+                bottom: 100px;
+                right: 50%;
+
+                transform:
+                    translateX(50%);
+            }
+
+            .stats {
+                display: none;
+            }
+
+            .section {
+                padding:
+                    100px
+                    25px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .feature {
+                min-height: auto;
+
+                padding:
+                    35px 0 !important;
+
+                border-right: 0;
+
+                border-bottom:
+                    1px solid
+                    rgba(255,255,255,.1);
+            }
+
+            .feature h3 {
+                margin-top: 45px;
+            }
+
+            .conversation {
+                grid-template-columns: 1fr;
+            }
+
+            .call-body {
+                padding: 30px 20px;
+            }
+
+            .cta {
+                padding: 100px 25px;
+            }
+
+        }
+
+    </style>
+</head>
+
+<body>
+
+<!-- =====================================================
+     NAV
+===================================================== -->
+
+<header class="nav">
+
+    <a
+        href="index.html"
+        class="brand"
+    >
+
+        <span class="brand-mark">
+            ✦
+        </span>
+
+        <span>
+            VIRTUAL GENIE
+        </span>
+
+    </a>
+
+
+    <nav class="nav-links">
+
+        <a href="index.html">
+            HOME
+        </a>
+
+        <a href="ai-automations.html">
+            AI AUTOMATIONS
+        </a>
+
+        <a href="business-os.html">
+            BUSINESS OS
+        </a>
+
+        <a href="#demo">
+            DEMO
+        </a>
+
+    </nav>
+
+
+    <a
+        href="#contact"
+        class="nav-cta"
+    >
+        START A CONVERSATION ↗
+    </a>
+
+</header>
+
+
+<!-- =====================================================
+     HERO
+===================================================== -->
+
+<main>
+
+<section class="hero">
+
+    <div class="hero-grid"></div>
+
+
+    <div class="hero-content">
+
+        <div class="eyebrow">
+
+            <span class="online"></span>
+
+            AI RECEPTIONIST
+            •
+            SYSTEM ONLINE
+
+        </div>
+
+
+        <h1>
+
+            Never miss
+
+            <em>
+                another opportunity.
+            </em>
+
+        </h1>
+
+
+        <p class="hero-description">
+
+            An AI receptionist that answers
+            every call, qualifies every lead
+            and books appointments around
+            the clock.
+
+        </p>
+
+
+        <div class="hero-actions">
+
+            <a
+                href="#demo"
+                class="primary-button"
+            >
+                HEAR IT IN ACTION
+                <span>↓</span>
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- 3D-LIKE PHONE SYSTEM -->
+
+    <div class="phone-system">
+
+        <div class="phone-ring"></div>
+        <div class="phone-ring"></div>
+        <div class="phone-ring"></div>
+
+        <div class="orbit">
+
+            <span
+                class="data-dot dot-1"
+            ></span>
+
+            <span
+                class="data-dot dot-2"
+            ></span>
+
+            <span
+                class="data-dot dot-3"
+            ></span>
+
+        </div>
+
+        <div class="phone-core">
+            ☎
+        </div>
+
+    </div>
+
+
+    <div class="stats">
+
+        <div class="stat">
+
+            <strong>24/7</strong>
+
+            <span>
+                Always available
+            </span>
+
+        </div>
+
+
+        <div class="stat">
+
+            <strong>0</strong>
+
+            <span>
+                Calls missed
+            </span>
+
+        </div>
+
+
+        <div class="stat">
+
+            <strong>∞</strong>
+
+            <span>
+                Conversations
+            </span>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     WHAT IT IS
+===================================================== -->
+
+<section class="section">
+
+    <div class="section-label">
+        01 / THE SYSTEM
+    </div>
+
+
+    <h2 class="section-title">
+
+        Your front desk,
+
+        <em>
+            powered by AI.
+        </em>
+
+    </h2>
+
+
+    <p class="section-description">
+
+        Virtual Genie gives your business
+        an intelligent voice layer that handles
+        inbound conversations automatically —
+        without putting another person on payroll.
+
+    </p>
+
+
+    <div class="features">
+
+        <article class="feature">
+
+            <div class="feature-number">
+                01
+            </div>
+
+            <h3>
+                Answers instantly
+            </h3>
+
+            <p>
+                Respond to inbound calls immediately,
+                even when your team is busy,
+                after hours or unavailable.
+            </p>
+
+        </article>
+
+
+        <article class="feature">
+
+            <div class="feature-number">
+                02
+            </div>
+
+            <h3>
+                Qualifies leads
+            </h3>
+
+            <p>
+                Ask the right questions,
+                understand intent and capture
+                the information your team needs.
+            </p>
+
+        </article>
+
+
+        <article class="feature">
+
+            <div class="feature-number">
+                03
+            </div>
+
+            <h3>
+                Books appointments
+            </h3>
+
+            <p>
+                Turn conversations into scheduled
+                appointments instead of leaving
+                prospects waiting for a callback.
+            </p>
+
+        </article>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     CALL DEMO
+===================================================== -->
+
+<section
+    class="section call-section"
+    id="demo"
+>
+
+    <div style="width:100%;">
+
+        <div class="section-label">
+            02 / LIVE CALL
+        </div>
+
+
+        <h2 class="section-title">
+
+            A conversation
+
+            <em>
+                that actually works.
+            </em>
+
+        </h2>
+
+
+        <div class="call-interface">
+
+            <div class="call-top">
+
+                <span>
+                    VIRTUAL GENIE AI
+                </span>
+
+                <span>
+                    LIVE SYSTEM
+                </span>
+
+            </div>
+
+
+            <div class="call-body">
+
+                <div class="call-status">
+
+                    <span class="online"></span>
+
+                    AI RECEPTIONIST
+                    HANDLING CALL
+
+                </div>
+
+
+                <div class="wave">
+
+                    <span style="--h:18"></span>
+                    <span style="--h:35"></span>
+                    <span style="--h:52"></span>
+                    <span style="--h:25"></span>
+                    <span style="--h:60"></span>
+                    <span style="--h:40"></span>
+                    <span style="--h:70"></span>
+                    <span style="--h:28"></span>
+                    <span style="--h:48"></span>
+                    <span style="--h:20"></span>
+                    <span style="--h:62"></span>
+                    <span style="--h:38"></span>
+                    <span style="--h:55"></span>
+
+                </div>
+
+
+                <div class="conversation">
+
+                    <div class="conversation-box">
+
+                        <small>
+                            CUSTOMER
+                        </small>
+
+                        <p>
+                            "I'd like to schedule
+                            an appointment for tomorrow."
+                        </p>
+
+                    </div>
+
+
+                    <div class="conversation-box">
+
+                        <small>
+                            VIRTUAL GENIE
+                        </small>
+
+                        <p>
+                            "Absolutely. I can help
+                            with that. What time works
+                            best for you?"
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     BUSINESS RESULT
+===================================================== -->
+
+<section class="section">
+
+    <div class="section-label">
+        03 / THE OUTCOME
+    </div>
+
+
+    <h2 class="section-title">
+
+        Every call becomes
+
+        <em>
+            an opportunity.
+        </em>
+
+    </h2>
+
+
+    <p class="section-description">
+
+        Calls don't just get answered.
+        They become qualified conversations,
+        appointments, customer records and
+        actions your business can actually use.
+
+    </p>
+
+
+    <div class="features">
+
+        <article class="feature">
+
+            <div class="feature-number">
+                CALL
+            </div>
+
+            <h3>
+                Conversation
+            </h3>
+
+            <p>
+                AI answers and understands
+                the caller's intent.
+            </p>
+
+        </article>
+
+
+        <article class="feature">
+
+            <div class="feature-number">
+                QUALIFY
+            </div>
+
+            <h3>
+                Lead captured
+            </h3>
+
+            <p>
+                Important information is
+                structured and recorded.
+            </p>
+
+        </article>
+
+
+        <article class="feature">
+
+            <div class="feature-number">
+                ACTION
+            </div>
+
+            <h3>
+                Business moves
+            </h3>
+
+            <p>
+                Appointment booked,
+                team notified or workflow triggered.
+            </p>
+
+        </article>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     CTA
+===================================================== -->
+
+<section
+    class="cta"
+    id="contact"
+>
+
+    <div class="cta-inner">
+
+        <div class="section-label">
+            VIRTUAL GENIE AI
+        </div>
+
+        <h2>
+
+            Give every caller
+
+            <em>
+                an answer.
+            </em>
+
+        </h2>
+
+        <p>
+
+            Tell us about your business
+            and we'll show you what an
+            AI receptionist could handle.
+
+        </p>
+
+
+        <a
+            href="index.html#contact"
+            class="primary-button"
+        >
+            START A CONVERSATION
+            <span>↗</span>
+        </a>
+
+    </div>
+
+</section>
+
+</main>
+
+
+<script>
+
+    /*
+        Small entrance animation.
+        Keeps the page feeling alive
+        without requiring another library.
+    */
+
+    const hero =
+        document.querySelector(
+            ".hero-content"
+        );
+
+    if (hero) {
+
+        hero.animate(
+            [
+                {
+                    opacity: 0,
+                    transform:
+                        "translateY(30px)"
+                },
+                {
+                    opacity: 1,
+                    transform:
+                        "translateY(0)"
+                }
+            ],
+            {
+                duration: 1000,
+                easing:
+                    "cubic-bezier(.22,1,.36,1)",
+                fill: "forwards"
+            }
+        );
+
+    }
+
+
+    /*
+        Subtle parallax on the phone
+        system.
+    */
+
+    const phone =
+        document.querySelector(
+            ".phone-system"
+        );
+
+    window.addEventListener(
+        "pointermove",
+        event => {
+
+            if (!phone) return;
+
+            const x =
+                event.clientX /
+                window.innerWidth -
+                .5;
+
+            const y =
+                event.clientY /
+                window.innerHeight -
+                .5;
+
+            phone.style.transform =
+                `
+                translateY(-50%)
+                translate(
+                    ${x * 10}px,
+                    ${y * 10}px
+                )
+                `;
+
+        },
+        {
+            passive: true
+        }
+    );
+
+</script>
+
+</body>
+</html>
