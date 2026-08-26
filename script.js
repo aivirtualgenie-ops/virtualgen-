@@ -1264,3 +1264,62 @@
     );
 
 })();
+/* =========================================================
+   SCROLL REVEALS
+   ========================================================= */
+
+(() => {
+
+    const revealElements =
+        document.querySelectorAll(
+            ".eyebrow, .section-label, .kicker, " +
+            ".hero-title, .hero-description, " +
+            ".system-title, .system-copy, " +
+            ".product-title, .product-description, " +
+            ".build-item, .flow-step, " +
+            ".bos-row, .final-cta h2"
+        );
+
+    revealElements.forEach(
+        element => {
+            element.classList.add("reveal");
+        }
+    );
+
+    const observer =
+        new IntersectionObserver(
+            entries => {
+
+                entries.forEach(
+                    entry => {
+
+                        if (
+                            entry.isIntersecting
+                        ) {
+
+                            entry.target
+                                .classList
+                                .add("visible");
+
+                            observer.unobserve(
+                                entry.target
+                            );
+                        }
+                    }
+                );
+
+            },
+            {
+                threshold: 0.12,
+                rootMargin:
+                    "0px 0px -8% 0px"
+            }
+        );
+
+    revealElements.forEach(
+        element => {
+            observer.observe(element);
+        }
+    );
+
+})();
